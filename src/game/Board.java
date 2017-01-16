@@ -2,6 +2,8 @@ package game;
 
 import java.util.Arrays;
 
+import exceptions.ColumnFullException;
+
 
 public class Board {
 	
@@ -23,42 +25,42 @@ public class Board {
 	
 	// copy constructor (more efficient than deepCopy function)
 	public Board(Board board) {
+		fields = new Mark[N_FIELDS];
 		for (int i = 0; i < N_FIELDS; ++i) {
 			fields[i] = board.fields[i];
 		}
 	}
 	
 	
-	// should throw column full exception
-	public void doMove(Column column, Mark mark) {
-		
+	public boolean isColumnFull(Column column) {
+		return fields[Position.indexOf(column.x, column.y, HEIGHT - 1)] != Mark.EMPTY;
 	}
 	
 	
-	private static Position cascade(Column column) {
-		return null;
-	}
-	
-	
-	// internal class for dealing with positions in 3D
-	private static class Position {
-		
-		public final int x, y, z;
-		
-		// somehow it is not necessary to declare function might throw illegalArgument???
-		public Position(int _x, int _y, int _z) {
-			if (_x < 0 || _x >= WIDTH || _y < 0 || _y >= DEPTH || _z < 0 || _z >= HEIGHT) {
-				throw new IllegalArgumentException();
+	public boolean isFull() {
+		for (int x = 0; x < WIDTH; ++x) {
+			for (int y = 0; y < DEPTH; ++y) {
+				if (!isColumnFull(new Column(x, y))) {
+					return false;
+				}
 			}
-			x = _x; 
-			y = _y; 
-			z = _z;
 		}
-		
-		public int index() {
-			return 0;
+		return true;
+	}
+	
+	
+	public void doMove(Column column, Mark mark) {
+		fields[cascade(column).index()] = mark;
+	}
+	
+	
+	private Position cascade(Column column) {
+		for (int z = 0; z < HEIGHT; ++z) {
+			if (fields[Position.indexOf(column.x, column.y, z)] == Mark.EMPTY) {
+				return new Position(column.x, column.y, z);
+			}
 		}
-		
+		throw new ColumnFullException(column.x, column.y);
 	}
 
 }
