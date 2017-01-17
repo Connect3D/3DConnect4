@@ -1,5 +1,6 @@
 package game;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import exceptions.ColumnFullException;
@@ -53,12 +54,29 @@ public class Board {
 	}
 	
 	
-	// TODO decide whether this should be public or not
-	// TODO add variable for win condition marks in a row length
-	public Game.Ending checkEndingFor(Position position, Mark mark) {
+	public ArrayList<Column> possibleColumns() {
+		ArrayList<Column> possible = new ArrayList<Column>();
+		for (int x = 0; x < WIDTH; ++x) {
+			for (int y = 0; y < DEPTH; ++y) {
+				Column column = new Column(x, y);
+				if (!isColumnFull(column)) {
+					possible.add(column);
+				}
+			}
+		}
+		return possible;
+	}
+	
+	
+	//==============================================//
+	// 				PRIVATE FUNCTIONS				//
+	//==============================================//
+	
+	
+	private Game.Ending checkEndingFor(Position position, Mark mark) {
 		for (Direction d = Direction.FIRST; !d.equals(Direction.MIDDLE); d = d.next()) {
 			int consecutive = 1 + consecutiveMarks(position, mark, d) + consecutiveMarks(position, mark, d.opposite());
-			if (consecutive >= 4) {
+			if (consecutive >= Game.CONSECUTIVE_MARKS_TO_WIN) {
 				if (mark == Mark.X) return Game.Ending.X_WINS;
 				if (mark == Mark.O) return Game.Ending.O_WINS;
 			}
@@ -68,7 +86,7 @@ public class Board {
 	}
 	
 	
-	// does not need to be public, because getEnding() also tells if the board is full and is faster
+	// does not need to be public, because getEnding() also tells if the board is full (DRAW) and is much faster
 	private boolean isFull() {
 		for (int x = 0; x < WIDTH; ++x) {
 			for (int y = 0; y < DEPTH; ++y) {

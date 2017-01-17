@@ -2,6 +2,8 @@ package game;
 
 public class Game {
 
+	public static final int CONSECUTIVE_MARKS_TO_WIN = 4;
+	
 	public enum Ending {
 		NOT_ENDED, DRAW, X_WINS, O_WINS;
 		
@@ -14,6 +16,7 @@ public class Game {
 		}
 		
 	}
+	
 	
 	public static void main(String[] args) {
 		

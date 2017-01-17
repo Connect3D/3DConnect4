@@ -8,9 +8,9 @@ class Direction {
 	public static final Direction LAST = new Direction(DirectionX.RIGHT, DirectionY.FORWARD, DirectionZ.UP);
 	public static final Direction MIDDLE = new Direction(DirectionX.CENTER, DirectionY.CENTER, DirectionZ.CENTER);
 	
-	public final DirectionX x;
-	public final DirectionY y;
-	public final DirectionZ z;
+	private final DirectionX x;
+	private final DirectionY y;
+	private final DirectionZ z;
 	
 	public Direction(DirectionX _x, DirectionY _y, DirectionZ _z) {
 		x = _x;
