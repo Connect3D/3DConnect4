@@ -14,13 +14,14 @@ public class Board {
 	
 	
 	private Mark[] fields;
-	private Position lastMove;
+	private Game.Ending ending;
+	
 	
 	// default constructor
 	public Board() {
 		fields = new Mark[N_FIELDS];
 		Arrays.fill(fields, Mark.EMPTY);
-		lastMove = null;
+		ending = Game.Ending.NOT_ENDED;
 	}
 	
 	
@@ -30,7 +31,13 @@ public class Board {
 		for (int i = 0; i < N_FIELDS; ++i) {
 			fields[i] = board.fields[i];
 		}
-		lastMove = board.lastMove;
+		ending = board.ending.copy();
+	}
+	
+	
+	// pass by value to avoid messing with board from outside of class
+	public Game.Ending getEnding() {
+		return ending.copy();
 	}
 	
 	
@@ -39,7 +46,30 @@ public class Board {
 	}
 	
 	
-	public boolean isFull() {
+	public void doMove(Column column, Mark mark) {
+		Position position = cascade(column);
+		fields[position.index()] = mark;
+		ending = checkEndingFor(position, mark);
+	}
+	
+	
+	// TODO decide whether this should be public or not
+	// TODO add variable for win condition marks in a row length
+	public Game.Ending checkEndingFor(Position position, Mark mark) {
+		for (Direction d = Direction.FIRST; !d.equals(Direction.MIDDLE); d = d.next()) {
+			int consecutive = 1 + consecutiveMarks(position, mark, d) + consecutiveMarks(position, mark, d.opposite());
+			if (consecutive >= 4) {
+				if (mark == Mark.X) return Game.Ending.X_WINS;
+				if (mark == Mark.O) return Game.Ending.O_WINS;
+			}
+		}
+		if (isFull()) return Game.Ending.DRAW;
+		else return Game.Ending.NOT_ENDED;
+	}
+	
+	
+	// does not need to be public, because getEnding() also tells if the board is full and is faster
+	private boolean isFull() {
 		for (int x = 0; x < WIDTH; ++x) {
 			for (int y = 0; y < DEPTH; ++y) {
 				if (!isColumnFull(new Column(x, y))) {
@@ -48,11 +78,6 @@ public class Board {
 			}
 		}
 		return true;
-	}
-	
-	
-	public void doMove(Column column, Mark mark) {
-		fields[cascade(column).index()] = mark;
 	}
 	
 	
@@ -66,8 +91,7 @@ public class Board {
 	}
 	
 	
-	private int extendsInDirection(Position position, Direction direction) {
-		Mark mark = fields[position.index()];
+	private int consecutiveMarks(Position position, Mark mark, Direction direction) {
 		Position next = position.inDirection(direction);
 		int amount = 0;
 		while (next != null && fields[next.index()] == mark) {
@@ -76,5 +100,5 @@ public class Board {
 		}
 		return amount;
 	}
-
+	
 }
