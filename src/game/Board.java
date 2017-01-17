@@ -14,12 +14,13 @@ public class Board {
 	
 	
 	private Mark[] fields;
-	
+	private Position lastMove;
 	
 	// default constructor
 	public Board() {
 		fields = new Mark[N_FIELDS];
 		Arrays.fill(fields, Mark.EMPTY);
+		lastMove = null;
 	}
 	
 	
@@ -29,6 +30,7 @@ public class Board {
 		for (int i = 0; i < N_FIELDS; ++i) {
 			fields[i] = board.fields[i];
 		}
+		lastMove = board.lastMove;
 	}
 	
 	
@@ -61,6 +63,18 @@ public class Board {
 			}
 		}
 		throw new ColumnFullException(column.x, column.y);
+	}
+	
+	
+	private int extendsInDirection(Position position, Direction direction) {
+		Mark mark = fields[position.index()];
+		Position next = position.inDirection(direction);
+		int amount = 0;
+		while (next != null && fields[next.index()] == mark) {
+			next = next.inDirection(direction);
+			++amount;
+		}
+		return amount;
 	}
 
 }
