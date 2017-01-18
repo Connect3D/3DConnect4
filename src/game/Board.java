@@ -101,7 +101,7 @@ public class Board {
 	
 	
 	private Game.Ending checkEndingFor(Position position, Mark mark) {
-		for (Direction d = Direction.FIRST; !d.equals(Direction.MIDDLE); d = d.next()) {
+		for (Direction d = Direction.begin(); !d.equals(Direction.center()); d = d.next()) {
 			int consecutive = 1 + consecutiveMarks(position, mark, d) + consecutiveMarks(position, mark, d.opposite());
 			if (consecutive >= Game.CONSECUTIVE_MARKS_TO_WIN) {
 				if (mark == Mark.X) return Game.Ending.X_WINS;
