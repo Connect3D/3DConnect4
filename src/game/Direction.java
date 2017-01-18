@@ -8,35 +8,36 @@ class Direction {
 	public static final Direction LAST = new Direction(DirectionX.RIGHT, DirectionY.FORWARD, DirectionZ.UP);
 	public static final Direction MIDDLE = new Direction(DirectionX.CENTER, DirectionY.CENTER, DirectionZ.CENTER);
 	
-	private final DirectionX x;
-	private final DirectionY y;
-	private final DirectionZ z;
+	public final DirectionX x_axis;
+	public final DirectionY y_axis;
+	public final DirectionZ z_axis;
 	
-	public Direction(DirectionX _x, DirectionY _y, DirectionZ _z) {
-		x = _x;
-		y = _y;
-		z = _z;
+	public Direction(DirectionX x, DirectionY y, DirectionZ z) {
+		x_axis = x;
+		y_axis = y;
+		z_axis = z;
 	}
 	
 	public Direction opposite() {
-		return new Direction(this.x.opposite(), this.y.opposite(), this.z.opposite());
+		return new Direction(this.x_axis.opposite(), this.y_axis.opposite(), this.z_axis.opposite());
 	}
 	
 	public Direction next() {
-		if (z != DirectionZ.UP) return new Direction(x, y, z.increment());
-		if (y != DirectionY.FORWARD) return new Direction(x, y.increment(), z.increment());
-		if (x != DirectionX.RIGHT) return new Direction(x.increment(), y.increment(), z.increment());
+		if (z_axis != DirectionZ.UP) return new Direction(x_axis, y_axis, z_axis.increment());
+		if (y_axis != DirectionY.FORWARD) return new Direction(x_axis, y_axis.increment(), z_axis.increment());
+		if (x_axis != DirectionX.RIGHT) return new Direction(x_axis.increment(), y_axis.increment(), z_axis.increment());
 		else return null;
 	}
 	
 	public boolean equals(Direction other) {
-		return x == other.x && y == other.y && z == other.z;
+		return x_axis == other.x_axis && y_axis == other.y_axis && z_axis == other.z_axis;
 	}
 	
+	/*// gives error because relative positions can be negative, but board positions not
 	public Position asRelativePosition() {
 		return new Position(x.toInt(), y.toInt(), z.toInt());
 	}
-	
+	*/
 }
 
 

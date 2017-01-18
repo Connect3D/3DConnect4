@@ -12,7 +12,7 @@ public class Position {
 	
 	
 	public Position(int _x, int _y, int _z) {
-		if (_x < 0 || _x >= Board.WIDTH || _y < 0 || _y >= Board.DEPTH || _z < 0 || _z >= Board.HEIGHT) {
+		if (!isValid(_x, _y, _z)) {
 			throw new InvalidPositionException(_x, _y, _z);
 		}
 		x = _x;
@@ -27,7 +27,7 @@ public class Position {
 	
 	
 	public static boolean isValid(int x, int y, int z) {
-		return x < 0 || x >= Board.WIDTH || y < 0 || y >= Board.DEPTH || z < 0 || z >= Board.HEIGHT;
+		return x >= 0 && x < Board.WIDTH && y >= 0 && y < Board.DEPTH && z >= 0 && z < Board.HEIGHT;
 	}
 	
 	
@@ -42,9 +42,8 @@ public class Position {
 	
 	// returns null if new position is invalid
 	public Position inDirection(Direction direction) {
-		Position relative = direction.asRelativePosition();
-		if (isValid(x + relative.x, y + relative.y, z + relative.z)){
-			return new Position(x + relative.x, y + relative.y, z + relative.z);
+		if (isValid(x + direction.x_axis.toInt(), y + direction.y_axis.toInt(), z + direction.z_axis.toInt())) {
+			return new Position(x + direction.x_axis.toInt(), y + direction.y_axis.toInt(), z + direction.z_axis.toInt());
 		}
 		return null;
 	}
