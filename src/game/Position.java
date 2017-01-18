@@ -1,6 +1,6 @@
 package game;
 
-import exceptions.InvalidPositionException;
+import exception.InvalidPositionException;
 
 
 // TODO: decide whether we should give public or package scope

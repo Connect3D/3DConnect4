@@ -3,7 +3,7 @@ package game;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import exceptions.ColumnFullException;
+import exception.ColumnFullException;
 
 
 public class Board {
