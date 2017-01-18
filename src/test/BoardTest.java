@@ -11,7 +11,6 @@ import game.Mark;
 
 public class BoardTest {
 
-	
 	@Test
 	public void test() {
 		
