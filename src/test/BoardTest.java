@@ -11,15 +11,6 @@ import game.Mark;
 
 public class BoardTest {
 
-<<<<<<< HEAD
-	/**
-	 * 
-	 * Task: Create tests
-	 * 
-	 */
-=======
-	
->>>>>>> bc012d043baefea1d23237182a2ea586e77eb2f7
 	@Test
 	public void test() {
 		
