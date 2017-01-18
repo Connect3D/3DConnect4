@@ -15,4 +15,15 @@ public class Column {
 		y = _y;
 	}
 	
+	
+	public Column(Column other) {
+		x = other.x;
+		y = other.y;
+	}
+	
+	
+	public boolean equals(Column other) {
+		return x == other.x && y == other.y;
+	}
+	
 }
