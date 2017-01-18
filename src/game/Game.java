@@ -9,23 +9,24 @@ public class Game implements Runnable {
 	public static final int CONSECUTIVE_MARKS_TO_WIN = 4;
 	
 	private Board board;
-	private Player player1;
-	private Player player2;
-	private Player current_player;
+	private Player[] players;
+	private int currentPlayer;
 	
 	
 	public Game(Player _player1, Player _player2) {
-		player1 = _player1;
-		player2 = _player2;
-		current_player = player1;
+		players = new Player[2];
+		players[0] = _player1;
+		players[1] = _player2;
+		currentPlayer = 0;
 		board = new Board();
 	}
 	
 	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
-			doMoveFor(current_player);
+			doMoveFor(players[currentPlayer]);
 			switchCurrentPlayer();
+			System.out.println(board.getEnding());
 		}
 	}
 	
@@ -44,8 +45,7 @@ public class Game implements Runnable {
 	
 	
 	private void switchCurrentPlayer() {
-		if (current_player == player1) current_player = player2;
-		if (current_player == player2) current_player = player1;
+		currentPlayer = currentPlayer == 0 ? 1 : 0;
 	}
 	
 	
@@ -60,6 +60,13 @@ public class Game implements Runnable {
 			if (this == DRAW) return DRAW;
 			if (this == X_WINS) return X_WINS;
 			else return O_WINS;
+		}
+		
+		public String toString() {
+			if (this == NOT_ENDED) return "NOT_ENDED";
+			if (this == DRAW) return "DRAW";
+			if (this == X_WINS) return "X_WINS";
+			else return "O_WINS";
 		}
 		
 	}
