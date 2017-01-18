@@ -51,6 +51,7 @@ class Direction {
 	}
 	
 	
+	// now also has package scope, because Direction has package scope
 	public enum Axis {
 		
 		NEGATIVE, NEUTRAL, POSITIVE;
