@@ -6,6 +6,11 @@ import org.junit.Test;
 
 public class BoardTest {
 
+	/**
+	 * 
+	 * Task: Create tests
+	 * 
+	 */
 	@Test
 	public void test() {
 		
