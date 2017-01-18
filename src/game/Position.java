@@ -6,9 +6,9 @@ import exception.InvalidPositionException;
 // TODO: decide whether we should give public or package scope
 public class Position {
 	
-	private final int x;
-	private final int y;
-	private final int z;
+	public final int x;
+	public  final int y;
+	public final int z;
 	
 	
 	// TODO consider private constructor?
