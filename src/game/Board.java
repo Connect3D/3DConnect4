@@ -74,6 +74,7 @@ public class Board {
 	
 	
 	private Game.Ending checkEndingFor(Position position, Mark mark) {
+		if (isFull()) return Game.Ending.DRAW;
 		for (Direction d = Direction.begin(); !d.equals(Direction.center()); d = d.next()) {
 			int consecutive = 1 + consecutiveMarks(position, mark, d) + consecutiveMarks(position, mark, d.opposite());
 			if (consecutive >= Game.CONSECUTIVE_MARKS_TO_WIN) {
@@ -81,8 +82,7 @@ public class Board {
 				if (mark == Mark.O) return Game.Ending.O_WINS;
 			}
 		}
-		if (isFull()) return Game.Ending.DRAW;
-		else return Game.Ending.NOT_ENDED;
+		return Game.Ending.NOT_ENDED;
 	}
 	
 	
