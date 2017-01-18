@@ -9,7 +9,7 @@ public class Game {
 		NOT_ENDED, DRAW, X_WINS, O_WINS;
 		
 		// way to pass by value (enums and classes and thus normally passed by reference)
-		public Ending copy() {
+		public Ending copy() { 
 			if (this == NOT_ENDED) return NOT_ENDED;
 			if (this == DRAW) return DRAW;
 			if (this == X_WINS) return X_WINS;

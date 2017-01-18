@@ -2,7 +2,8 @@ package game;
 
 
 // no access specifier for package scope
-class Direction {
+// TODO: Make private again
+public class Direction {
 	
 	
 	public static Direction begin() {
@@ -44,7 +45,8 @@ class Direction {
 	
 	
 	// constructor is never needed outside of class
-	private Direction(Axis x, Axis y, Axis z) {
+	//TODO: make private again
+	public Direction(Axis x, Axis y, Axis z) {
 		x_axis = x;
 		y_axis = y;
 		z_axis = z;
