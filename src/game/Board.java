@@ -18,33 +18,6 @@ public class Board {
 	private Game.Ending ending;
 	
 	
-	//================================================================================
-	// only for testing
-	public static void main(String[] args) {
-		
-		System.out.println("testing of Board class");
-		
-		Board b1 = new Board();
-		
-		b1.doMove(new Column(1, 1), Mark.X);
-		b1.doMove(new Column(1, 1), Mark.X);
-		b1.doMove(new Column(1, 1), Mark.X);
-		
-		System.out.println(b1.ending == Game.Ending.NOT_ENDED);
-		
-		b1.doMove(new Column(1, 1), Mark.X);
-		
-		System.out.println(b1.isColumnFull(new Column(1, 1)));
-		System.out.println(b1.ending == Game.Ending.X_WINS);
-		
-		Board b2 = new Board(b1);
-		
-		System.out.println(b2.possibleColumns().size() == 15);
-		
-	}
-	//================================================================================
-	
-	
 	// default constructor
 	public Board() {
 		fields = new Mark[N_FIELDS];
@@ -96,7 +69,7 @@ public class Board {
 	
 	
 	//==============================================//
-	// 				PRIVATE FUNCTIONS				//
+	//             PRIVATE FUNCTIONS                //
 	//==============================================//
 	
 	
