@@ -11,6 +11,7 @@ public class Position {
 	private final int z;
 	
 	
+	// TODO consider private constructor?
 	public Position(int _x, int _y, int _z) {
 		if (!isValid(_x, _y, _z)) {
 			throw new InvalidPositionException(_x, _y, _z);
