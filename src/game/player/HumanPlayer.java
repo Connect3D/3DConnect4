@@ -7,6 +7,7 @@ import game.Mark;
 
 public class HumanPlayer extends Player {
 
+	
 	public HumanPlayer(Mark m) {
 		super(m);
 	}
@@ -15,5 +16,5 @@ public class HumanPlayer extends Player {
 	public Column getMove(Board board) {
 		return null;
 	}
-	
+
 }

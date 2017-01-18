@@ -2,7 +2,7 @@ package game;
 
 
 // no access specifier for package scope
-// TODO: Make private again
+// TODO: remove public scope again
 public class Direction {
 	
 	

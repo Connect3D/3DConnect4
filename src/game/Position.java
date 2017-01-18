@@ -1,17 +1,16 @@
 package game;
 
-import exception.InvalidPositionException;
+import util.exception.InvalidPositionException;
 
 
 // TODO: decide whether we should give public or package scope
 public class Position {
 	
 	public final int x;
-	public  final int y;
+	public final int y;
 	public final int z;
 	
 	
-	// TODO consider private constructor?
 	public Position(int _x, int _y, int _z) {
 		if (!isValid(_x, _y, _z)) {
 			throw new InvalidPositionException(_x, _y, _z);

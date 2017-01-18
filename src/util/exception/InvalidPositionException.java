@@ -1,4 +1,4 @@
-package exception;
+package util.exception;
 
 public class InvalidPositionException extends RuntimeException {
 

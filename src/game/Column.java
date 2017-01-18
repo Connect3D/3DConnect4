@@ -1,6 +1,6 @@
 package game;
 
-import exception.InvalidColumnException;
+import util.exception.InvalidColumnException;
 
 public class Column {
 
