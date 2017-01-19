@@ -14,7 +14,5 @@ public class RandomStrategy implements Strategy {
 		int index = ThreadLocalRandom.current().nextInt(0, possible.size());
 		return possible.get(index);
 	}
-
-	
 	
 }

@@ -15,6 +15,7 @@ public class HumanPlayer extends Player {
 	
 	public HumanPlayer(Mark m, ProvidesMoves p) {
 		super(m);
+		input = p;
 	}
 
 
