@@ -1,6 +1,7 @@
 package game;
 
 import game.player.Player;
+import util.OutputsBoard;
 
 
 // provides both functionality for running the game to the end or step by step
@@ -11,22 +12,24 @@ public class Game implements Runnable {
 	private Board board;
 	private Player[] players;
 	private int currentPlayer;
+	private OutputsBoard boardOutput;
 	
-	
-	public Game(Player _player1, Player _player2) {
+	public Game(Player _player1, Player _player2, OutputsBoard output) {
 		players = new Player[2];
 		players[0] = _player1;
 		players[1] = _player2;
 		currentPlayer = 0;
 		board = new Board();
+		boardOutput = output;
 	}
 	
 	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
+			if (boardOutput != null) boardOutput.printBoard();
 			doMoveFor(players[currentPlayer]);
 			switchCurrentPlayer();
-			System.out.println(board.getEnding());
+			System.out.println(board.getEnding());		// temporary
 		}
 	}
 	

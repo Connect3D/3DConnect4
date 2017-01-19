@@ -68,6 +68,16 @@ public class Board {
 	}
 	
 	
+	public String getRow(int x, int y) {
+		String row = "|";
+		Direction direction = new Direction(Direction.Axis.POSITIVE, Direction.Axis.NEUTRAL, Direction.Axis.NEUTRAL);
+		for (Position p = new Position(x, y, 0); p != null; p = p.inDirection(direction)) {
+			row += " " + fields[p.index()].toString() + " |";
+		}
+		return row;
+	}
+	
+	
 	//==============================================//
 	//             PRIVATE FUNCTIONS                //
 	//==============================================//

@@ -5,10 +5,11 @@ import java.util.Scanner;
 import game.*;
 import game.player.*;
 import game.player.strategy.*;
+import util.OutputsBoard;
 import util.ProvidesMoves;
 
 
-public class LocalGame implements Runnable, ProvidesMoves {
+public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 	
 	
 	public static void main(String[] args) {
@@ -18,7 +19,7 @@ public class LocalGame implements Runnable, ProvidesMoves {
 		LocalGame test = new LocalGame();
 		Player p1 = new HumanPlayer(Mark.X, test);
 		Player p2 = new ComputerPlayer(Mark.O, new RandomStrategy());
-		Game game = new Game(p1, p2);
+		Game game = new Game(p1, p2, test);
 		
 		Thread t1 = new Thread(test);
 		Thread t2 = new Thread(game);
@@ -87,6 +88,11 @@ public class LocalGame implements Runnable, ProvidesMoves {
 		Column choice = new Column(move);
 		move = null;
 		return choice;
+	}
+
+
+	public synchronized void printBoard() {
+		
 	}
 	
 	

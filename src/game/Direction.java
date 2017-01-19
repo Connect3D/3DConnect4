@@ -45,7 +45,6 @@ public class Direction {
 	
 	
 	// constructor is never needed outside of class
-	//TODO: make private again
 	public Direction(Axis x, Axis y, Axis z) {
 		x_axis = x;
 		y_axis = y;
