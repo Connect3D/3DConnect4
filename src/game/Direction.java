@@ -26,6 +26,13 @@ public class Direction {
 	public final Axis z_axis;
 	
 	
+	public Direction(Axis x, Axis y, Axis z) {
+		x_axis = x;
+		y_axis = y;
+		z_axis = z;
+	}
+	
+	
 	public Direction opposite() {
 		return new Direction(this.x_axis.opposite(), this.y_axis.opposite(), this.z_axis.opposite());
 	}
@@ -41,14 +48,6 @@ public class Direction {
 	
 	public boolean equals(Direction other) {
 		return x_axis == other.x_axis && y_axis == other.y_axis && z_axis == other.z_axis;
-	}
-	
-	
-	// constructor is never needed outside of class
-	public Direction(Axis x, Axis y, Axis z) {
-		x_axis = x;
-		y_axis = y;
-		z_axis = z;
 	}
 	
 	

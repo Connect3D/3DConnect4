@@ -14,7 +14,7 @@ public class Game implements Runnable {
 	private OutputsBoard boardOutput = null;
 	
 	
-	// use this constructor if you want to draw the board to some output, console, tui whatever
+	// constructor for running the game with output(client)
 	public Game(Player _player1, Player _player2, OutputsBoard output) {
 		players[0] = _player1;
 		players[1] = _player2;
@@ -22,7 +22,7 @@ public class Game implements Runnable {
 	}
 	
 	
-	// use this constructor if you want to draw the board to some output, console, tui whatever
+	// constructor for running the game without output(server)
 	public Game(Player _player1, Player _player2) {
 		players[0] = _player1;
 		players[1] = _player2;
@@ -60,21 +60,21 @@ public class Game implements Runnable {
 	// all possible endings of a game
 	public enum Ending {
 		
-		NOT_ENDED, DRAW, X_WINS, O_WINS;
+		NOT_ENDED, X_WINS, O_WINS, DRAW;
 	
 		// way to pass by value (enums and classes and thus normally passed by reference)
 		public Ending copy() { 
 			if (this == NOT_ENDED) return NOT_ENDED;
-			if (this == DRAW) return DRAW;
 			if (this == X_WINS) return X_WINS;
-			else return O_WINS;
+			if (this == O_WINS) return O_WINS;
+			else return DRAW;
 		}
 		
 		public String toString() {
-			if (this == NOT_ENDED) return "NOT_ENDED";
-			if (this == DRAW) return "DRAW";
-			if (this == X_WINS) return "X_WINS";
-			else return "O_WINS";
+			if (this == NOT_ENDED) return "not ended";
+			if (this == X_WINS) return "Player X won";
+			if (this == O_WINS) return "Player O won";
+			else return "It was a draw";
 		}
 		
 	}

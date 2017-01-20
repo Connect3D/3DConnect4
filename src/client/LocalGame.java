@@ -1,13 +1,13 @@
 package client;
 
-import java.util.Scanner;
-import java.util.concurrent.locks.ReentrantLock;
-
 import game.*;
 import game.player.*;
 import game.player.strategy.*;
 import util.OutputsBoard;
 import util.ProvidesMoves;
+import util.ThreadedStreamReader;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 
 public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
@@ -16,23 +16,8 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 	public static void main(String[] args) {
 		
 		LocalGame testLocalGame = new LocalGame();
-		/*
-		Player p1 = new HumanPlayer(Mark.X, testLocalGame);
-		Player p2 = new ComputerPlayer(Mark.O, new RandomStrategy());
-		Game game = new Game(p1, p2, testLocalGame);
-		
-		Thread thread = new Thread(game);
-		thread.start();
-		*/
 		testLocalGame.run();
-		/*
-		try {
-			thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}*/
 		
-		//System.out.println(game.getEnding());
 	}
 	
 	
@@ -41,65 +26,94 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 	
 	
 	private ReentrantLock printLock = new ReentrantLock();
-	private Player player1 = null;
-	private Player player2 = null;
-	private Game game = null;
 	private Column move = null;
 	
 	
 	public void run() {
 		
-
-		System.out.println("Starting");
+		ThreadedStreamReader input = new ThreadedStreamReader(System.in);
+		Thread input_thread = new Thread(input);
+		input_thread.start();
 		
-		Scanner console = new Scanner(System.in);
-		boolean exit = false;
+		Player player1 = null;
+		Player player2 = null;
+		Game game = null;
 		
-		while (!exit) {
-			String input = console.nextLine();
-			String[] splitted = input.split(" ");
+		System.out.println("Starting local game");
+		
+		
+		while (input_thread.isAlive()) {
 			
-			if (splitted[0].equals("exit")) break;
-			
-			if (game != null && game.getEnding() == Game.Ending.NOT_ENDED) {
-				switch (splitted[0]) {
-					case "move":
-						if (splitted.length == 3) {
-							synchronized (this) {
-								move = new Column(Integer.parseInt(splitted[1]), Integer.parseInt(splitted[2]));
-								notify();
+			if (input.available()) {
+				
+				String command = input.getLine();
+				String[] splitted = command.split(" ");
+				
+				if (game == null) {
+					switch (splitted[0]) {
+						case "players":
+							if (splitted.length == 3) {
+								PlayerType p1 = PlayerType.fromString(splitted[1]);
+								PlayerType p2 = PlayerType.fromString(splitted[2]);
+								if (p1 != null && p2 != null) {
+									player1 = makePlayer(PlayerType.fromString(splitted[1]), Mark.X);
+									player2 = makePlayer(PlayerType.fromString(splitted[2]), Mark.O);
+									System.out.println("Players initialized");
+								}
+								else {
+									System.out.println("Playertype not recognized");
+								}
 							}
-						}
-						break;
+							break;
+						case "start":
+							game = makeNewGame(player1, player2);
+					}
+				}
+				else if (game.getEnding() == Game.Ending.NOT_ENDED) {
+					switch (splitted[0]) {
+						case "move":
+							if (splitted.length == 3) {
+								synchronized (this) {
+									move = new Column(Integer.parseInt(splitted[1]), Integer.parseInt(splitted[2]));
+									notify();
+								}
+							}
+							break;
+					}
 				}
 			}
-			else {
-				switch (splitted[0]) {
-					case "players":
-						if (splitted.length == 3) {
-							PlayerType p1 = PlayerType.fromString(splitted[1]);
-							PlayerType p2 = PlayerType.fromString(splitted[2]);
-							if (p1 != null && p2 != null) {
-								player1 = makePlayer(PlayerType.fromString(splitted[1]), Mark.X);
-								player2 = makePlayer(PlayerType.fromString(splitted[2]), Mark.O);
-								System.out.println("Players initialized");
-							}
-						}
-						break;
-					case "start":
-						if (player1 != null && player2 != null) {
-							game = new Game(player1, player2, this);
-							Thread thread = new Thread(game);
-							thread.start();
-						}
-						else {
-							System.out.println("Players are not initialized");
-						}
-				}
+			if (game != null && game.getEnding() != Game.Ending.NOT_ENDED) {
+				finishGame(game);
+				game = null;
+			}
+			try {
+				Thread.sleep(40);
+			} 
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
- 		
-		console.close();
+	}
+	
+	
+	private void finishGame(Game game) {
+		printLock.lock();
+		System.out.println("game finished");
+		System.out.println(game.getEnding());
+		printLock.unlock();
+	}
+	
+	
+	private Game makeNewGame(Player p1, Player p2) {		// giving reference argument didnt work for players, mayb add return game
+		if (p1 == null || p2 == null) {
+			System.out.println("Players are not initialized");
+			return null;
+		}
+		Game new_game = new Game(p1, p2, this);
+		Thread thread = new Thread(new_game);
+		thread.start();
+		return new_game;
 	}
 	
 	
