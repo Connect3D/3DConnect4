@@ -16,21 +16,20 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 	public static void main(String[] args) {
 		
 		System.out.println("starting game");
-		
-		LocalGame test = new LocalGame();
-		Player p1 = new HumanPlayer(Mark.X, test);
+
+		LocalGame testLocalGame = new LocalGame();
+		Player p1 = new HumanPlayer(Mark.X, testLocalGame);
 		Player p2 = new ComputerPlayer(Mark.O, new RandomStrategy());
-		Game game = new Game(p1, p2, test);
+		Game game = new Game(p1, p2, testLocalGame);
 		
-		Thread t1 = new Thread(test);
-		Thread t2 = new Thread(game);
 		
-		t1.start();
-		t2.start();
+		Thread thread = new Thread(game);
+		thread.start();
+		testLocalGame.run();
+		
 		
 		try {
-			t1.join();
-			t2.join();
+			thread.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

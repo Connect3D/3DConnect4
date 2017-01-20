@@ -4,24 +4,29 @@ import game.player.Player;
 import util.OutputsBoard;
 
 
-// provides both functionality for running the game to the end or step by step
+
 public class Game implements Runnable {
 
 	public static final int CONSECUTIVE_MARKS_TO_WIN = 4;
 	
-	private Board board;
-	private Player[] players;
-	private int currentPlayer;
-	private OutputsBoard boardOutput;
+	private Board board = new Board();
+	private Player[] players = new Player[2];
+	private int currentPlayer = 0;
+	private OutputsBoard boardOutput = null;
 	
 	
+	// use this constructor if you want to draw the board to some output, console, tui whatever
 	public Game(Player _player1, Player _player2, OutputsBoard output) {
-		players = new Player[2];
 		players[0] = _player1;
 		players[1] = _player2;
-		currentPlayer = 0;
-		board = new Board();
 		boardOutput = output;
+	}
+	
+	
+	// use this constructor if you want to draw the board to some output, console, tui whatever
+	public Game(Player _player1, Player _player2) {
+		players[0] = _player1;
+		players[1] = _player2;
 	}
 	
 	
@@ -31,6 +36,7 @@ public class Game implements Runnable {
 			doMoveFor(players[currentPlayer]);
 			switchCurrentPlayer();
 		}
+		if (boardOutput != null) boardOutput.printBoard(board);
 	}
 	
 	
