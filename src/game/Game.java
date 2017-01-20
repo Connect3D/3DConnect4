@@ -4,7 +4,6 @@ import game.player.Player;
 import util.OutputsBoard;
 
 
-
 public class Game implements Runnable {
 
 	public static final int CONSECUTIVE_MARKS_TO_WIN = 4;
