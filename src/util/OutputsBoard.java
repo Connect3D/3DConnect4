@@ -1,7 +1,10 @@
 package util;
 
+import game.Board;
+
+
 public interface OutputsBoard {
 
-	public void printBoard();
+	public void printBoard(Board board);
 	
 }

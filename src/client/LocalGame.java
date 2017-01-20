@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Scanner;
+import java.util.concurrent.locks.ReentrantLock;
 
 import game.*;
 import game.player.*;
@@ -43,10 +44,11 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 	
 	
 	private Column move = null;
+	//private ReentrantLock inputLock = new ReentrantLock();
+	private ReentrantLock printLock = new ReentrantLock();
 	
 	
 	public void run() {
-		System.out.println("starting");
 		
 		Scanner console = new Scanner(System.in);
 		boolean exit = false;
@@ -89,10 +91,28 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 		move = null;
 		return choice;
 	}
-
-
-	public synchronized void printBoard() {
-		
+	
+	
+	public synchronized void printBoard(Board board) {
+		printLock.lock();
+		for (int y = Board.DEPTH - 1; y >= 0; --y) {
+			for (int z = 0; z < Board.HEIGHT; ++z) {
+				System.out.print(Board.DELIMETER);
+				System.out.print("\t");
+			}
+			System.out.print("\n");
+			for (int z = 0; z < Board.HEIGHT; ++z) {
+				System.out.print(board.getRowAsString(y, z));
+				System.out.print("\t");
+			}
+			System.out.print("\n");
+		}
+		for (int z = 0; z < Board.HEIGHT; ++z) {
+			System.out.print(Board.DELIMETER);
+			System.out.print("\t");
+		}
+		System.out.print("\n");
+		printLock.unlock();
 	}
 	
 	

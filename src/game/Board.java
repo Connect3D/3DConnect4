@@ -12,6 +12,7 @@ public class Board {
 	public static final int DEPTH = 4;
 	public static final int HEIGHT = 4;
 	public static final int N_FIELDS = WIDTH * DEPTH * HEIGHT;
+	public static final String DELIMETER = "+---+---+---+---+";
 	
 	
 	private Mark[] fields;
@@ -68,10 +69,10 @@ public class Board {
 	}
 	
 	
-	public String getRow(int x, int y) {
+	public String getRowAsString(int y, int z) {
 		String row = "|";
 		Direction direction = new Direction(Direction.Axis.POSITIVE, Direction.Axis.NEUTRAL, Direction.Axis.NEUTRAL);
-		for (Position p = new Position(x, y, 0); p != null; p = p.inDirection(direction)) {
+		for (Position p = new Position(0, y, z); p != null; p = p.inDirection(direction)) {
 			row += " " + fields[p.index()].toString() + " |";
 		}
 		return row;

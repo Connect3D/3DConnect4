@@ -14,6 +14,7 @@ public class Game implements Runnable {
 	private int currentPlayer;
 	private OutputsBoard boardOutput;
 	
+	
 	public Game(Player _player1, Player _player2, OutputsBoard output) {
 		players = new Player[2];
 		players[0] = _player1;
@@ -26,10 +27,9 @@ public class Game implements Runnable {
 	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
-			if (boardOutput != null) boardOutput.printBoard();
+			if (boardOutput != null) boardOutput.printBoard(board);
 			doMoveFor(players[currentPlayer]);
 			switchCurrentPlayer();
-			System.out.println(board.getEnding());		// temporary
 		}
 	}
 	
