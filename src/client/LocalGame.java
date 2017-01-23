@@ -6,11 +6,14 @@ import game.player.strategy.*;
 import util.OutputsBoard;
 import util.ProvidesMoves;
 import util.ThreadedStreamReader;
+
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 
-public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
+public class LocalGame implements Runnable, ProvidesMoves, Observer {
 	
 	
 	public static void main(String[] args) {
@@ -97,6 +100,14 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 	}
 	
 	
+
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 	private void finishGame(Game game) {
 		printLock.lock();
 		System.out.println("game finished");
@@ -110,7 +121,7 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 			System.out.println("Players are not initialized");
 			return null;
 		}
-		Game new_game = new Game(p1, p2, this);
+		Game new_game = new Game(p1, p2);
 		Thread thread = new Thread(new_game);
 		thread.start();
 		return new_game;
@@ -165,6 +176,8 @@ public class LocalGame implements Runnable, ProvidesMoves, OutputsBoard {
 		System.out.print("\n");
 		printLock.unlock();
 	}
+
+
 	
 	
 }

@@ -6,6 +6,7 @@ import java.util.Observable;
 import util.OutputsBoard;
 
 
+// TODO make thread safe !!!!!!!!!!!!!
 public class Game extends Observable implements Runnable {
 
 	public static final int CONSECUTIVE_MARKS_TO_WIN = 4;
@@ -13,37 +14,24 @@ public class Game extends Observable implements Runnable {
 	private Board board = new Board();
 	private Player[] players = new Player[2];
 	private int currentPlayer = 0;
-	private OutputsBoard boardOutput = null;
-	
-	
-	// constructor for running the game with output(client)
-	public Game(Player _player1, Player _player2, OutputsBoard output) {
-		players[0] = _player1;
-		players[1] = _player2;
-		boardOutput = output;
-	}
-	
-	
-	// constructor for running the game without output(server)
+	private Mark lastTurn = Mark.EMPTY;
+
+
 	public Game(Player _player1, Player _player2) {
 		players[0] = _player1;
 		players[1] = _player2;
 	}
 	
 	
-	public Mark getTurn() {
-		return players[currentPlayer].mark;
+	public Mark getLastTurn() {
+		return lastTurn;
 	}
 	
 	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
-			if (boardOutput != null) boardOutput.printBoard(board);
 			doMoveFor(players[currentPlayer]);
-			
-			switchCurrentPlayer();
 		}
-		if (boardOutput != null) boardOutput.printBoard(board);
 	}
 	
 	
@@ -56,8 +44,10 @@ public class Game extends Observable implements Runnable {
 		if (board.getEnding() == Ending.NOT_ENDED) {
 			Column move = player.getMove(board);
 			board.doMove(move, player.mark);
+			lastTurn = player.mark;
 			setChanged();
 			notifyObservers(move);
+			switchCurrentPlayer();
 		}
 	}
 	
