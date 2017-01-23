@@ -65,7 +65,7 @@ public class View extends JFrame implements Observer   {
 		
 		panel.add(panelNorth, BorderLayout.NORTH);
 		JPanel panelSouth = new JPanel(new BorderLayout(DIM, DIM));
-		turn = new JLabel("It is ")
+		turn = new JLabel("It is ");
 		
 		
 		
