@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import game.Board;
 import game.Column;
 import game.Mark;
+import game.Move;
 import util.ProvidesMoves;
 
 
@@ -19,13 +20,13 @@ public class HumanPlayer extends Player {
 	}
 
 
-	public Column getMove(Board board) {
+	public Move getMove(Board board) {
 		ArrayList<Column> possible = board.possibleColumns();
 		while (true) {
 			Column choice = input.waitForMove();
 			for (int i = 0; i < possible.size(); ++i) {
 				if (possible.get(i).equals(choice)) {
-					return choice;
+					return new Move(choice, mark);
 				}
 			}
 		}
