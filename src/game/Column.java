@@ -21,7 +21,6 @@ public class Column {
 		y = other.y;
 	}
 	
-	
 	public boolean equals(Column other) {
 		return x == other.x && y == other.y;
 	}

@@ -11,7 +11,7 @@ import util.ProvidesMoves;
 
 public class HumanPlayer extends Player {
 
-	ProvidesMoves input;
+	private ProvidesMoves input;
 	
 	public HumanPlayer(String n, Mark m, ProvidesMoves p) {
 		super(n, m);
@@ -23,10 +23,8 @@ public class HumanPlayer extends Player {
 		ArrayList<Column> possible = board.possibleColumns();
 		while (true) {
 			Column choice = input.waitForMove();
-			for (int i = 0; i < possible.size(); ++i) {
-				if (possible.get(i).equals(choice)) {
-					return new Move(choice, mark);
-				}
+			if(possible.contains(choice)) {
+				return new Move(choice, mark);
 			}
 		}
 	}

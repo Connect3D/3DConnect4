@@ -8,6 +8,10 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import game.Game;
+import game.Mark;
+import game.View;
+import game.player.HumanPlayer;
 import util.MessageUI;
 
 /**
@@ -31,9 +35,9 @@ public class Client extends Thread {
 	/**
 	 * Constructs a Client-object and tries to make a socket connection.
 	 */
-	public Client(String name, InetAddress host, int port, MessageUI muiArg) throws IOException {
+	public Client(String name, InetAddress host, int port, MessageUI m) throws IOException {
 		clientName = name;
-		mui = muiArg;
+		mui = m;
 		// try to open a Socket to the server
 		try {
 			sock = new Socket(host, port);
@@ -83,7 +87,6 @@ public class Client extends Thread {
 			shutdown();
 		}
 	}
-	
 
 	class Reader implements Runnable {
 		public void run() {
@@ -99,4 +102,5 @@ public class Client extends Thread {
 		}
 	}
 }
+
 

@@ -19,10 +19,9 @@ public class Game extends Observable implements Runnable {
 		players[1] = _player2;
 	}
 	
-	
 
-	public Player getCurrentPlayer() {
-		return players[currentPlayer];
+	public String getCurrentPlayerName() {
+		return players[currentPlayer].getName();
 	}
 	
 	
