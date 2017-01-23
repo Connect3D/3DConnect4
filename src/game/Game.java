@@ -20,10 +20,7 @@ public class Game extends Observable implements Runnable {
 	}
 	
 	
-	public Board getBoardState() {
-		return new Board(board);
-	}
-	
+
 	public Player getCurrentPlayer() {
 		return players[currentPlayer];
 	}
@@ -36,22 +33,26 @@ public class Game extends Observable implements Runnable {
 	}
 	
 	
-	public Ending getEnding() {
+	public synchronized Board getBoardState() {
+		return new Board(board);
+	}
+	
+	
+	public synchronized Ending getEnding() {
 		return board.getEnding();
 	}
 	
-	//concurrency. synchronize functions with data race.
-	//look at thread pull.game thread safe.
-	//updates network and GUI with tupil of move and playername
+	
 	private void doMoveFor(Player player) {
-		if (board.getEnding() == Ending.NOT_ENDED) {
-			Move move = player.getMove(board);
+		Move move = player.getMove(board);
+		synchronized (this) {
 			board.doMove(move);
-			setChanged();
-			notifyObservers(move);
 			switchCurrentPlayer();
 		}
+		setChanged();
+		notifyObservers(move);
 	}
+	
 	
 	private void switchCurrentPlayer() {
 		currentPlayer = currentPlayer == 0 ? 1 : 0;
@@ -62,7 +63,7 @@ public class Game extends Observable implements Runnable {
 		
 		NOT_ENDED, X_WINS, O_WINS, DRAW;
 	
-		// way to pass by value (enums and classes and thus normally passed by reference)
+		// way to pass by value (enums are classes and thus normally passed by reference)
 		public Ending copy() { 
 			if (this == NOT_ENDED) return NOT_ENDED;
 			if (this == X_WINS) return X_WINS;

@@ -11,6 +11,7 @@ import game.Direction.Axis;
 import game.Column;
 import game.Game;
 import game.Mark;
+import game.Move;
 import game.Position;
 
 public class BoardTest {
@@ -122,7 +123,7 @@ public class BoardTest {
     	Position next = position;
     	int amount = 0;
     	while (next != null && amount < steps){
-			board.doMove(new Column(next.x, next.y) , mark);
+			board.doMove(new Move(new Column(next.x, next.y), mark));
 			next = next.inDirection(direction);
 			amount++;
 		} 

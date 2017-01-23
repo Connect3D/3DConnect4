@@ -71,6 +71,8 @@ public class View extends JFrame implements Observer   {
 		anotherGame = new JButton("Play again");
 		anotherGame.addActionListener(controller);
 		anotherGame.setEnabled(false);
+		turn = new JLabel("It is ");
+		
 		
 		panelSouth.add(turn);
 		panelSouth.add(anotherGame, BorderLayout.SOUTH);
