@@ -29,6 +29,8 @@ public class Game extends Observable implements Runnable {
 		while (board.getEnding() == Ending.NOT_ENDED) {
 			doMoveFor(players[currentPlayer]);
 		}
+		setChanged();
+		notifyObservers(board.getEnding());
 	}
 	
 	

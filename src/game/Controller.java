@@ -23,7 +23,7 @@ public class Controller implements ActionListener, ProvidesMoves {
 	 * Receives input from GUI buttons, calls an appropriate command of Game.
 	 */
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public synchronized void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if (src instanceof JButton) {
 			JButton button = (JButton) src;

@@ -37,9 +37,9 @@ public class View extends JFrame implements Observer {
 	private JButton anotherGame;
 	private static final int DIM = 4;
 
-	public View(Controller controller) {
+	public View(Game game, Controller controller) {
 		super("Connect4_3D_View");
-		buildGUI(controller);
+		buildGUI(game, controller);
 		setSize(300, 300);
 		setVisible(true);
 
@@ -54,7 +54,7 @@ public class View extends JFrame implements Observer {
 		});
 	}
 
-	private void buildGUI(Controller controller) {
+	private void buildGUI(Game game, Controller controller) {
 		panel = new JPanel(new FlowLayout());
 		JPanel panelNorth = new JPanel(new GridLayout(DIM, DIM));
 
@@ -74,6 +74,7 @@ public class View extends JFrame implements Observer {
 		anotherGame.addActionListener(controller);
 		anotherGame.setEnabled(false);
 		turn = new JLabel("");
+		updateTurn(game.getCurrentPlayerName());
 		panelSouth.add(turn);
 		panelSouth.add(anotherGame, BorderLayout.SOUTH);
 
@@ -83,6 +84,7 @@ public class View extends JFrame implements Observer {
 		cc.add(panelSouth);
 	}
 
+	//TODO: Instantiate classes in a more structured manner. Possible instantiate them in other classes.
 	public static void main(String[] args) {
 		Controller controller = new Controller();
 		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
@@ -90,9 +92,9 @@ public class View extends JFrame implements Observer {
 		Game game = new Game(p1, p2);
 		Thread gameThread = new Thread(game);
 		gameThread.start();
-		View view = new View(controller);
-		view.updateTurn(game.getCurrentPlayerName());
+		View view = new View(game, controller);
 		controller.setView(view);
+		game.addObserver(view);
 	}
 
 	@Override
@@ -105,7 +107,7 @@ public class View extends JFrame implements Observer {
 	}
 
 	public void updateTurn(String playername) {
-		turn = new JLabel("It is " + playername + "'s turn.");
+		turn.setText("It is " + playername + "'s turn.");
 	}
 
 	public Vector getButtonVector(JButton button) {

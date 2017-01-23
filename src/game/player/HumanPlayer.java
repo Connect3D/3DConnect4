@@ -23,8 +23,10 @@ public class HumanPlayer extends Player {
 		ArrayList<Column> possible = board.possibleColumns();
 		while (true) {
 			Column choice = input.waitForMove();
-			if(possible.contains(choice)) {
-				return new Move(choice, mark);
+			for (Column c : possible) {
+				if (c.equals(choice)) {
+					return new Move(choice, mark);
+				}
 			}
 		}
 	}
