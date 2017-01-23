@@ -25,10 +25,6 @@ public class Game extends Observable implements Runnable {
 		return players[currentPlayer].getName();
 	}
 	
-	public Mark getCurrentPlayerMark() {
-		return players[currentPlayer].mark;
-	}
-	
 	/**
 	 * Had to implement this due to move not giving the player but the mark.
 	 */
@@ -36,6 +32,10 @@ public class Game extends Observable implements Runnable {
 		return players[currentPlayer == 0 ? 1 : 0].getName();
 	}
 	
+	public Mark getCurrentPlayerMark() {
+		return players[currentPlayer].mark;
+	}
+
 	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
@@ -65,7 +65,6 @@ public class Game extends Observable implements Runnable {
 		setChanged();
 		notifyObservers(move);
 	}
-	
 	
 	private void switchCurrentPlayer() {
 		currentPlayer = currentPlayer == 0 ? 1 : 0;

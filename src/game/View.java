@@ -39,16 +39,8 @@ public class View extends JFrame implements Observer {
 
 	public View() {
 		super("Connect4_3D_View");
-		
-		Controller controller = new Controller();
-		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
-		Player p2 = new HumanPlayer("Aart", Mark.O, controller);
-		Game game = new Game(p1, p2);
-		Thread gameThread = new Thread(game);
-		gameThread.start();
-		game.addObserver(this);
 
-		buildGUI(game, controller);
+		init();
 		setSize(300, 300);
 		setVisible(true);
 
@@ -61,6 +53,18 @@ public class View extends JFrame implements Observer {
 				System.exit(0);
 			}
 		});
+	}	
+	
+	public void init() {
+		Controller controller = new Controller();
+		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
+		Player p2 = new HumanPlayer("Aart", Mark.O, controller);
+		Game game = new Game(p1, p2);
+		Thread gameThread = new Thread(game);
+		gameThread.start();
+		game.addObserver(this);
+		controller.setGame(game);
+		buildGUI(game, controller);
 	}
 
 	private void buildGUI(Game game, Controller controller) {
@@ -99,28 +103,24 @@ public class View extends JFrame implements Observer {
 	public static void main(String[] args) {
 		new View();
 	}
-
-	/**
-	 * NOTE: WOULD BE SAFER TO TURN MARK IN MOVE INTO A PLAYER, SINCE NOW I HAVE
-	 * TO REQUEST THE OTHER PLAYER WHICH MIGHT NOT YET BE UPDATED
-	 */
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof Game) {
 			Game game = (Game) o;
 			if (arg instanceof Game.Ending) {
-				turn.setText(game.getOtherPlayerName() + " has won.");
+				turn.setText(game.getEnding().toString());
 				anotherGame.setEnabled(true);
 			}
 			if (arg instanceof Move) {
 				Move move = (Move) arg;
-				buttons[move.column.x][move.column.y].setText(move.mark.opposite().toString());
+				buttons[move.column.x][move.column.y].setText(move.mark.toString());
 				if (game.getBoardState().isColumnFull(move.column)) {
 					buttons[move.column.x][move.column.y].setEnabled(false);
 				}
-				turn.setText("It is " + game.getCurrentPlayerName() + "'s turn. With mark " + move.mark + ".");
+				turn.setText("It is " + game.getCurrentPlayerName() + "'s turn. With mark " + move.mark.opposite() + ".");
+				}
 			}
-		}
 	}
 
 	public void updateTurn(String playername) {
@@ -130,7 +130,9 @@ public class View extends JFrame implements Observer {
 	public void resetButtons() {
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
-				buttons[x][y].setEnabled(true);
+				JButton button = buttons[x][y];
+				button.setEnabled(true);
+				button.setText("EMPTY");
 				anotherGame.setEnabled(false);
 			}
 		}
@@ -149,8 +151,13 @@ public class View extends JFrame implements Observer {
 
 	class Controller implements ActionListener, ProvidesMoves {
 
-		Column column;
-		
+		private Column column;
+		private Game game;
+
+		private void setGame(Game game) {
+			this.game = game;
+		}
+
 		/**
 		 * Receives input from GUI buttons, calls an appropriate command of
 		 * Game.
@@ -160,13 +167,12 @@ public class View extends JFrame implements Observer {
 			Object src = e.getSource();
 			if (src instanceof JButton) {
 				if (src.equals(anotherGame)) {
-					resetButtons();
-					//reset game;
+					//game.resetBoard();
+				} else {
+					Vector buttonPos = getButtonVector((JButton) src);
+					column = new Column(buttonPos.x, buttonPos.y);
+					notifyAll();
 				}
-				JButton button = (JButton) src;
-				Vector buttonPos = getButtonVector(button);
-				column = new Column(buttonPos.x, buttonPos.y);
-				notifyAll();
 			}
 		}
 
