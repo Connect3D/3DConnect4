@@ -15,7 +15,7 @@ public class Board {
 	public static final String DELIMETER = "+---+---+---+---+";
 	
 	
-	private Mark[] fields;
+	public Mark[] fields;
 	private Game.Ending ending;
 	
 	
@@ -48,10 +48,10 @@ public class Board {
 	}
 	
 	
-	public void doMove(Column column, Mark mark) {
-		Position position = cascade(column);
-		fields[position.index()] = mark;
-		ending = checkEndingFor(position, mark);
+	public void doMove(Move move) {
+		Position position = cascade(move.column);
+		fields[position.index()] = move.mark;
+		ending = checkEndingFor(position, move.mark);
 	}
 	
 	

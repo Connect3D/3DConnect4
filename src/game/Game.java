@@ -41,11 +41,10 @@ public class Game extends Observable implements Runnable {
 	
 	private void doMoveFor(Player player) {
 		if (board.getEnding() == Ending.NOT_ENDED) {
-			Column move = player.getMove(board);
-			board.doMove(move, player.mark);
-			Move _move = new Move(move, player.mark);
+			Move move = player.getMove(board);
+			board.doMove(move);
 			setChanged();
-			notifyObservers(_move);		// give new move object
+			notifyObservers(move);
 			switchCurrentPlayer();
 		}
 	}

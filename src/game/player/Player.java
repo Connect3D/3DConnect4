@@ -3,6 +3,7 @@ package game.player;
 import game.Board;
 import game.Column;
 import game.Mark;
+import game.Move;
 
 
 public abstract class Player {
@@ -13,6 +14,6 @@ public abstract class Player {
 		mark = m;
 	}
 	
-	public abstract Column getMove(Board board);
+	public abstract Move getMove(Board board);
 	
 }
