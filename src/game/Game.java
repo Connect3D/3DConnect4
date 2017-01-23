@@ -1,9 +1,7 @@
 package game;
 
 import game.player.Player;
-import javafx.beans.InvalidationListener;
 import java.util.Observable;
-import util.OutputsBoard;
 
 
 // TODO make thread safe !!!!!!!!!!!!!
@@ -39,15 +37,17 @@ public class Game extends Observable implements Runnable {
 		return board.getEnding();
 	}
 	
-	
-	private void doMoveFor(Player player) {
+	//concurrency. synchronize functions with data race.
+	//look at thread pull.game thread safe.
+	//updates network and GUI with tupil of move and playername
+	private void doMoveFor(Player player) { 
 		if (board.getEnding() == Ending.NOT_ENDED) {
 			Column move = player.getMove(board);
 			board.doMove(move, player.mark);
 			lastTurn = player.mark;
-			setChanged();
-			notifyObservers(move);
 			switchCurrentPlayer();
+			setChanged();
+			notifyObservers(move); 
 		}
 	}
 	
