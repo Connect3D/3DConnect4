@@ -129,7 +129,7 @@ public class LocalGame implements Runnable, ProvidesMoves, Observer {
 	
 	
 	private Player makePlayer(PlayerType playerType, Mark mark) {
-		if (playerType == PlayerType.HUMAN) return new HumanPlayer(mark, this);
+		if (playerType == PlayerType.HUMAN) return new HumanPlayer("Henk", mark, this);
 		if (playerType == PlayerType.RANDOM) return new ComputerPlayer(mark, new RandomStrategy());
 		if (playerType == PlayerType.MINIMAX) return null;
 		if (playerType == PlayerType.ONLINE) return null;

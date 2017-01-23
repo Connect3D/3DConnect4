@@ -10,9 +10,14 @@ import game.player.strategy.*;
 public class ComputerPlayer extends Player {
 
 	private Strategy strategy;
+	public static final String NAME = "ComputerPlayer";
 	
 	public ComputerPlayer(Mark m, Strategy s) {
-		super(m);
+		this(NAME, m, s);
+	}
+	
+	public ComputerPlayer(String n, Mark m, Strategy s) {
+		super(n, m);
 		strategy = s;
 	}
 

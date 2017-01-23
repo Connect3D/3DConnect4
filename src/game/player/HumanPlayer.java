@@ -11,11 +11,10 @@ import util.ProvidesMoves;
 
 public class HumanPlayer extends Player {
 
-	
 	ProvidesMoves input;
 	
-	public HumanPlayer(Mark m, ProvidesMoves p) {
-		super(m);
+	public HumanPlayer(String n, Mark m, ProvidesMoves p) {
+		super(n, m);
 		input = p;
 	}
 

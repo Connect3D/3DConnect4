@@ -24,6 +24,10 @@ public class Game extends Observable implements Runnable {
 		return new Board(board);
 	}
 	
+	public Player getCurrentPlayer() {
+		return players[currentPlayer];
+	}
+	
 	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
@@ -52,7 +56,6 @@ public class Game extends Observable implements Runnable {
 	private void switchCurrentPlayer() {
 		currentPlayer = currentPlayer == 0 ? 1 : 0;
 	}
-	
 	
 	// all possible endings of a game
 	public enum Ending {

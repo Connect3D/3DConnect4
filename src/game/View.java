@@ -9,12 +9,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Observable;
 import java.util.Observer;
+import java.awt.Container;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import client.LocalGame;
 import game.player.HumanPlayer;
 
 /**
@@ -64,11 +66,19 @@ public class View extends JFrame implements Observer   {
 		}
 		
 		panel.add(panelNorth, BorderLayout.NORTH);
-		JPanel panelSouth = new JPanel(new BorderLayout(DIM, DIM));
-		turn = new JLabel("It is ")
+		JPanel panelSouth = new JPanel(new BorderLayout());
+		turn = new JLabel("It is " + game.getCurrentPlayer().getName() + "'s turn.");
+		anotherGame = new JButton("Play again");
+		anotherGame.addActionListener(controller);
+		anotherGame.setEnabled(false);
 		
+		panelSouth.add(turn);
+		panelSouth.add(anotherGame, BorderLayout.SOUTH);
 		
-		
+		Container cc = getContentPane();
+		cc.setLayout(new FlowLayout());
+		cc.add(panelNorth);
+		cc.add(panelSouth);
 	}
 	
 	@Override
@@ -77,6 +87,11 @@ public class View extends JFrame implements Observer   {
 			
 		}
 		
+	}
+	
+	public static void main(String[] args) {
+		Game game = new Game(new HumanPlayer("Rich", Mark.X, new LocalGame()), new HumanPlayer("Aart", Mark.O, new LocalGame()));
+		new View(game);
 	}
 
 
