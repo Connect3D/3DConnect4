@@ -14,7 +14,6 @@ public class Game extends Observable implements Runnable {
 	private Board board = new Board();
 	private Player[] players = new Player[2];
 	private int currentPlayer = 0;
-	private Mark lastTurn = Mark.EMPTY;
 
 
 	public Game(Player _player1, Player _player2) {
@@ -23,8 +22,8 @@ public class Game extends Observable implements Runnable {
 	}
 	
 	
-	public Mark getLastTurn() {
-		return lastTurn;
+	public Board getBoardState() {
+		return new Board(board);
 	}
 	
 	
@@ -44,9 +43,9 @@ public class Game extends Observable implements Runnable {
 		if (board.getEnding() == Ending.NOT_ENDED) {
 			Column move = player.getMove(board);
 			board.doMove(move, player.mark);
-			lastTurn = player.mark;
+			Move _move = new Move(move, player.mark);
 			setChanged();
-			notifyObservers(move);
+			notifyObservers(_move);		// give new move object
 			switchCurrentPlayer();
 		}
 	}
