@@ -36,7 +36,9 @@ public class Game extends Observable implements Runnable {
 		return board.getEnding();
 	}
 	
-	
+	//concurrency. synchronize functions with data race.
+	//look at thread pull.game thread safe.
+	//updates network and GUI with tupil of move and playername
 	private void doMoveFor(Player player) {
 		if (board.getEnding() == Ending.NOT_ENDED) {
 			Move move = player.getMove(board);
@@ -46,7 +48,6 @@ public class Game extends Observable implements Runnable {
 			switchCurrentPlayer();
 		}
 	}
-	
 	
 	private void switchCurrentPlayer() {
 		currentPlayer = currentPlayer == 0 ? 1 : 0;
