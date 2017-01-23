@@ -31,10 +31,16 @@ public class Game extends Observable implements Runnable {
 	}
 	
 	
+	public Mark getTurn() {
+		return players[currentPlayer].mark;
+	}
+	
+	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
 			if (boardOutput != null) boardOutput.printBoard(board);
 			doMoveFor(players[currentPlayer]);
+			
 			switchCurrentPlayer();
 		}
 		if (boardOutput != null) boardOutput.printBoard(board);
@@ -50,6 +56,8 @@ public class Game extends Observable implements Runnable {
 		if (board.getEnding() == Ending.NOT_ENDED) {
 			Column move = player.getMove(board);
 			board.doMove(move, player.mark);
+			setChanged();
+			notifyObservers(move);
 		}
 	}
 	
