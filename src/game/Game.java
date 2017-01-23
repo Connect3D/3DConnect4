@@ -39,17 +39,15 @@ public class Game extends Observable implements Runnable {
 	//concurrency. synchronize functions with data race.
 	//look at thread pull.game thread safe.
 	//updates network and GUI with tupil of move and playername
-	private void doMoveFor(Player player) { 
+	private void doMoveFor(Player player) {
 		if (board.getEnding() == Ending.NOT_ENDED) {
-			Column move = player.getMove(board);
-			board.doMove(move, player.mark);
-			lastTurn = player.mark;
-			switchCurrentPlayer();
+			Move move = player.getMove(board);
+			board.doMove(move);
 			setChanged();
-			notifyObservers(move); 
+			notifyObservers(move);
+			switchCurrentPlayer();
 		}
 	}
-	
 	
 	private void switchCurrentPlayer() {
 		currentPlayer = currentPlayer == 0 ? 1 : 0;

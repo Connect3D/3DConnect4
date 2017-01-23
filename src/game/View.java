@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -61,6 +62,11 @@ public class View extends JFrame implements Observer   {
 			button.addActionListener(controller);
 			panelNorth.add(button);
 		}
+		
+		panel.add(panelNorth, BorderLayout.NORTH);
+		JPanel panelSouth = new JPanel(new BorderLayout(DIM, DIM));
+		turn = new JLabel("It is ")
+		
 		
 		
 	}
