@@ -1,10 +1,12 @@
 package game;
 
 import game.player.Player;
+import javafx.beans.InvalidationListener;
+import java.util.Observable;
 import util.OutputsBoard;
 
 
-public class Game implements Runnable {
+public class Game extends Observable implements Runnable {
 
 	public static final int CONSECUTIVE_MARKS_TO_WIN = 4;
 	
@@ -78,7 +80,5 @@ public class Game implements Runnable {
 		}
 		
 	}
-
-	
 
 }
