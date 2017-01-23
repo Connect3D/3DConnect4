@@ -31,14 +31,23 @@ import util.ProvidesMoves;
  */
 public class View extends JFrame implements Observer {
 
+	private JButton anotherGame;
 	private JPanel panel;
 	private JLabel turn;
 	private JButton[][] buttons;
-	private JButton anotherGame;
 	private static final int DIM = 4;
 
-	public View(Game game, Controller controller) {
+	public View() {
 		super("Connect4_3D_View");
+		
+		Controller controller = new Controller();
+		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
+		Player p2 = new HumanPlayer("Aart", Mark.O, controller);
+		Game game = new Game(p1, p2);
+		Thread gameThread = new Thread(game);
+		gameThread.start();
+		game.addObserver(this);
+
 		buildGUI(game, controller);
 		setSize(300, 300);
 		setVisible(true);
@@ -74,7 +83,8 @@ public class View extends JFrame implements Observer {
 		anotherGame.addActionListener(controller);
 		anotherGame.setEnabled(false);
 		turn = new JLabel("");
-		updateTurn(game.getCurrentPlayerName());
+		turn.setText(
+				"It is " + game.getCurrentPlayerName() + "'s turn. With mark " + game.getCurrentPlayerMark() + ".");
 		panelSouth.add(turn);
 		panelSouth.add(anotherGame, BorderLayout.SOUTH);
 
@@ -84,30 +94,46 @@ public class View extends JFrame implements Observer {
 		cc.add(panelSouth);
 	}
 
-	//TODO: Instantiate classes in a more structured manner. Possible instantiate them in other classes.
+	// TODO: Instantiate classes in a more structured manner. Possible
+	// instantiate them in other classes.
 	public static void main(String[] args) {
-		Controller controller = new Controller();
-		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
-		Player p2 = new HumanPlayer("Aart", Mark.O, controller);
-		Game game = new Game(p1, p2);
-		Thread gameThread = new Thread(game);
-		gameThread.start();
-		View view = new View(game, controller);
-		controller.setView(view);
-		game.addObserver(view);
+		new View();
 	}
 
+	/**
+	 * NOTE: WOULD BE SAFER TO TURN MARK IN MOVE INTO A PLAYER, SINCE NOW I HAVE
+	 * TO REQUEST THE OTHER PLAYER WHICH MIGHT NOT YET BE UPDATED
+	 */
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof Game && arg instanceof Move) {
-			Move move = (Move) arg;
-			buttons[move.column.x][move.column.y].setText(move.mark.toString());
-			updateTurn(((Game) o).getCurrentPlayerName());
+		if (o instanceof Game) {
+			Game game = (Game) o;
+			if (arg instanceof Game.Ending) {
+				turn.setText(game.getOtherPlayerName() + " has won.");
+				anotherGame.setEnabled(true);
+			}
+			if (arg instanceof Move) {
+				Move move = (Move) arg;
+				buttons[move.column.x][move.column.y].setText(move.mark.opposite().toString());
+				if (game.getBoardState().isColumnFull(move.column)) {
+					buttons[move.column.x][move.column.y].setEnabled(false);
+				}
+				turn.setText("It is " + game.getCurrentPlayerName() + "'s turn. With mark " + move.mark + ".");
+			}
 		}
 	}
 
 	public void updateTurn(String playername) {
 		turn.setText("It is " + playername + "'s turn.");
+	}
+
+	public void resetButtons() {
+		for (int x = 0; x < Board.WIDTH; x++) {
+			for (int y = 0; y < Board.DEPTH; y++) {
+				buttons[x][y].setEnabled(true);
+				anotherGame.setEnabled(false);
+			}
+		}
 	}
 
 	public Vector getButtonVector(JButton button) {
@@ -120,5 +146,43 @@ public class View extends JFrame implements Observer {
 		}
 		return null;
 	}
-	
+
+	class Controller implements ActionListener, ProvidesMoves {
+
+		Column column;
+		
+		/**
+		 * Receives input from GUI buttons, calls an appropriate command of
+		 * Game.
+		 */
+		@Override
+		public synchronized void actionPerformed(ActionEvent e) {
+			Object src = e.getSource();
+			if (src instanceof JButton) {
+				if (src.equals(anotherGame)) {
+					resetButtons();
+					//reset game;
+				}
+				JButton button = (JButton) src;
+				Vector buttonPos = getButtonVector(button);
+				column = new Column(buttonPos.x, buttonPos.y);
+				notifyAll();
+			}
+		}
+
+		@Override
+		public synchronized Column waitForMove() {
+			try {
+				while (column == null) {
+					wait();
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			Column choice = new Column(column);
+			column = null;
+			return choice;
+		}
+
+	}
 }

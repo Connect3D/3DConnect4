@@ -5,6 +5,7 @@ import java.util.Observable;
 
 
 // TODO make thread safe !!!!!!!!!!!!!
+// TODO implement reset
 public class Game extends Observable implements Runnable {
 
 	public static final int CONSECUTIVE_MARKS_TO_WIN = 4;
@@ -22,6 +23,17 @@ public class Game extends Observable implements Runnable {
 
 	public String getCurrentPlayerName() {
 		return players[currentPlayer].getName();
+	}
+	
+	public Mark getCurrentPlayerMark() {
+		return players[currentPlayer].mark;
+	}
+	
+	/**
+	 * Had to implement this due to move not giving the player but the mark.
+	 */
+	public String getOtherPlayerName() {
+		return players[currentPlayer == 0 ? 1 : 0].getName();
 	}
 	
 	

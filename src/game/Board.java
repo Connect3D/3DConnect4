@@ -47,7 +47,6 @@ public class Board {
 		return fields[Position.indexOf(column.x, column.y, HEIGHT - 1)] != Mark.EMPTY;
 	}
 	
-	
 	public void doMove(Move move) {
 		Position position = cascade(move.column);
 		fields[position.index()] = move.mark;
