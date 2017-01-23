@@ -1,9 +1,7 @@
 package game;
 
 import game.player.Player;
-import javafx.beans.InvalidationListener;
 import java.util.Observable;
-import util.OutputsBoard;
 
 
 // TODO make thread safe !!!!!!!!!!!!!
@@ -22,15 +20,15 @@ public class Game extends Observable implements Runnable {
 	}
 	
 	
-	public Board getBoardState() {
-		return new Board(board);
-	}
-	
-	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {
 			doMoveFor(players[currentPlayer]);
 		}
+	}
+	
+	
+	public Board getBoardState() {
+		return new Board(board);
 	}
 	
 	
