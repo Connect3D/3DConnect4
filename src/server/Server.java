@@ -4,49 +4,57 @@ import util.MessageUI;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 
 
-public class Server extends Thread {
-	private static final String USAGE = "usage: " + Server.class.getName() + " <port>";
+public class Server implements Runnable {
+	
+	//private static final String USAGE = "usage: " + Server.class.getName() + " <port>";
 
-	private int port;
-	private MessageUI mui;
-	private Collection<ClientHandler> threads;
-
-
-	public Server(int portArg, MessageUI muiArg) {
-		mui = muiArg;
-		port = portArg;
-		threads = new ArrayList<ClientHandler>();
-	}
+	public final int port;
+	
+	private MessageUI console;
+	private Collection<ClientHandler> clients;
+	private ServerSocket serverSocket = null;
 
 	
-	public void run() {
-		ServerSocket ssocket = null;
+	public Server(int portArg, MessageUI muiArg) {
+		port = portArg;
+		console = muiArg;
+		clients = new LinkedList<ClientHandler>();
 		try {
-			ssocket = new ServerSocket(port);
-			while (true) {
-				Socket socket = ssocket.accept();
+			serverSocket = new ServerSocket(port);
+		} catch (IOException e) {
+			console.addMessage("ERROR: serversocket could not be created on port " + port);
+			//shutdown(serverSocket); 	// not necessary socket doesnt exist yet
+			//System.exit(0);			// we can just attempt again
+		}
+	}
+	
+	
+	public void run() {
+		
+		while (true) {
+			try {
+				Socket socket = serverSocket.accept();
 				ClientHandler clientHandler = new ClientHandler(this, socket);
 				addHandler(clientHandler);
-				mui.addMessage("[client no." + threads.size() + " connected.]");
+				console.addMessage("[client no." + clients.size() + " connected.]");
 				clientHandler.announce();
 				clientHandler.start();
+				
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			mui.addMessage("ERROR: serversocket could not be created on port " + port);
-			shutdown(ssocket);
-			System.exit(0);
 		}
 	}
 
 
-	public void shutdown(ServerSocket sock) {
-		mui.addMessage("Closing socket connection...");
+	public void shutdown() {
+		console.addMessage("Closing socket connection...");
 		try {
-			sock.close();
+			serverSocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -54,20 +62,20 @@ public class Server extends Thread {
 
 
 	public void broadcast(String msg) {
-		for (ClientHandler ch : threads) {
+		for (ClientHandler ch : clients) {
 			ch.sendMessage(msg);
-			mui.addMessage(msg);
+			console.addMessage(msg);
 		}
 	}
 
 	
 	public void addHandler(ClientHandler handler) {
-		threads.add(handler);
+		clients.add(handler);
 	}
 
 	
 	public void removeHandler(ClientHandler handler) {
-		threads.remove(handler);
+		clients.remove(handler);
 	}
 
 }

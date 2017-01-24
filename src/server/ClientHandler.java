@@ -10,8 +10,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
+import game.Column;
+import util.ProvidesMoves;
 
-public class ClientHandler extends Thread {
+
+public class ClientHandler extends Thread implements ProvidesMoves {
 
 	private Server server;
 	private Socket sock;
@@ -83,6 +86,13 @@ public class ClientHandler extends Thread {
 			System.exit(0);
 		}
 		return address;
+	}
+
+
+	@Override
+	public Column waitForMove() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
