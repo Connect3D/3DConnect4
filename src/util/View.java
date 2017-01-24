@@ -1,4 +1,4 @@
-package game;
+package util;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -20,19 +20,19 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import client.LocalGame;
+import game.Board;
+import game.Column;
+import game.Controller;
+import game.Game;
+import game.Mark;
+import game.Move;
+import game.Game.Ending;
 import game.player.HumanPlayer;
 import game.player.Player;
-import util.ProvidesMoves;
-import util.Vector;
 import util.exception.ColumnFullException;
 
 /**
- * @author RichKok GUI with buttons and text notifying the user of the game's
- *         status. An Actionlistener is attached to the buttons, calling the
- *         private Controller class which in turn issues the Game class. The
- *         view is added as an observer to the game class, therefore changes in
- *         Game consequently call the update command. Changes of state in the
- *         game class are observed
+ * Replaced by Connect4GUI package
  */
 public class View extends JFrame implements Observer {
 
@@ -98,8 +98,7 @@ public class View extends JFrame implements Observer {
 				if (game.getBoardState().isColumnFull(column)) {
 					inputButtons[column.x][column.y].setEnabled(false);
 				}
-				turn.setText(
-						"It is "  + game.getCurrentPlayerName() + "'s turn. With mark " + mark.opposite() + ".");
+				turn.setText(mark + "'s turn.");
 			}
 		}
 	}
@@ -152,8 +151,6 @@ public class View extends JFrame implements Observer {
 	public JPanel createStatusPanel(Game game) {
 		JPanel statusPanel = new JPanel(new FlowLayout());
 		turn = new JLabel("");
-		turn.setText(
-				"It is " + game.getCurrentPlayerName() + "'s turn. With mark " + game.getCurrentPlayerMark() + ".");
 		turn.setPreferredSize(new Dimension(200, 20));
 
 		statusPanel.add(turn);

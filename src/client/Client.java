@@ -10,9 +10,9 @@ import java.net.Socket;
 
 import game.Game;
 import game.Mark;
-import game.View;
 import game.player.HumanPlayer;
 import util.MessageUI;
+import util.View;
 
 /**
  * P2 prac wk4. <br>

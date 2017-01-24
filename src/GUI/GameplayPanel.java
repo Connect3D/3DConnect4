@@ -15,8 +15,8 @@ import game.Board;
 import game.Controller;
 import game.Game;
 import game.Mark;
-import game.View;
 import util.Vector;
+import util.View;
 
 public class GameplayPanel extends JPanel {
 
@@ -67,7 +67,6 @@ public class GameplayPanel extends JPanel {
 		resetButton.setEnabled(bool);
 	}
 	
-
 	
 	public Vector getInputbuttonVector(JRadioButton src) {
 		for (int x = 0; x < Board.WIDTH; x++) {
