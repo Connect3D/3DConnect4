@@ -10,11 +10,13 @@ import java.awt.event.WindowEvent;
 import java.util.Observable;
 import java.util.Observer;
 import java.awt.Container;
+import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import client.LocalGame;
 import game.player.HumanPlayer;
@@ -31,17 +33,18 @@ import util.ProvidesMoves;
  */
 public class View extends JFrame implements Observer {
 
+	private Controller controller;
 	private JButton anotherGame;
-	private JPanel panel;
 	private JLabel turn;
-	private JButton[][] buttons;
+	private JRadioButton[][] inputButtons;
+	private JButton[] outputButtons;
 	private static final int DIM = 4;
 
 	public View() {
 		super("Connect4_3D_View");
 
 		init();
-		setSize(300, 300);
+		setSize(600, 600);
 		setVisible(true);
 
 		addWindowListener(new WindowAdapter() {
@@ -56,7 +59,7 @@ public class View extends JFrame implements Observer {
 	}	
 	
 	public void init() {
-		Controller controller = new Controller();
+		controller = new Controller();
 		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
 		Player p2 = new HumanPlayer("Aart", Mark.O, controller);
 		Game game = new Game(p1, p2);
@@ -68,34 +71,79 @@ public class View extends JFrame implements Observer {
 	}
 
 	private void buildGUI(Game game, Controller controller) {
-		panel = new JPanel(new FlowLayout());
-		JPanel panelNorth = new JPanel(new GridLayout(DIM, DIM));
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		GridLayout glayout = new GridLayout(3, 1);
+		glayout.setVgap(0);
+		
+		JPanel playPanel = new JPanel(glayout);
+		playPanel.add(createStatusPanel(game));
+		playPanel.add(createInputPanel());
 
-		buttons = new JButton[Board.WIDTH][Board.DEPTH];
+		playPanel.add(createMenuPanel(), BorderLayout.SOUTH);
+		
+		JPanel mainOutputPanel = new JPanel(new FlowLayout());
+		mainOutputPanel.add(createColumnOutputPanel());
+		
+		mainPanel.add(playPanel, BorderLayout.WEST);
+		mainPanel.add(mainOutputPanel, BorderLayout.EAST);
+		
+		Container cc = getContentPane();
+		cc.setLayout(new FlowLayout());
+		cc.add(mainPanel);
+	}
+	
+	public JPanel createInputPanel() {
+		JPanel input = new JPanel(new GridLayout(DIM, DIM));
+		inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
-				JButton button = new JButton("EMPTY");
-				buttons[x][y] = button;
+				JRadioButton button = new JRadioButton();
+				inputButtons[x][y] = button;
 				button.addActionListener(controller);
-				panelNorth.add(button);
+				input.add(button);
 			}
 		}
-
-		panel.add(panelNorth, BorderLayout.NORTH);
-		JPanel panelSouth = new JPanel(new BorderLayout());
+		return input;
+	}
+	
+	
+	public JPanel createMenuPanel() {
+		JPanel menuPanel = new JPanel(new FlowLayout());
 		anotherGame = new JButton("Play again");
 		anotherGame.addActionListener(controller);
 		anotherGame.setEnabled(false);
+		menuPanel.add(anotherGame);
+		return menuPanel;
+	}
+	
+	public JPanel createStatusPanel(Game game) { 
+		JPanel statusPanel = new JPanel(new FlowLayout());
 		turn = new JLabel("");
 		turn.setText(
 				"It is " + game.getCurrentPlayerName() + "'s turn. With mark " + game.getCurrentPlayerMark() + ".");
-		panelSouth.add(turn);
-		panelSouth.add(anotherGame, BorderLayout.SOUTH);
+		statusPanel.add(turn);
+		return statusPanel;
+	}
+	
+	public JPanel createColumnOutputPanel() {
+		JPanel fpanel = new JPanel(new FlowLayout());
+		outputButtons = new JButton[DIM * DIM * DIM];
+		GridLayout gLayout = new GridLayout(DIM, 1);
+		gLayout.setVgap(20);
+		JPanel mgpanel = new JPanel(gLayout);
+		for (int i = 0; i < DIM; i++) {
+			JPanel gpanel = new JPanel(new GridLayout(DIM, DIM));
 
-		Container cc = getContentPane();
-		cc.setLayout(new FlowLayout());
-		cc.add(panelNorth);
-		cc.add(panelSouth);
+			for (int j = 0; j < DIM * DIM; j++) {
+				JButton button = new JButton();
+				button.setPreferredSize(new Dimension(20, 20));
+				outputButtons[i] = button;
+				gpanel.add(button);
+			}
+			mgpanel.add(gpanel);
+		}
+		fpanel.add(mgpanel);
+		return fpanel;
 	}
 
 	// TODO: Instantiate classes in a more structured manner. Possible
@@ -114,9 +162,9 @@ public class View extends JFrame implements Observer {
 			}
 			if (arg instanceof Move) {
 				Move move = (Move) arg;
-				buttons[move.column.x][move.column.y].setText(move.mark.toString());
+				//outputButtons[move.column.x][move.column.y].setText(move.mark.toString());
 				if (game.getBoardState().isColumnFull(move.column)) {
-					buttons[move.column.x][move.column.y].setEnabled(false);
+					//buttons[move.column.x][move.column.y].setEnabled(false);
 				}
 				turn.setText("It is " + game.getCurrentPlayerName() + "'s turn. With mark " + move.mark.opposite() + ".");
 				}
@@ -130,9 +178,8 @@ public class View extends JFrame implements Observer {
 	public void resetButtons() {
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
-				JButton button = buttons[x][y];
-				button.setEnabled(true);
-				button.setText("EMPTY");
+				//JRadioButton button = buttons[x][y];
+				//button.setEnabled(true);
 				anotherGame.setEnabled(false);
 			}
 		}
@@ -141,9 +188,9 @@ public class View extends JFrame implements Observer {
 	public Vector getButtonVector(JButton button) {
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
-				if (button.equals(buttons[x][y])) {
+				//if (button.equals(buttons[x][y])) {
 					return new Vector(x, y);
-				}
+				//}
 			}
 		}
 		return null;
