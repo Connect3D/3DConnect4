@@ -1,7 +1,6 @@
 package game.player;
 
 import game.Board;
-import game.Column;
 import game.Mark;
 import game.Move;
 

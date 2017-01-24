@@ -3,7 +3,7 @@ package game;
 import util.exception.InvalidPositionException;
 
 
-// TODO: decide whether we should give public or package scope
+
 public class Position {
 	
 	public final int x;
@@ -25,13 +25,12 @@ public class Position {
 		return x >= 0 && x < Board.WIDTH && y >= 0 && y < Board.DEPTH && z >= 0 && z < Board.HEIGHT;
 	}
 	
-	
-	// TODO check correct usage of WIDTH and DEPTH on non 4*4*4 board
+
 	public static int indexOf(int x, int y, int z) {
 		if (!isValid(x, y, z)) {
 			throw new InvalidPositionException(x, y, z);
 		}
-		return x * Board.WIDTH * Board.WIDTH + y * Board.DEPTH + z;
+		return x * Board.HEIGHT * Board.DEPTH + y * Board.HEIGHT + z;
 	}
 	
 	
