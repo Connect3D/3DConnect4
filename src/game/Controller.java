@@ -89,7 +89,8 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	public void keyTyped(KeyEvent e) {
 		Object src = e.getSource();
 		if (src instanceof JTextField) {
-			if (mainGUI.equalsNameField((JTextField) src)) {
+			JTextField srcTextField = (JTextField) src;
+			if (mainGUI.equalsNameField(srcTextField)) {
 				mainGUI.enableConnectButton(true);
 			}
 		}
