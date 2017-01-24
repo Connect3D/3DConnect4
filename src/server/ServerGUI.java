@@ -125,7 +125,8 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		bConnect.setEnabled(false);
 
 		server = new Server(port, this);
-		server.start();
+		Thread t = new Thread(server);
+		t.start();
 
 		addMessage("Started listening on port " + port + "...");
 	}
