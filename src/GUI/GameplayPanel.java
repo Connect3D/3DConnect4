@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import game.Board;
+import game.Controller;
 import game.Game;
 import game.Mark;
 import game.View;
@@ -19,14 +20,13 @@ import util.Vector;
 
 public class GameplayPanel extends JPanel {
 
-	private JPanel mainPanel;
-	private JButton anotherGame;
+	private JButton resetButton;
 	private JLabel statusLabel;
 	private JRadioButton[][] inputButtons;
 	private JButton[][][] outputButtons;
 	
-	public GameplayPanel(Connect4GUI.Controller controller) {
-		JPanel mainPanel = new JPanel(new BorderLayout());
+	public GameplayPanel(Controller controller) {
+		this.setLayout(new BorderLayout());
 		GridLayout glayout = new GridLayout(3, 1);
 		glayout.setVgap(0);
 
@@ -39,10 +39,14 @@ public class GameplayPanel extends JPanel {
 		JPanel mainOutputPanel = new JPanel(new FlowLayout());
 		mainOutputPanel.add(createColumnOutputPanel());
 
-		mainPanel.add(playPanel, BorderLayout.WEST);
-		mainPanel.add(mainOutputPanel, BorderLayout.EAST);
+		this.add(playPanel, BorderLayout.WEST);
+		this.add(mainOutputPanel, BorderLayout.EAST);
 	}
 	
+	public JButton getResetbutton() {
+		return resetButton;
+	}
+
 	void selectInputbutton(int x, int y, boolean bool){
 		inputButtons[x][y].setSelected(bool);
 	}
@@ -59,13 +63,11 @@ public class GameplayPanel extends JPanel {
 		inputButtons[x][y].setEnabled(false);
 	}
 	
-	void enableAnothergameButton(boolean bool) {
-		anotherGame.setEnabled(bool);
+	void enableResetButton(boolean bool) {
+		resetButton.setEnabled(bool);
 	}
 	
-	public JButton getAnothergameButton() {
-		return anotherGame;
-	}
+
 	
 	public Vector getInputbuttonVector(JRadioButton src) {
 		for (int x = 0; x < Board.WIDTH; x++) {
@@ -78,7 +80,7 @@ public class GameplayPanel extends JPanel {
 		return null;
 	}
 	
-	public JPanel createInputPanel(Connect4GUI.Controller  controller) {
+	public JPanel createInputPanel(Controller  controller) {
 		JPanel input = new JPanel(new GridLayout(Board.WIDTH, Board.HEIGHT));
 		inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
 		for (int x = 0; x < Board.WIDTH; x++) {
@@ -92,12 +94,12 @@ public class GameplayPanel extends JPanel {
 		return input;
 	}
 
-	public JPanel createMenuPanel(Connect4GUI.Controller  controller) {
+	public JPanel createMenuPanel(Controller  controller) {
 		JPanel menuPanel = new JPanel(new FlowLayout());
-		anotherGame = new JButton("Play again");
-		anotherGame.addActionListener(controller);
-		anotherGame.setEnabled(false);
-		menuPanel.add(anotherGame);
+		resetButton = new JButton("Play again");
+		resetButton.addActionListener(controller);
+		resetButton.setEnabled(false);
+		menuPanel.add(resetButton);
 		return menuPanel;
 	}
 

@@ -1,4 +1,4 @@
-package server;
+package GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import server.Server;
 import util.MessageUI;
 
 public class ServerGUI extends JFrame implements ActionListener, MessageUI {
