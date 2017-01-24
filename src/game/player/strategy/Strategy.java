@@ -6,6 +6,6 @@ import game.Column;
 
 public interface Strategy {
 
-	public Column getMove(Board board);
+	public Column pickColumn(Board board);
 	
 }
