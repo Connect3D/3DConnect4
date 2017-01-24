@@ -20,22 +20,6 @@ public class Game extends Observable implements Runnable {
 		players[1] = _player2;
 	}
 	
-	
-	public String getCurrentPlayerName() {
-		return players[currentPlayer].getName();
-	}
-	
-	/**
-	 * Had to implement this due to move not giving the player but the mark.
-	 */
-	public String getOtherPlayerName() {
-		return players[currentPlayer == 0 ? 1 : 0].getName();
-	}
-	
-	public Mark getCurrentPlayerMark() {
-		return players[currentPlayer].mark;
-	}
-	
 	public int getColumnHeigth(Column column) {
 		return board.getColumnHeigth(column);
 	}

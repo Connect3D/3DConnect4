@@ -1,4 +1,4 @@
-package client;
+package GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import client.Client;
 import util.MessageUI;
 
 public class ClientGUI extends JFrame implements ActionListener, KeyListener, MessageUI {

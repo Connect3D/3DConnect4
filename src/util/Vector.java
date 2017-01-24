@@ -1,9 +1,9 @@
-package game;
+package util;
 
 public class Vector {
 	
-	int x; 
-	int y;
+	public int x; 
+	public int y;
 	
 	public Vector(int x, int y) {
 		this.x = x;

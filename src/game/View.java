@@ -9,6 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.TimeUnit;
 import java.awt.Container;
 import java.awt.Dimension;
 
@@ -22,6 +23,7 @@ import client.LocalGame;
 import game.player.HumanPlayer;
 import game.player.Player;
 import util.ProvidesMoves;
+import util.Vector;
 import util.exception.ColumnFullException;
 
 /**
@@ -45,7 +47,7 @@ public class View extends JFrame implements Observer {
 		super("Connect4_3D_View");
 
 		init();
-		setSize(600, 600);
+		setSize(400, 500);
 		setVisible(true);
 
 		addWindowListener(new WindowAdapter() {
@@ -84,6 +86,11 @@ public class View extends JFrame implements Observer {
 				Column column = move.column;
 				Mark mark = move.mark;
 				try {
+					TimeUnit.MILLISECONDS.sleep(100);
+				} catch (InterruptedException e1) {
+				}
+				inputButtons[column.x][column.y].setSelected(false);
+				try {
 					outputButtons[column.x][column.y][game.getColumnHeigth(column) - 1].setText(mark.toString());
 				} catch (ColumnFullException e) {
 					outputButtons[column.x][column.y][DIM - 1].setText(mark.toString());
@@ -92,7 +99,7 @@ public class View extends JFrame implements Observer {
 					inputButtons[column.x][column.y].setEnabled(false);
 				}
 				turn.setText(
-						"It is " + game.getCurrentPlayerName() + "'s turn. With mark " + mark.opposite() + ".");
+						"It is "  + game.getCurrentPlayerName() + "'s turn. With mark " + mark.opposite() + ".");
 			}
 		}
 	}
@@ -147,6 +154,8 @@ public class View extends JFrame implements Observer {
 		turn = new JLabel("");
 		turn.setText(
 				"It is " + game.getCurrentPlayerName() + "'s turn. With mark " + game.getCurrentPlayerMark() + ".");
+		turn.setPreferredSize(new Dimension(200, 20));
+
 		statusPanel.add(turn);
 		return statusPanel;
 	}
@@ -204,45 +213,5 @@ public class View extends JFrame implements Observer {
 		return null;
 	}
 
-	class Controller implements ActionListener, ProvidesMoves {
 
-		private Column column;
-		private Game game;
-
-		private void setGame(Game game) {
-			this.game = game;
-		}
-
-		/**
-		 * Receives input from GUI buttons, calls an appropriate command of
-		 * Game.
-		 */
-		@Override
-		public synchronized void actionPerformed(ActionEvent e) {
-			Object src = e.getSource();
-			if (src.equals(anotherGame)) {
-				// game.resetBoard();
-			}
-			if (src instanceof JRadioButton) {
-				Vector buttonPos = getButtonVector((JRadioButton) src);
-				column = new Column(buttonPos.x, buttonPos.y);
-				notifyAll();
-			}
-		}
-
-		@Override
-		public synchronized Column waitForMove() {
-			try {
-				while (column == null) {
-					wait();
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			Column choice = new Column(column);
-			column = null;
-			return choice;
-		}
-
-	}
 }
