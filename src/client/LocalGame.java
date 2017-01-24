@@ -3,7 +3,6 @@ package client;
 import game.*;
 import game.player.*;
 import game.player.strategy.*;
-import util.OutputsBoard;
 import util.ProvidesMoves;
 import util.ThreadedStreamReader;
 
