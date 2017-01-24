@@ -22,6 +22,7 @@ import client.LocalGame;
 import game.player.HumanPlayer;
 import game.player.Player;
 import util.ProvidesMoves;
+import util.exception.ColumnFullException;
 
 /**
  * @author RichKok GUI with buttons and text notifying the user of the game's
@@ -37,7 +38,7 @@ public class View extends JFrame implements Observer {
 	private JButton anotherGame;
 	private JLabel turn;
 	private JRadioButton[][] inputButtons;
-	private JButton[] outputButtons;
+	private JButton[][][] outputButtons;
 	private static final int DIM = 4;
 
 	public View() {
@@ -56,8 +57,8 @@ public class View extends JFrame implements Observer {
 				System.exit(0);
 			}
 		});
-	}	
-	
+	}
+
 	public void init() {
 		controller = new Controller();
 		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
@@ -70,28 +71,54 @@ public class View extends JFrame implements Observer {
 		buildGUI(game, controller);
 	}
 
+	@Override
+	public void update(Observable o, Object arg) {
+		if (o instanceof Game) {
+			Game game = (Game) o;
+			if (arg instanceof Game.Ending) {
+				turn.setText(game.getEnding().toString());
+				anotherGame.setEnabled(true);
+			}
+			if (arg instanceof Move) {
+				Move move = (Move) arg;
+				Column column = move.column;
+				Mark mark = move.mark;
+				try {
+					outputButtons[column.x][column.y][game.getColumnHeigth(column) - 1].setText(mark.toString());
+				} catch (ColumnFullException e) {
+					outputButtons[column.x][column.y][DIM - 1].setText(mark.toString());
+				}
+				if (game.getBoardState().isColumnFull(column)) {
+					inputButtons[column.x][column.y].setEnabled(false);
+				}
+				turn.setText(
+						"It is " + game.getCurrentPlayerName() + "'s turn. With mark " + mark.opposite() + ".");
+			}
+		}
+	}
+
 	private void buildGUI(Game game, Controller controller) {
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		GridLayout glayout = new GridLayout(3, 1);
 		glayout.setVgap(0);
-		
+
 		JPanel playPanel = new JPanel(glayout);
 		playPanel.add(createStatusPanel(game));
 		playPanel.add(createInputPanel());
 
 		playPanel.add(createMenuPanel(), BorderLayout.SOUTH);
-		
+
 		JPanel mainOutputPanel = new JPanel(new FlowLayout());
 		mainOutputPanel.add(createColumnOutputPanel());
-		
+
 		mainPanel.add(playPanel, BorderLayout.WEST);
 		mainPanel.add(mainOutputPanel, BorderLayout.EAST);
-		
+
 		Container cc = getContentPane();
 		cc.setLayout(new FlowLayout());
 		cc.add(mainPanel);
 	}
-	
+
 	public JPanel createInputPanel() {
 		JPanel input = new JPanel(new GridLayout(DIM, DIM));
 		inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
@@ -105,8 +132,7 @@ public class View extends JFrame implements Observer {
 		}
 		return input;
 	}
-	
-	
+
 	public JPanel createMenuPanel() {
 		JPanel menuPanel = new JPanel(new FlowLayout());
 		anotherGame = new JButton("Play again");
@@ -115,8 +141,8 @@ public class View extends JFrame implements Observer {
 		menuPanel.add(anotherGame);
 		return menuPanel;
 	}
-	
-	public JPanel createStatusPanel(Game game) { 
+
+	public JPanel createStatusPanel(Game game) {
 		JPanel statusPanel = new JPanel(new FlowLayout());
 		turn = new JLabel("");
 		turn.setText(
@@ -124,21 +150,22 @@ public class View extends JFrame implements Observer {
 		statusPanel.add(turn);
 		return statusPanel;
 	}
-	
+
 	public JPanel createColumnOutputPanel() {
 		JPanel fpanel = new JPanel(new FlowLayout());
-		outputButtons = new JButton[DIM * DIM * DIM];
+		outputButtons = new JButton[DIM][DIM][DIM];
 		GridLayout gLayout = new GridLayout(DIM, 1);
 		gLayout.setVgap(20);
 		JPanel mgpanel = new JPanel(gLayout);
-		for (int i = 0; i < DIM; i++) {
+		for (int z = DIM - 1; z >= 0; z--) {
 			JPanel gpanel = new JPanel(new GridLayout(DIM, DIM));
-
-			for (int j = 0; j < DIM * DIM; j++) {
-				JButton button = new JButton();
-				button.setPreferredSize(new Dimension(20, 20));
-				outputButtons[i] = button;
-				gpanel.add(button);
+			for (int x = 0; x < DIM; x++) {
+				for (int y = 0; y < DIM; y++) {
+					JButton button = new JButton();
+					button.setPreferredSize(new Dimension(20, 20));
+					outputButtons[x][y][z] = button;
+					gpanel.add(button);
+				}
 			}
 			mgpanel.add(gpanel);
 		}
@@ -151,25 +178,6 @@ public class View extends JFrame implements Observer {
 	public static void main(String[] args) {
 		new View();
 	}
-	
-	@Override
-	public void update(Observable o, Object arg) {
-		if (o instanceof Game) {
-			Game game = (Game) o;
-			if (arg instanceof Game.Ending) {
-				turn.setText(game.getEnding().toString());
-				anotherGame.setEnabled(true);
-			}
-			if (arg instanceof Move) {
-				Move move = (Move) arg;
-				//outputButtons[move.column.x][move.column.y].setText(move.mark.toString());
-				if (game.getBoardState().isColumnFull(move.column)) {
-					//buttons[move.column.x][move.column.y].setEnabled(false);
-				}
-				turn.setText("It is " + game.getCurrentPlayerName() + "'s turn. With mark " + move.mark.opposite() + ".");
-				}
-			}
-	}
 
 	public void updateTurn(String playername) {
 		turn.setText("It is " + playername + "'s turn.");
@@ -178,19 +186,19 @@ public class View extends JFrame implements Observer {
 	public void resetButtons() {
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
-				//JRadioButton button = buttons[x][y];
-				//button.setEnabled(true);
+				// JRadioButton button = buttons[x][y];
+				// button.setEnabled(true);
 				anotherGame.setEnabled(false);
 			}
 		}
 	}
 
-	public Vector getButtonVector(JButton button) {
+	public Vector getButtonVector(JRadioButton button) {
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
-				//if (button.equals(buttons[x][y])) {
+				if (button.equals(inputButtons[x][y])) {
 					return new Vector(x, y);
-				//}
+				}
 			}
 		}
 		return null;
@@ -212,14 +220,13 @@ public class View extends JFrame implements Observer {
 		@Override
 		public synchronized void actionPerformed(ActionEvent e) {
 			Object src = e.getSource();
-			if (src instanceof JButton) {
-				if (src.equals(anotherGame)) {
-					//game.resetBoard();
-				} else {
-					Vector buttonPos = getButtonVector((JButton) src);
-					column = new Column(buttonPos.x, buttonPos.y);
-					notifyAll();
-				}
+			if (src.equals(anotherGame)) {
+				// game.resetBoard();
+			}
+			if (src instanceof JRadioButton) {
+				Vector buttonPos = getButtonVector((JRadioButton) src);
+				column = new Column(buttonPos.x, buttonPos.y);
+				notifyAll();
 			}
 		}
 

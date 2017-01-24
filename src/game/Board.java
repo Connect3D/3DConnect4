@@ -36,7 +36,10 @@ public class Board {
 		ending = board.ending.copy();
 	}
 	
-	
+	public int getColumnHeigth(Column column) {
+		return cascade(column).z;
+	}
+
 	// pass by value to avoid messing with board from outside of class
 	public Game.Ending getEnding() {
 		return ending.copy();
@@ -46,6 +49,7 @@ public class Board {
 	public boolean isColumnFull(Column column) {
 		return fields[Position.indexOf(column.x, column.y, HEIGHT - 1)] != Mark.EMPTY;
 	}
+	
 	
 	public void doMove(Move move) {
 		Position position = cascade(move.column);
