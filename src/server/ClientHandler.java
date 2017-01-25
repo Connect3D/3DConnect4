@@ -11,36 +11,39 @@ import java.net.UnknownHostException;
 import java.util.Scanner;
 
 import game.Column;
+import protocol.ErrorCode;
 import util.ProvidesMoves;
 
 
-public class ClientHandler extends Thread implements ProvidesMoves {
+public class ClientHandler implements Runnable, ProvidesMoves {
 
-	private Server server;
-	private Socket sock;
-	private BufferedReader in;
-	private BufferedWriter out;
-	private String clientName;
-
+	private final Server server;
+	private final Socket socket;
+	private final BufferedReader in;
+	private final BufferedWriter out;
+	
+	private String name = "";
+	private Column move = null;
+	
 	
 	public ClientHandler(Server serverArg, Socket sockArg) throws IOException {
 		server = serverArg;
-		sock = sockArg;
-		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-		out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
+		socket = sockArg;
+		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 	}
-
 	
-	public void announce() throws IOException {
-		clientName = in.readLine();
-		server.broadcast("[" + clientName + " has entered]");
+	
+	public String getName() {
+		return name;
 	}
 
 	
 	public void run() {
 		try {
 			while (true) {
-				server.broadcast(clientName + ": " + in.readLine());
+				server.broadcast(name + ": " + in.readLine());
+				// somwhere read input and provide moves
 			}
 		} catch (IOException e) {
 			shutdown();
@@ -48,7 +51,7 @@ public class ClientHandler extends Thread implements ProvidesMoves {
 	}
 
 	
-	public void sendMessage(String msg) {
+	public void send(String msg) {
 		try {
 			out.write(msg);
 			out.newLine();
@@ -57,42 +60,38 @@ public class ClientHandler extends Thread implements ProvidesMoves {
 			shutdown();
 		}
 	}
+	
+	
+	public void terminate() {
+		send(ErrorCode.SERVER_SHUTTING_DOWN.toString());
+		try {
+			socket.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	
+	// implement properly
 	private void shutdown() {
-		server.removeHandler(this);
-		server.broadcast("[" + clientName + " has left]");
-	}
-	
-
-	static int createPort(String port) {
-		int portInt = 0;
-		try {
-			portInt = Integer.parseInt(port);
-		} catch (NumberFormatException e) {
-			System.out.println("ERROR: port " + port + " is not an integer.");
-			System.exit(0);
-		}
-		return portInt;
-	}
-
-	
-	static InetAddress createAddress(String host) {
-		InetAddress address = null;
-		try {
-			address = InetAddress.getByName(host);
-		} catch (UnknownHostException e) {
-			System.out.println("ERROR: Localhost " + host + " not found");
-			System.exit(0);
-		}
-		return address;
+		//server.removeHandler(this);
+		server.broadcast("[" + name + " has left]");
 	}
 
 
-	@Override
 	public Column waitForMove() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			while (move == null) {
+				wait();
+			}
+		} 
+		catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		Column choice = new Column(move);
+		move = null;
+		return choice;
 	}
 	
 }

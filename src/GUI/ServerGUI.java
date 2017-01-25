@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -125,7 +126,12 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		tfPort.setEditable(false);
 		bConnect.setEnabled(false);
 
-		server = new Server(port, this);
+		try {
+			server = new Server(port, this);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Thread t = new Thread(server);
 		t.start();
 
