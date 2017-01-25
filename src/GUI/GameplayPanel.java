@@ -16,7 +16,6 @@ import game.Controller;
 import game.Game;
 import game.Mark;
 import util.Vector;
-import util.View;
 
 public class GameplayPanel extends JPanel {
 
@@ -27,6 +26,7 @@ public class GameplayPanel extends JPanel {
 	
 	public GameplayPanel(Controller controller) {
 		this.setLayout(new BorderLayout());
+		
 		GridLayout glayout = new GridLayout(3, 1);
 		glayout.setVgap(0);
 

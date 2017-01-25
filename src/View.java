@@ -1,4 +1,4 @@
-package util;
+
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -29,6 +29,7 @@ import game.Move;
 import game.Game.Ending;
 import game.player.HumanPlayer;
 import game.player.Player;
+import util.Vector;
 import util.exception.ColumnFullException;
 
 /**

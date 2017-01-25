@@ -23,7 +23,8 @@ public class ClientPanel extends JPanel implements MessageUI {
 	private JTextArea taMessages;
 	
 	public ClientPanel(Controller controller) {
-		this.setLayout(new FlowLayout());
+
+		this.setLayout(new BorderLayout(0, 20));
 		JPanel p1 = new JPanel(new FlowLayout());
 		JPanel pp = new JPanel(new GridLayout(3, 2));
 
@@ -50,9 +51,9 @@ public class ClientPanel extends JPanel implements MessageUI {
 
 		p1.add(pp, BorderLayout.WEST);
 		p1.add(b1Connect, BorderLayout.EAST);
-
-		JPanel p2 = new JPanel(new BorderLayout());
-		JPanel p3 = new JPanel(new BorderLayout());
+		
+		BorderLayout p2Layout = new BorderLayout(0, -30);
+		JPanel p2 = new JPanel(p2Layout);
 
 		JLabel tlMyMessage = new JLabel("MyMessage");
 		tfMyMessage = new JTextField(" ", 34);
@@ -62,6 +63,8 @@ public class ClientPanel extends JPanel implements MessageUI {
 		p2.add(tlMyMessage);
 		p2.add(tfMyMessage, BorderLayout.SOUTH);
 
+		JPanel p3 = new JPanel(new BorderLayout(0, 10));
+
 		JLabel tlMessages = new JLabel("Messages:");
 		taMessages = new JTextArea("", 10, 34);
 		taMessages.setEditable(false);
@@ -69,9 +72,9 @@ public class ClientPanel extends JPanel implements MessageUI {
 		p3.add(tlMessages);
 		p3.add(taMessages, BorderLayout.SOUTH);
 
-		this.add(p1);
+		this.add(p1, BorderLayout.NORTH);
 		this.add(p2);
-		this.add(p3);
+		this.add(p3, BorderLayout.SOUTH);
 	}
 
 	public JButton getConnectButton() {
