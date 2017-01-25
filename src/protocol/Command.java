@@ -4,7 +4,7 @@ import util.Util;
 
 public class Command {
 
-	// TODO add chat command!
+
 	public static final String[] validCommands = { 
 		"OK", 
 		"ERROR",
@@ -21,7 +21,7 @@ public class Command {
 		"DECLINE"
 	};
 
-	// TODO add chat command!
+	// TODO uncomment commands we will be supporting
 	public static final String[] supportedCommands = {
 		"OK", 
 		"ERROR",
@@ -32,6 +32,7 @@ public class Command {
 		"START",
 		"MOVE",
 		"EXIT",
+		"SAY",
 		//"LIST",
 		//"CHALLENGE",
 		//"ACCEPT",
@@ -39,7 +40,6 @@ public class Command {
 	};
 	
 	
-	// TODO add chat command!
 	public static boolean syntacticallyCorrect(String arg) {
 		String[] command = arg.split(" ");
 		if (command.length > 0 && Util.contains(validCommands, command[0])) {
@@ -53,6 +53,7 @@ public class Command {
 				case "START": return command.length == 3;
 				case "MOVE": return command.length == 3 && Util.isInt(command[1]) && Util.isInt(command[2]);
 				case "EXIT": return command.length == 2;
+				case "SAY": return command.length >= 3;
 				case "LIST": return true;	// always valid cause length is unknown
 				case "CHALLENGE": return command.length == 2;
 				case "ACCEPT": return command.length == 2;

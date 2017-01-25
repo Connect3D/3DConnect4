@@ -15,6 +15,9 @@ import protocol.ErrorCode;
 import util.ProvidesMoves;
 
 
+// TODO implement disconnect will leave one player and ready the other
+// TODO remove all printStacktrace, console is owned by MessageUI
+
 public class ClientHandler implements Runnable, ProvidesMoves {
 
 	private final Server server;
@@ -34,49 +37,26 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	}
 	
 	
-	public String getName() {
-		return name;
-	}
-
-	
 	public void run() {
 		try {
-			while (true) {
+			while (socket.isConnected()) {	// TODO put in synchronized
 				server.broadcast(name + ": " + in.readLine());
 				// somwhere read input and provide moves
 			}
 		} catch (IOException e) {
-			shutdown();
+			// is not connected anymore we can't do much
 		}
 	}
 
 	
-	public void send(String msg) {
+	public synchronized void send(String msg) {
 		try {
 			out.write(msg);
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {
-			shutdown();
-		}
-	}
-	
-	
-	public void terminate() {
-		send(ErrorCode.SERVER_SHUTTING_DOWN.toString());
-		try {
-			socket.close();
-		}
-		catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	
-	// implement properly
-	private void shutdown() {
-		//server.removeHandler(this);
-		server.broadcast("[" + name + " has left]");
 	}
 
 

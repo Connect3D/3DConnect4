@@ -31,7 +31,7 @@ public class ServerTui implements MessageUI {
 	
 	
 	public void run() throws IOException {
-		System.out.println(USAGE);
+		addMessage(USAGE);
 		while (!quit) {
 			String[] command = console.readLine().split(" ");
 			if (command.length > 0) {
@@ -41,8 +41,9 @@ public class ServerTui implements MessageUI {
 							try {
 								server = new Server(Network.createPort(command[1]), this);
 								new Thread(server).start();
+								addMessage("Server opened succesfully on port " + command[1]);
 							} catch (IOException e) {
-								System.out.println(e.getMessage());
+								addMessage(e.getMessage());
 							}
 						}
 						break;
@@ -56,23 +57,24 @@ public class ServerTui implements MessageUI {
 						if (server != null) {
 							server.shutdown();
 							server = null;
+							addMessage("Quitting");
 						}
 						quit = true;
 						break;
 					default:
-						System.out.println(USAGE);
+						addMessage(USAGE);
 						break;
 				}
 			}
 			else {
-				System.out.println(USAGE);
+				addMessage(USAGE);
 			}
 		}
 		console.close();
 	}
 	
 	
-	public void addMessage(String msg) {
+	public synchronized void addMessage(String msg) {
 		System.out.println(msg);
 	}
 	

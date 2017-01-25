@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import protocol.ErrorCode;
 import protocol.Name;
 import util.MessageUI;
 
@@ -19,16 +20,18 @@ import util.MessageUI;
 
 public class Server implements Runnable {
 	
-	private final HashMap<String, ClientHandler> activeConnections;
-	private final HashSet<String> playerNames;
+	public static final String NAME = "server";
+	
+	private final HashMap<String, ClientHandler> activeConnections = new HashMap<String, ClientHandler>();
+	private final HashSet<String> playerNames = new HashSet<String>();
+	private final HashSet<String> supportChat = new HashSet<String>();
+	private final HashSet<String> ready = new HashSet<String>();
 	private final ServerSocket serverSocket;
 	private final MessageUI console;
 	
 	
 	public Server(int port, MessageUI messageUi) throws IOException{
 		console = messageUi;
-		activeConnections = new HashMap<String, ClientHandler>();
-		playerNames = new HashSet<String>();
 		try {
 			serverSocket = new ServerSocket(port);
 		} catch (IOException e) {
@@ -42,10 +45,12 @@ public class Server implements Runnable {
 		while (!exit) {
 			try {
 				Socket socket = serverSocket.accept();
-				new Thread(new ClientHandler(this, socket)).start();
+				synchronized (this) {
+					new Thread(new ClientHandler(this, socket)).start();		// TODO what happens if client connects after shutdown??
+				}
 			}
-			catch (IOException e) {
-				console.addMessage("Server shut down correctly");
+			catch (IOException e) {		// shutdown() function closes socket which makes this exception occur
+				console.addMessage("Server shut down succesful");
 				break;
 			}
 			synchronized (this) {
@@ -57,41 +62,90 @@ public class Server implements Runnable {
 
 	public synchronized void shutdown() {
 		console.addMessage("Shutting down server");
+		broadcast(ErrorCode.SERVER_SHUTTING_DOWN.toString());
 		for (String name : playerNames) {
-			activeConnections.get(name).terminate();
+			remove(name); 					// remove does not actually disconnect the client, just removes it from active list
+			console.addMessage(name + " left");
 		}
 		try {
-			serverSocket.close();
-		} catch (IOException e) {
+		    Thread.sleep(1000);            	// wait 2 seconds, so clienthandlers have time to send shut down code
+		    serverSocket.close();
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-
-	// TODO look at implementation
+	
+	
 	public synchronized void broadcast(String msg) {
-		for (String name : playerNames) {
+		for (String name : supportChat) {
 			activeConnections.get(name).send(msg);
-			console.addMessage(msg);		// maybe remove??
 		}
 	}
-
+	
+	
+	private synchronized void remove(String name) {
+		if (playerNames.contains(name)) {
+			unready(name);							// if player was unready nothing happens
+			activeConnections.remove(name);
+			playerNames.remove(name);		
+			supportChat.remove(name);				// if player didn't support chat nothing happens
+		}
+	}
+	
+	
+	//////////////////////////////////////////////////////////
+	//                                                      //
+	//    commands for connected clients to change state    //
+	//                                                      //
+	//////////////////////////////////////////////////////////
+	
+	public synchronized boolean joinChat(String name) {
+		if (playerNames.contains(name)) {
+			if (!supportChat.contains(name)) {
+				supportChat.add(name);
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	
+	public synchronized boolean ready(String name) {
+		if (playerNames.contains(name)) {
+			ready.add(name);
+			// TODO start new game
+			return true;
+		}
+		return false;
+	}
+	
+	
+	public synchronized boolean unready(String name) {
+		if (ready.contains(name)) {
+			ready.remove(name);
+			return true;
+		}
+		return false;
+	}
+	
 	
 	public synchronized boolean join(String name, ClientHandler client) {
-		if (Name.nameValid(name) && !playerNames.contains(name)) {
+		if (Name.valid(name) && !playerNames.contains(name)) {
 			activeConnections.put(name, client);
 			playerNames.add(name);
+			broadcast("SAY " + NAME + " [ " + name + " has joined the server ]");
+			console.addMessage(name + " has joined the server");
 			return true;
 		}
 		return false;
 	}
 
 	
-	public synchronized boolean leave(ClientHandler client) {
-		String name = client.getName();
+	public synchronized boolean leave(String name) {
 		if (playerNames.contains(name)) {
-			activeConnections.remove(name);
-			playerNames.remove(name);
+			remove(name);
+			broadcast("SAY " + NAME + " [ " + name + " has left the server ]");
+			console.addMessage(name + " has left the server");
 			return true;
 		}
 		return false;
