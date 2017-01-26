@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import util.MessageUI;
-import util.Network;
 import util.Util;
 
 
@@ -39,7 +38,7 @@ public class ServerTui implements MessageUI {
 					case OPEN_COMMAND:
 						if (command.length == 2 && Util.isInt(command[1]) && server == null) {
 							try {
-								server = new Server(Network.createPort(command[1]), this);
+								server = new Server(Util.createPort(command[1]), this);
 								new Thread(server).start();
 								addMessage("Server opened succesfully on port " + command[1]);
 							} catch (IOException e) {

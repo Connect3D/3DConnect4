@@ -15,15 +15,19 @@ public class Command {
 		"START",
 		"MOVE",
 		"EXIT",
+		"SAY",
+		"AVAILABLE",
 		"LIST",
+		"LEADERBOARD",
 		"CHALLENGE",
 		"ACCEPT",
 		"DECLINE"
 	};
+	
 
 	// TODO uncomment commands we will be supporting
 	public static final String[] supportedCommands = {
-		"OK", 
+		"OK",
 		"ERROR",
 		"CONNECT",
 		"DISCONNECT",
@@ -33,7 +37,9 @@ public class Command {
 		"MOVE",
 		"EXIT",
 		"SAY",
+		"AVAILABLE",
 		//"LIST",
+		//"LEADERBOARD",
 		//"CHALLENGE",
 		//"ACCEPT",
 		//"DECLINE"
@@ -54,7 +60,9 @@ public class Command {
 				case "MOVE": return command.length == 3 && Util.isInt(command[1]) && Util.isInt(command[2]);
 				case "EXIT": return command.length == 2;
 				case "SAY": return command.length >= 3;
-				case "LIST": return true;	// always valid cause length is unknown
+				case "AVAILABLE": return command.length == 1;
+				case "LIST": return true;							// always valid cause length is unknown
+				case "LEADERBOARD": return true;					// same as previous
 				case "CHALLENGE": return command.length == 2;
 				case "ACCEPT": return command.length == 2;
 				case "DECLINE": return command.length == 2;

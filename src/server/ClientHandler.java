@@ -25,7 +25,6 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	private final BufferedReader in;
 	private final BufferedWriter out;
 	
-	private String name = "";
 	private Column move = null;
 	
 	
@@ -38,14 +37,22 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	
 	
 	public void run() {
-		try {
-			while (socket.isConnected()) {	// TODO put in synchronized
-				server.broadcast(name + ": " + in.readLine());
-				// somwhere read input and provide moves
-			}
-		} catch (IOException e) {
-			// is not connected anymore we can't do much
+		
+		while (socket.isConnected()) {	// TODO put in synchronized
+			
 		}
+		server.leave(this);		// USE EXCEPTION TO RUN THIS
+	}
+	
+	
+	public synchronized void terminate() {
+		send(ErrorCode.SERVER_SHUTTING_DOWN.toString());
+		try { 
+			socket.close();
+			in.close();
+			out.close();
+		} 
+		catch (IOException e) { }
 	}
 
 	
@@ -60,6 +67,7 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	}
 
 
+	// TODO look at not being synchronized
 	public Column waitForMove() {
 		try {
 			while (move == null) {
