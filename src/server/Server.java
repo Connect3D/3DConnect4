@@ -44,7 +44,11 @@ public class Server implements Runnable {
 			try {
 				Socket socket = serverSocket.accept();
 				synchronized (this) {
-					try { new Thread(new ClientHandler(this, socket)).start(); } 
+					try {
+						ClientHandler client = new ClientHandler(this, socket);
+						clients.put(client, ClientState.PENDING);
+						new Thread(client).start(); 
+					} 
 					catch (IOException e) { }
 				}
 			}

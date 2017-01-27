@@ -5,18 +5,17 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Scanner;
 
 import game.Column;
-import protocol.ErrorCode;
+import protocol.CommandTemp;
+import protocol.Error;
 import util.ProvidesMoves;
+import util.Util;
 
 
 // TODO implement disconnect will leave one player and ready the other
-// TODO remove all printStacktrace, console is owned by MessageUI
+// TODO remove all printStacktrace, console is owned by MessageUI and server
 
 public class ClientHandler implements Runnable, ProvidesMoves {
 
@@ -36,17 +35,65 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	}
 	
 	
-	public void run() {
+	public void run() {	// TODO synchronize where necessary
 		
-		while (socket.isConnected()) {	// TODO put in synchronized
-			
+		try {
+			while (true) {
+				String[] command = Util.arrayTrim(in.readLine().split(" "));
+				if (CommandTemp.syntacticallyCorrect(command)) {
+					if (CommandTemp.commandSupported(command[0])) {
+						runCommand(command);
+					}
+					else {
+						send(Error.COMMAND_UNSUPPORTED.toString());
+					}
+				}
+				else {
+					send(Error.COMMAND_INVALID.toString());
+				}
+			}
 		}
-		server.leave(this);		// USE EXCEPTION TO RUN THIS
+		catch (IOException e) {
+			server.leave(this);
+		}
 	}
 	
 	
-	public synchronized void terminate() {
-		send(ErrorCode.SERVER_SHUTTING_DOWN.toString());
+	public void runCommand(String[] command) { // TODO synchronize where necessary
+		switch (command[0]) {
+			case "OK":
+				break;
+			case "ERROR":
+				break;
+			case "CONNECT":
+				break;
+			case "DISCONNECT":
+				break;
+			case "READY":
+				break;
+			case "UNREADY":
+				break;
+			case "START":
+				break;
+			case "MOVE":
+				break;
+			case "EXIT":
+				break;
+			case "SAY":
+				break;
+			case "AVAILABLE":
+				break;
+		/*	case "LIST": break;			// so far unsupported
+			case "LEADERBOARD": break;
+			case "CHALLENGE": break;
+			case "ACCEPT": break;
+			case "DECLINE": break;	*/
+		}
+	}
+	
+	
+	public synchronized void terminate() {	// TODO necessary to be sync?
+		send(Error.SERVER_SHUTTING_DOWN.toString());
 		try { 
 			socket.close();
 			in.close();
@@ -58,25 +105,20 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	
 	public synchronized void send(String msg) {
 		try {
-			out.write(msg);
-			out.newLine();
+			out.write(msg + "\n");
 			out.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} 
+		catch (IOException e) { }
 	}
 
-
-	// TODO look at not being synchronized
-	public Column waitForMove() {
+	
+	public synchronized Column waitForMove() {
 		try {
 			while (move == null) {
 				wait();
 			}
 		} 
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		catch (InterruptedException e) { }
 		Column choice = new Column(move);
 		move = null;
 		return choice;
