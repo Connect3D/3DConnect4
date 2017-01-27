@@ -8,10 +8,12 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import game.Column;
-import protocol.CommandTemp;
+import protocol.Command;
 import protocol.Error;
+import util.Pair;
 import util.ProvidesMoves;
 import util.Util;
+import util.exception.*;
 
 
 // TODO implement disconnect will leave one player and ready the other
@@ -37,29 +39,32 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	
 	public void run() {	// TODO synchronize where necessary
 		
-		try {
-			while (true) {
-				String[] command = Util.arrayTrim(in.readLine().split(" "));
-				if (CommandTemp.syntacticallyCorrect(command)) {
-					if (CommandTemp.commandSupported(command[0])) {
-						runCommand(command);
-					}
-					else {
-						send(Error.COMMAND_UNSUPPORTED.toString());
-					}
-				}
-				else {
-					send(Error.COMMAND_INVALID.toString());
-				}
+		while (true) {
+			try {
+				Pair<Command, String[]> command = Command.parse(in.readLine(), true);
 			}
+			catch (CommandInvalidException e) {
+				send(Error.COMMAND_INVALID.toString());
+			}
+			catch (CommandUnsupportedException e) {
+				send(Error.COMMAND_UNSUPPORTED.toString());
+			}
+			catch (UnknownCommandException e) {
+				send(Error.UNKNOWN_ERROR.toString());
+			}
+			catch (CommandException e) {
+				// should never execute, because each type of command exception is handled above.
+			}
+			catch (IOException e) {
+				server.leave(this);
+			}
+			
 		}
-		catch (IOException e) {
-			server.leave(this);
-		}
+		
 	}
 	
-	
-	public void runCommand(String[] command) { // TODO synchronize where necessary
+	/*
+	public void runCommand(Command command, String[] args) { // TODO synchronize where necessary
 		switch (command[0]) {
 			case "OK":
 				break;
@@ -83,13 +88,13 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 				break;
 			case "AVAILABLE":
 				break;
-		/*	case "LIST": break;			// so far unsupported
+			case "LIST": break;			// so far unsupported
 			case "LEADERBOARD": break;
 			case "CHALLENGE": break;
 			case "ACCEPT": break;
-			case "DECLINE": break;	*/
+			case "DECLINE": break;	
 		}
-	}
+	}*/
 	
 	
 	public synchronized void terminate() {	// TODO necessary to be sync?
