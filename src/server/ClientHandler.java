@@ -49,12 +49,6 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 			catch (CommandUnsupportedException e) {
 				send(Error.COMMAND_UNSUPPORTED.toString());
 			}
-			catch (UnknownCommandException e) {
-				send(Error.UNKNOWN_ERROR.toString());
-			}
-			catch (CommandException e) {
-				// should never execute, because each type of command exception is handled above.
-			}
 			catch (IOException e) {
 				server.leave(this);
 			}

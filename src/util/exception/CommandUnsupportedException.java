@@ -1,6 +1,6 @@
 package util.exception;
 
 
-public class CommandUnsupportedException extends CommandException {
+public class CommandUnsupportedException extends Exception {
 	
 }
