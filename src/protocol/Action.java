@@ -27,6 +27,7 @@ public enum Action implements Command {
 	}
 	
 	
+	// use the parse function of Command outside of package
 	protected static Action parse(String s) {
 		return ACTIONS.inverse().get(s);
 	}

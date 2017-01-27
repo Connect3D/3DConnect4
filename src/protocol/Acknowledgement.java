@@ -17,6 +17,7 @@ public enum Acknowledgement implements Command {
 	}
 	
 	
+	// use the parse function of Command outside of package
 	protected static Acknowledgement parse(String s) {
 		return ACKNOWLEDGEMENTS.inverse().get(s);
 	}

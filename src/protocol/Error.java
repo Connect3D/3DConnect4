@@ -20,11 +20,7 @@ public enum Error implements Command {
 	}
 	
 	
-	public String[] toStringArray() {
-		return ERRORS.get(this).split(" ");
-	}
-	
-	
+	// use the parse function of Command outside of package
 	protected static Error parse(String s) {
 		return ERRORS.inverse().get(s);
 	}

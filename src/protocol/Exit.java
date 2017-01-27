@@ -18,11 +18,7 @@ public enum Exit implements Command {
 	}
 	
 	
-	public String[] toStringArray() {
-		return EXITS.get(this).split(" ");
-	}
-	
-	
+	// use the parse function of Command outside of package
 	protected static Exit parse(String s) {
 		return EXITS.inverse().get(s);
 	}
