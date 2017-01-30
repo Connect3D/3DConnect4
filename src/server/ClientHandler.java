@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.Observable;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import protocol.*;
 import protocol.command.Acknowledgement;
@@ -30,6 +31,7 @@ public class ClientHandler extends Observable implements Runnable {
 	public static final long MAX_THINKING_TIME = 600000l;           // 10 minutes
 	
 	private final Timer timer = new Timer();
+	private final CommandParser parser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
 	
 	private final Server server;
 	private final Socket socket;
@@ -40,7 +42,7 @@ public class ClientHandler extends Observable implements Runnable {
 	//private boolean acknowledgementPending = false;
 	//private boolean inGame = false;
 	
-	private boolean isShuttingDown = false;
+	private AtomicBoolean isShuttingDown = new AtomicBoolean(false);
 	
 	
 	
@@ -60,9 +62,9 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	public void run() {	// TODO synchronize where necessary
 		
-		while (!isShuttingDown) {
+		while (!isShuttingDown.get()) {
 			try {
-				Pair<Command, String[]> command = Command.parse(in.readLine(), true);
+				Pair<Command, String[]> command = parser.parse(in.readLine());			// Command.parse(in.readLine(), true);
 				if (command.first instanceof Action) {
 					runAction((Action) command.first, command.second);
 				}
@@ -82,9 +84,12 @@ public class ClientHandler extends Observable implements Runnable {
 			catch (CommandUnsupportedException e) {
 				sendCommand(Error.COMMAND_UNSUPPORTED);
 			}
+			catch (CommandForbiddenException e) {
+				sendCommand(Error.FORBIDDEN);
+			}
 			catch (IOException e) {
 				shutDown();
-			}
+			} 
 		}
 	}
 	
@@ -120,21 +125,21 @@ public class ClientHandler extends Observable implements Runnable {
 	///////////////////////////////////////
 	
 	public synchronized void sendCommand(Command command, String arguments) {
-		sendCommand(command, Util.splitWords(arguments));
+		String args = Util.join(Util.split(arguments));
+		try {
+			out.write(command.toString());
+			if (args != "") {
+				out.write(" " + arguments);
+			}
+			out.write("\n");
+			out.flush();
+		} 
+		catch (IOException e) { }
 	}
 	
 	
 	public synchronized void sendCommand(Command command, String[] arguments) {
-		String[] args = Util.arrayTrim(arguments);		// it is safe to give arrayTrim null and it never returns null
-		try {
-			out.write(command.toString());
-			for (String arg : args) {
-				out.write(" " + arg);
-			}
-			out.write("\n");
-			out.flush();
-		}
-		catch (IOException e) { }
+		sendCommand(command, Util.join(arguments));
 	}
 	
 	
@@ -157,7 +162,7 @@ public class ClientHandler extends Observable implements Runnable {
 		sendCommand(Action.DISCONNECT);
 		server.leave(this);
 		timer.schedule(new Shutdown(this), SHUTDOWN_DELAY);
-		isShuttingDown = true;
+		isShuttingDown.set(true);;
 	}
 	
 	

@@ -86,19 +86,19 @@ public enum Action implements Command {
 		DIRECTION.put(ACCEPT,      Command.Direction.CLIENT_TO_SERVER);
 		DIRECTION.put(DECLINE,     Command.Direction.CLIENT_TO_SERVER);
 		
-		PATTERN.put(CONNECT,     Pattern.compile("^CONNECT [A-Za-z0-9]{1-20}$"));
-		PATTERN.put(DISCONNECT,  Pattern.compile("^DISCONNECT$"));
-		PATTERN.put(READY,       Pattern.compile("^READY$"));
-		PATTERN.put(UNREADY,     Pattern.compile("^UNREADY$"));
-		PATTERN.put(START,       Pattern.compile("START [A-Za-z0-9]{1-20} [A-Za-z0-9]{1-20}$"));
-		PATTERN.put(MOVE,        Pattern.compile("^MOVE [0-3] [0-3]$"));
-		PATTERN.put(SAY,         Pattern.compile("^SAY( \\S+)+$"));
-		PATTERN.put(AVAILABLE,   Pattern.compile("^AVAILABLE$"));
-		PATTERN.put(LIST,        Pattern.compile("^LIST$"));
-		PATTERN.put(LEADERBOARD, Pattern.compile("^LEADERBOARD$"));
-		PATTERN.put(CHALLENGE,   Pattern.compile("^CHALLENGE [A-Za-z0-9]{1-20}$"));
-		PATTERN.put(ACCEPT,      Pattern.compile("^ACCEPT [A-Za-z0-9]{1-20}$"));
-		PATTERN.put(DECLINE,     Pattern.compile("^DECLINE [A-Za-z0-9]{1-20}$"));
+		PATTERN.put(CONNECT,     Pattern.compile("CONNECT [A-Za-z0-9]{1,20}"));
+		PATTERN.put(DISCONNECT,  Pattern.compile("DISCONNECT"));
+		PATTERN.put(READY,       Pattern.compile("READY"));
+		PATTERN.put(UNREADY,     Pattern.compile("UNREADY"));
+		PATTERN.put(START,       Pattern.compile("START [A-Za-z0-9]{1,20} [A-Za-z0-9]{1,20}"));
+		PATTERN.put(MOVE,        Pattern.compile("MOVE [0-3] [0-3]"));
+		PATTERN.put(SAY,         Pattern.compile("SAY( \\S+)+"));
+		PATTERN.put(AVAILABLE,   Pattern.compile("AVAILABLE"));
+		PATTERN.put(LIST,        Pattern.compile("LIST"));
+		PATTERN.put(LEADERBOARD, Pattern.compile("LEADERBOARD"));
+		PATTERN.put(CHALLENGE,   Pattern.compile("CHALLENGE [A-Za-z0-9]{1,20}"));
+		PATTERN.put(ACCEPT,      Pattern.compile("ACCEPT [A-Za-z0-9]{1,20}"));
+		PATTERN.put(DECLINE,     Pattern.compile("DECLINE [A-Za-z0-9]{1,20}"));
 		
 	}
 	

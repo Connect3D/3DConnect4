@@ -23,12 +23,15 @@ public enum Exit implements Command {
 	}
 	
 	
-	public static Exit parse(String[] command) throws CommandUnsupportedException {
+	public static Exit parse(String[] command) throws CommandUnsupportedException, CommandInvalidException {
 		if (command != null && command.length > 1) {
-			Exit result = NAME.inverse().get(command[0] + " " + command[1]);
-			if (result != null) {
-				return result;
+			if (command[0].equals("EXIT")) {
+				Exit result = NAME.inverse().get(command[0] + " " + command[1]);
+				if (result != null) {
+					return result;
+				}
 			}
+			throw new CommandInvalidException();
 		}
 		throw new CommandUnsupportedException();
 	}
@@ -36,7 +39,7 @@ public enum Exit implements Command {
 	
 	public static boolean isValid(Exit e, String s, Command.Direction d) throws CommandForbiddenException, CommandInvalidException {
 		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(e) == d || DIRECTION.get(e) == Command.Direction.BIDIRECTIONAL)) {
-			if (PATTERN.get(e).matcher(s).matches()) {
+			if (PATTERN.get(e).matcher("\n" + s + "\n").matches()) {
 				return true;
 			}
 			throw new CommandInvalidException();
@@ -64,11 +67,11 @@ public enum Exit implements Command {
 		DIRECTION.put(TIMEOUT,    Command.Direction.SERVER_TO_CLIENT);
 		DIRECTION.put(FORFEITURE, Command.Direction.BIDIRECTIONAL);
 		
-		PATTERN.put(WON,        Pattern.compile("^EXIT WON$"));
-		PATTERN.put(LOST,       Pattern.compile("^EXIT LOST$"));
-		PATTERN.put(DRAW,       Pattern.compile("^EXIT DRAW$"));
-		PATTERN.put(TIMEOUT,    Pattern.compile("^EXIT TIMEOUT$"));
-		PATTERN.put(FORFEITURE, Pattern.compile("^EXIT FORFEITURE$"));
+		PATTERN.put(WON,        Pattern.compile("EXIT WON"));
+		PATTERN.put(LOST,       Pattern.compile("EXIT LOST"));
+		PATTERN.put(DRAW,       Pattern.compile("EXIT DRAW"));
+		PATTERN.put(TIMEOUT,    Pattern.compile("EXIT TIMEOUT"));
+		PATTERN.put(FORFEITURE, Pattern.compile("EXIT FORFEITURE"));
 		
 	}
 	
