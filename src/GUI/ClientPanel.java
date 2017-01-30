@@ -105,6 +105,7 @@ public class ClientPanel extends JPanel implements MessageUI {
 		tfHostname.setEditable(bool);
 		tfPort.setEditable(bool);
 		tfName.setEditable(bool);
+		b1Connect.setEnabled(bool);
 	}
 	
 	

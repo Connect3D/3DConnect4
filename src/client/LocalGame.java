@@ -120,7 +120,7 @@ public class LocalGame implements Runnable, ProvidesMoves, Observer {
 	}
 	
 	
-	private Game makeNewGame(Player p1, Player p2) {		// giving reference argument didnt work for players, mayb add return game
+	private Game makeNewGame(Player p1, Player p2) {		// giving reference argument didnt work for players, maybe add return game
 		if (p1 == null || p2 == null) {
 			System.out.println("Players are not initialized");
 			return null;

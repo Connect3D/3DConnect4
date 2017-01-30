@@ -7,8 +7,6 @@ import com.google.common.collect.EnumHashBiMap;
 
 import util.exception.*;
 
-
-
 public enum Acknowledgement implements Command {
 
 	OK,
@@ -54,7 +52,7 @@ public enum Acknowledgement implements Command {
 		NAME.put(OK,          "OK" );
 		NAME.put(SAY,         "SAY");
 		NAME.put(LIST,        "LIST");
-		NAME.put(LEADERBOARD, "LEADEROARD");
+		NAME.put(LEADERBOARD, "LEADEBROARD");
 		
 		DIRECTION.put(OK,          Command.Direction.BIDIRECTIONAL);
 		DIRECTION.put(SAY,         Command.Direction.SERVER_TO_CLIENT);

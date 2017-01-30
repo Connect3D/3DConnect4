@@ -7,8 +7,6 @@ import com.google.common.collect.EnumHashBiMap;
 
 import util.exception.*;
 
-
-
 public enum Action implements Command {
 	
 	CONNECT,

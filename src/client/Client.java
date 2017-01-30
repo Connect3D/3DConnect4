@@ -75,8 +75,6 @@ public class Client extends Thread {
 		return clientName;
 	}
 
-	
-	//ASK WHETHER THIS IS A GOOD SOLUTION OR THE OBSERVER PATTERN SHOULD BE APPLIED.
 	public void sendMessage(String message) {
 		try {
 			out.write(message);

@@ -15,6 +15,7 @@ import game.Board;
 import game.Controller;
 import game.Game;
 import game.Mark;
+import protocol.command.Action;
 import util.Vector;
 
 public class GameplayPanel extends JPanel {
@@ -28,12 +29,10 @@ public class GameplayPanel extends JPanel {
 		this.setLayout(new BorderLayout());
 		
 		GridLayout glayout = new GridLayout(3, 1);
-		glayout.setVgap(0);
-
+		glayout.setVgap(0);		
 		JPanel playPanel = new JPanel(glayout);
 		playPanel.add(createStatusPanel());
 		playPanel.add(createInputPanel(controller));
-
 		playPanel.add(createMenuPanel(controller), BorderLayout.SOUTH);
 
 		JPanel mainOutputPanel = new JPanel(new FlowLayout());
@@ -79,6 +78,15 @@ public class GameplayPanel extends JPanel {
 		return null;
 	}
 	
+	public JPanel createStatusPanel() {
+		JPanel statusPanel = new JPanel(new BorderLayout());
+		statusLabel = new JLabel("");
+		statusPanel.add(statusLabel, BorderLayout.NORTH);
+		statusPanel.add(new JButton(Action.UNREADY.toString()), BorderLayout.SOUTH);
+		return statusPanel;
+	}
+	
+	
 	public JPanel createInputPanel(Controller  controller) {
 		JPanel input = new JPanel(new GridLayout(Board.WIDTH, Board.HEIGHT));
 		inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
@@ -101,14 +109,6 @@ public class GameplayPanel extends JPanel {
 		menuPanel.add(resetButton);
 		return menuPanel;
 	}
-
-	public JPanel createStatusPanel() {
-		JPanel statusPanel = new JPanel(new FlowLayout());
-		statusLabel = new JLabel("");
-		statusPanel.add(statusLabel);
-		return statusPanel;
-	}
-	
 
 	public JPanel createColumnOutputPanel() {
 		JPanel fpanel = new JPanel(new FlowLayout());
