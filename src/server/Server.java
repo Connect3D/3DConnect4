@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import protocol.Name;
 import util.MessageUI;
@@ -19,14 +21,18 @@ import util.MessageUI;
 
 public class Server implements Runnable {
 	
-	public static final String NAME = "server";	// TODO rename to SERVER_NAME
+	public static final String SERVER_NAME = "server";
+	public static final long SHUTDOWN_DELAY = 3000l;                // 3 seconds
 	
 	private final HashMap<ClientHandler, ClientState> clients = new HashMap<ClientHandler, ClientState>();
 	private final HashMap<ClientHandler, String> names = new HashMap<ClientHandler, String>();
 	private final HashSet<ClientHandler> chat = new HashSet<ClientHandler>();
 	
+	private final Timer shutdownTimer = new Timer();
 	private final ServerSocket serverSocket;
-	private final MessageUI console;
+	public final MessageUI console;
+	
+	private boolean isShuttingDown = false;
 	
 	
 	public Server(int port, MessageUI messageUi) throws IOException{
@@ -40,41 +46,38 @@ public class Server implements Runnable {
 	
 	
 	public void run() {
-		while (true) {
+		while (true) {			// TODO check if this works cleanly
 			try {
 				Socket socket = serverSocket.accept();
 				synchronized (this) {
 					try {
-						ClientHandler client = new ClientHandler(this, socket);
-						clients.put(client, ClientState.PENDING);
-						new Thread(client).start(); 
+						if (isShuttingDown) {
+							socket.close();
+						}
+						else {
+							ClientHandler client = new ClientHandler(this, socket);
+							clients.put(client, ClientState.PENDING);
+							new Thread(client).start();
+						}
 					} 
 					catch (IOException e) { }
 				}
 			}
 			catch (IOException e) {		// shutdown() function closes socket which makes this exception occur
-				console.addMessage("Server shut down succesful");
+				console.addMessage("Server shut down succesfully");
 				break;
 			}
 		}
 	}
 
 
-	public synchronized void shutdown() {
-		console.addMessage("Shutting down server");
-		chat.clear();			// makes sure noone gets bothered by eachothers disconnect messages
-		for (ClientHandler client : clients.keySet()) {
-			client.terminate();
-		}
-		try { serverSocket.close(); }
-		catch(IOException e) { }
-	}
+
 	
 	
 	public synchronized void broadcast(String msg) {
-		for (ClientHandler client : chat) {
-			client.send(msg);
-		}
+		//for (ClientHandler client : chat) {
+			//client.send(msg);
+		//}
 	}
 	
 	
@@ -122,12 +125,11 @@ public class Server implements Runnable {
 	}
 	
 	
-	// TODO implement rejoin
 	public synchronized boolean join(ClientHandler client, String name) {
 		if (clients.get(client) == ClientState.PENDING && Name.valid(name) && !names.containsValue(name)) {
 			clients.put(client, ClientState.UNREADY);
 			names.put(client, name);
-			broadcast("SAY " + NAME + joinMessage(name));
+			broadcast("SAY " + SERVER_NAME + joinMessage(name));
 			console.addMessage(joinMessage(name));
 			return true;
 		}
@@ -139,7 +141,7 @@ public class Server implements Runnable {
 	// TODO make sure if in game other person is put in (un)ready, unless server closing
 	public synchronized void leave(ClientHandler client) {
 		if (clients.get(client) != ClientState.PENDING) {
-			broadcast("SAY " + NAME + leaveMessage(names.get(client)));
+			broadcast("SAY " + SERVER_NAME + leaveMessage(names.get(client)));
 			console.addMessage(leaveMessage(names.get(client)));
 		}
 		remove(client);
@@ -166,6 +168,45 @@ public class Server implements Runnable {
 	
 	private String leaveMessage(String name) {
 		return " <" + name + " has left the server>";
+	}
+	
+	
+	//////////////////////////////////////////
+	//                                      //
+	//    functionality for shutting down   //
+	//                                      //
+	//////////////////////////////////////////
+	
+	
+	// TODO quit all ongoing games
+	public synchronized void shutDown() {
+		console.addMessage("Shutting down server");
+		chat.clear();			// makes sure noone gets bothered by eachothers disconnect messages
+		for (ClientHandler client : clients.keySet()) {
+			client.shutDown();
+		}
+		shutdownTimer.schedule(new Shutdown(this), SHUTDOWN_DELAY);
+		isShuttingDown = true;
+	}
+	
+	
+	// class for delayed shutdown
+	private class Shutdown extends TimerTask {
+		
+		private Server server;
+		
+		public Shutdown(Server s) {
+			server = s;
+		}
+		
+		public void run() {
+			try {
+				synchronized (server) {
+					server.serverSocket.close();
+				}
+			} 
+			catch (IOException e) { }
+		}
 	}
 	
 }

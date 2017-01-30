@@ -6,27 +6,42 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Observable;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import game.Column;
-import protocol.Command;
-import protocol.Error;
-import util.Pair;
-import util.ProvidesMoves;
-import util.Util;
+import protocol.*;
+import protocol.command.Acknowledgement;
+import protocol.command.Action;
+import protocol.command.Command;
+import protocol.command.Error;
+import protocol.command.Exit;
+import util.*;
 import util.exception.*;
 
 
 // TODO implement disconnect will leave one player and ready the other
 // TODO remove all printStacktrace, console is owned by MessageUI and server
 
-public class ClientHandler implements Runnable, ProvidesMoves {
+public class ClientHandler extends Observable implements Runnable {
 
+	public static final long SHUTDOWN_DELAY = 1000l;				// 1 second
+	public static final long MAX_ACKNOWLEDGEMENT_DELAY = 5000l;     // 5 seconds
+	public static final long MAX_THINKING_TIME = 600000l;           // 10 minutes
+	
+	private final Timer timer = new Timer();
+	
 	private final Server server;
 	private final Socket socket;
 	private final BufferedReader in;
 	private final BufferedWriter out;
 	
-	private Column move = null;
+	//private Pair<Command, String[]> lastCommandSend = null;
+	//private boolean acknowledgementPending = false;
+	//private boolean inGame = false;
+	
+	private boolean isShuttingDown = false;
+	
 	
 	
 	public ClientHandler(Server serverArg, Socket sockArg) throws IOException {
@@ -37,90 +52,139 @@ public class ClientHandler implements Runnable, ProvidesMoves {
 	}
 	
 	
+	//////////////////////////////////////
+	//                                  //
+	//    Executing incoming commands   //
+	//                                  //
+	//////////////////////////////////////
+	
 	public void run() {	// TODO synchronize where necessary
 		
-		while (true) {
+		while (!isShuttingDown) {
 			try {
 				Pair<Command, String[]> command = Command.parse(in.readLine(), true);
+				if (command.first instanceof Action) {
+					runAction((Action) command.first, command.second);
+				}
+				else if (command.first instanceof Exit) {
+					runExit((Exit) command.first, command.second);
+				}
+				else if (command.first instanceof Acknowledgement) {
+					runAcknowledgement((Acknowledgement) command.first, command.second);
+				}
+				else if (command.first instanceof Error) {
+					runError((Error) command.first, command.second);
+				}
 			}
 			catch (CommandInvalidException e) {
-				send(Error.COMMAND_INVALID.toString());
+				sendCommand(Error.COMMAND_INVALID);			// maybe depending on whether waiting for ack or not
 			}
 			catch (CommandUnsupportedException e) {
-				send(Error.COMMAND_UNSUPPORTED.toString());
+				sendCommand(Error.COMMAND_UNSUPPORTED);
 			}
 			catch (IOException e) {
-				server.leave(this);
+				shutDown();
 			}
-			
+		}
+	}
+	
+	
+	private void runAction(Action action, String[] args) {
+		server.console.addMessage("action");
+		sendCommand(Action.SAY, "action");
+	}
+	
+	
+	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) {
+		server.console.addMessage("action");
+		sendCommand(Action.SAY, "ack");
+	}
+	
+	
+	private void runError(Error error, String[] args) {
+		server.console.addMessage("action");
+		sendCommand(Action.SAY, "err");
+	}
+	
+	
+	private void runExit(Exit exit, String[] args) {
+		server.console.addMessage("action");
+		sendCommand(Action.SAY, "exit");
+	}
+	
+	
+	///////////////////////////////////////
+	//                                   //
+	//    Sending commands over socket   //
+	//                                   //
+	///////////////////////////////////////
+	
+	public synchronized void sendCommand(Command command, String arguments) {
+		sendCommand(command, Util.splitWords(arguments));
+	}
+	
+	
+	public synchronized void sendCommand(Command command, String[] arguments) {
+		String[] args = Util.arrayTrim(arguments);		// it is safe to give arrayTrim null and it never returns null
+		try {
+			out.write(command.toString());
+			for (String arg : args) {
+				out.write(" " + arg);
+			}
+			out.write("\n");
+			out.flush();
+		}
+		catch (IOException e) { }
+	}
+	
+	
+	public synchronized void sendCommand(Command command) {
+		try {
+			out.write(command.toString() + "\n");
+			out.flush();
+		}
+		catch (IOException e) { }
+	}
+	
+	
+	//////////////////////////////////////////
+	//                                      //
+	//    functionality for shutting down   //
+	//                                      //
+	//////////////////////////////////////////
+	
+	public synchronized void shutDown() {
+		sendCommand(Action.DISCONNECT);
+		server.leave(this);
+		timer.schedule(new Shutdown(this), SHUTDOWN_DELAY);
+		isShuttingDown = true;
+	}
+	
+	
+	// private shutdown class for delayed shutdowns
+	private class Shutdown extends TimerTask {
+		
+		ClientHandler client;
+		
+		public Shutdown(ClientHandler c) {
+			client = c;
 		}
 		
-	}
-	
-	/*
-	public void runCommand(Command command, String[] args) { // TODO synchronize where necessary
-		switch (command[0]) {
-			case "OK":
-				break;
-			case "ERROR":
-				break;
-			case "CONNECT":
-				break;
-			case "DISCONNECT":
-				break;
-			case "READY":
-				break;
-			case "UNREADY":
-				break;
-			case "START":
-				break;
-			case "MOVE":
-				break;
-			case "EXIT":
-				break;
-			case "SAY":
-				break;
-			case "AVAILABLE":
-				break;
-			case "LIST": break;			// so far unsupported
-			case "LEADERBOARD": break;
-			case "CHALLENGE": break;
-			case "ACCEPT": break;
-			case "DECLINE": break;	
+		public void run() {
+			try {
+				synchronized (client) {
+					in.close();
+					out.close();
+					socket.close();
+				}
+			} 
+			catch (IOException e) { }
 		}
-	}*/
-	
-	
-	public synchronized void terminate() {	// TODO necessary to be sync?
-		send(Error.SERVER_SHUTTING_DOWN.toString());
-		try { 
-			socket.close();
-			in.close();
-			out.close();
-		} 
-		catch (IOException e) { }
-	}
-
-	
-	public synchronized void send(String msg) {
-		try {
-			out.write(msg + "\n");
-			out.flush();
-		} 
-		catch (IOException e) { }
-	}
-
-	
-	public synchronized Column waitForMove() {
-		try {
-			while (move == null) {
-				wait();
-			}
-		} 
-		catch (InterruptedException e) { }
-		Column choice = new Column(move);
-		move = null;
-		return choice;
+		
 	}
 	
 }
+
+
+
+

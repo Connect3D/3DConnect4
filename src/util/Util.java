@@ -4,8 +4,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-public class Util {
 
+public class Util {
+	
 	
 	public static <T> boolean contains(T[] array, T test) {
 		for (T t : array) {
@@ -17,13 +18,23 @@ public class Util {
 	}
 	
 	
-	public static <T> boolean arrayStartEquals(T[] t1, T[] t2) {
-		for (int i = 0; i < (t1.length < t2.length ? t1.length : t2.length); ++i) {
-			if (!t1[i].equals(t2[i])) {
-				return false;
+	public static String join(String[] args) {
+		String result = "";
+		for (String arg : args) {
+			result += " " + arg;
+		}
+		return result;
+	}
+	
+	
+	public static String[] split(String input) {
+		if (input != null) {
+			String[] splitted = input.split("\\s+");
+			if (splitted != null && !(splitted.length == 1 && splitted[0] == "")) {
+				return splitted;
 			}
 		}
-		return true;
+		return new String[0];
 	}
 	
 	
@@ -34,18 +45,6 @@ public class Util {
 	        return false;
 	    }
 	    return true;
-	}
-	
-	
-	public static String[] arrayTrim(String[] in) {
-		ArrayList<String> out = new ArrayList<String>();
-		for (int i = 0; i < in.length; ++i) {
-			String s = in[i].trim();
-			if (!s.equals("")) {
-				out.add(s);
-			}
-		}
-		return (String[]) out.toArray();
 	}
 	
 	

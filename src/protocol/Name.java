@@ -1,24 +1,19 @@
 package protocol;
 
-import server.Server;
+import java.util.regex.Pattern;
+
+
 
 public class Name {
 
-	public static final String VALID_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	public static final int MIN_LENGTH = 1;
 	public static final int MAX_LENGTH = 20;
 	
+	private static final Pattern REGEX_PATTERN = Pattern.compile("^[A-Za-z0-9]{1-20}$");
+	
 	
 	public static boolean valid(String name) {
-		if (name.length() >= MIN_LENGTH && name.length() <= MAX_LENGTH && !name.equals(Server.NAME)) {
-			for (int i = 0; i < name.length(); ++i) {
-				if (!VALID_CHARACTERS.contains(name.substring(i, i+1))) {
-					return false;
-				}
-			}
-			return true;
-		}
-		return false;
+		return REGEX_PATTERN.matcher(name + "\n").matches();	// + "\n" is a cheaty way to make sure the regular expression limits the name size
 	}
 	
 }

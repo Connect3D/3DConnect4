@@ -48,13 +48,13 @@ public class ServerTui implements MessageUI {
 						break;
 					case CLOSE_COMMAND:
 						if (server != null) {
-							server.shutdown();
+							server.shutDown();
 							server = null;
 						}
 						break;
 					case QUIT_COMMAND:
 						if (server != null) {
-							server.shutdown();
+							server.shutDown();
 							server = null;
 							addMessage("Quitting");
 						}

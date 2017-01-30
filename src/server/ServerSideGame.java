@@ -3,12 +3,14 @@ package server;
 import java.util.Observable;
 import java.util.Observer;
 
+import game.Column;
 import game.Game;
 import game.Mark;
 import game.Move;
 import game.player.HumanPlayer;
+import util.ProvidesMoves;
 
-public class ServerSideGame implements Observer {
+public class ServerSideGame implements Observer, ProvidesMoves {
 
 	private Game game;
 	public final ClientHandler player1;
@@ -18,7 +20,7 @@ public class ServerSideGame implements Observer {
 	public ServerSideGame(ClientHandler p1, ClientHandler p2) {
 		player1 = p1;
 		player2 = p2;
-		game = new Game(new HumanPlayer("name", Mark.X, p1), new HumanPlayer("name", Mark.O, p2));
+		game = new Game(new HumanPlayer("name", Mark.X, this), new HumanPlayer("name", Mark.O, this));
 		game.addObserver(this);
 		Thread t = new Thread(game);
 		t.start();
@@ -32,6 +34,13 @@ public class ServerSideGame implements Observer {
 		else if (arg1 instanceof Move) {
 			// move was done
 		}
+	}
+
+
+	@Override
+	public Column waitForMove() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	
