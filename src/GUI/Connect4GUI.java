@@ -34,19 +34,20 @@ import util.exception.ColumnFullException;
 
 public class Connect4GUI extends JFrame implements Observer, MessageUI {
 
-	private ClientPanel clientPanel;
-	private GameplayPanel gameplayPanel;
+	public final ClientPanel clientPanel = new ClientPanel();
+	public final GameplayPanel gameplayPanel = new GameplayPanel();
 	private Controller controller;
 	private static final int DIM = 4;
-
+    private final Mark thisPlayerMark = Mark.X;
+    
 	public Connect4GUI() {
 		super("Connect4_3D_View");
 
 		init();
-		setSize(800, 500);
+		setSize(900, 500);
 
 		buildGUI();
-		gameplayPanel.setStatuslabelText("Go ahead X");
+		gameplayPanel.statusLabel.setText("Go ahead X");
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -67,15 +68,22 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 
 	public void init() {
 		controller = new Controller();
-		Player p1 = new HumanPlayer("Richard", Mark.X, controller);
-		Player p2 = new HumanPlayer("Aart", Mark.O, controller);
+		//Player p1 = new HumanPlayer("Richard", Mark.X, controller);
+		//Player p2 = new HumanPlayer("Aart", Mark.O, controller);
+		//Game game = new Game(p1, p2);
+		//new Thread(game).start();
+		//game.addObserver(this);
+		//controller.setGame(game);
+		controller.setGUI(this);
+		clientPanel.build(controller);
+		gameplayPanel.build(controller);
+	}
+	
+	public void createGame(Player p1, Player p2) {
 		Game game = new Game(p1, p2);
 		new Thread(game).start();
 		game.addObserver(this);
 		controller.setGame(game);
-		controller.setGUI(this);
-		clientPanel = new ClientPanel(controller);
-		gameplayPanel = new GameplayPanel(controller);
 	}
 
 	public void buildGUI() {
@@ -90,70 +98,19 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		cc.add(mainpanel);
 	}
 
-	public static String getHostAddress() {
-		try {
-			InetAddress iaddr = InetAddress.getLocalHost();
-			return iaddr.getHostName();
-		} catch (UnknownHostException e) {
-			return "?unknown?";
-		}
+//	TODO Implement (or in client)
+	public void enableGameplay() {
+		gameplayPanel.enableInputButtons(true);
+		gameplayPanel.statusButton.setEnabled(true);
+		gameplayPanel.exitButton.setEnabled(true);
 	}
+//	
+//	String text = eventSource.getText();
+//	States newState = text.equals(States.READY.toString()) ? States.READY : States.UNREADY;
+//	client.setState(newState);
+//	mainGUI.gameplayPanel.statusButton.setText(newState.toString());
 
-	public Vector getInputbuttonVector(JRadioButton src) {
-		return gameplayPanel.getInputbuttonVector(src);
-	}
-
-	public String getMyMessageText() {
-		return clientPanel.getMyMessageText();
-	}
-
-	public String getClientName() {
-		return clientPanel.getClientName();
-	}
-
-	public int getPort() {
-		return Integer.parseInt(clientPanel.getPort());
-	}
-
-	public InetAddress getInetAddress() {
-		InetAddress iaddress = null;
-		try {
-			iaddress = InetAddress.getByName(clientPanel.getHostName());
-		} catch (UnknownHostException e) {
-			System.out.println("ERROR: Couldn't get address.");
-		}
-		return iaddress;
-	}
-
-	public boolean equalsResetButton(JButton btn) {
-		return btn.equals(gameplayPanel.getResetbutton());
-	}
-
-	public boolean equalsConnectButton(JButton btn) {
-		return btn.equals(clientPanel.getConnectButton());
-	}
-
-	public boolean equalsNameField(JTextField field) {
-		JTextField clientNamefield = clientPanel.getNameField();
-		return field.equals(clientPanel.getNameField());
-	}
-
-	public void setMyMessageText(String msg) {
-		clientPanel.setMyMessageText(msg);
-	}
-
-	public void enableClientFields(boolean bool) {
-		clientPanel.enableFields(bool);
-	}
-
-	public void setMyMessageFieldEditable(boolean bool) {
-		clientPanel.setMyMessageFieldEditable(bool);
-	}
-
-	public void enableConnectButton(boolean bool) {
-		clientPanel.enableConnectButton(bool);
-	}
-
+	
 	public void addMessage(String msg) {
 		clientPanel.addMessage(msg);
 	}
@@ -163,8 +120,8 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		if (o instanceof Game) {
 			Game game = (Game) o;
 			if (arg instanceof Game.Ending) {
-				gameplayPanel.setStatuslabelText(game.getEnding().toString());
-				gameplayPanel.enableResetButton(true);
+				gameplayPanel.statusLabel.setText(game.getEnding().toString());
+				gameplayPanel.resetButton.setEnabled(true);
 			}
 			if (arg instanceof Move) {
 				Move move = (Move) arg;
@@ -172,21 +129,21 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 				Mark mark = move.mark;
 				try {
 					TimeUnit.MILLISECONDS.sleep(100);
-				} catch (InterruptedException e1) {
-				}
-				gameplayPanel.selectInputbutton(column.x, column.y, false);
-				try {
+					gameplayPanel.selectInputbutton(column.x, column.y, false);
 					gameplayPanel.setOutputbuttonText(column.x, column.y, game.getColumnHeigth(column) - 1,
 							mark.toString());
+				} catch (InterruptedException e1) {
 				} catch (ColumnFullException e) {
 					gameplayPanel.setOutputbuttonText(column.x, column.y, DIM - 1, mark.toString());
 				}
 				if (game.getBoardState().isColumnFull(column)) {
 					gameplayPanel.enableInputbutton(column.x, column.y, false);
 				}
-				gameplayPanel.setStatuslabelText(mark.opposite() + "'s turn");
+				gameplayPanel.statusLabel.setText(mark.opposite() + "'s turn");
 			}
 		}
 	}
+	
+
 
 }

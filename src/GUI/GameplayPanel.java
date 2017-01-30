@@ -10,7 +10,9 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 
+import client.States;
 import game.Board;
 import game.Controller;
 import game.Game;
@@ -20,18 +22,21 @@ import util.Vector;
 
 public class GameplayPanel extends JPanel {
 
-	private JButton resetButton;
-	private JLabel statusLabel;
-	private JRadioButton[][] inputButtons;
-	private JButton[][][] outputButtons;
-	
-	public GameplayPanel(Controller controller) {
+	public final JButton resetButton = new JButton("Play again");
+	public final JButton exitButton = new JButton("Exit");
+	public final JLabel statusLabel = new JLabel("");
+	public final JButton statusButton = new JButton(States.UNREADY.toString());
+	public final JRadioButton[][] inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
+	public final JButton[][][] outputButtons = new JButton[Board.WIDTH][Board.DEPTH][Board.HEIGHT];
+	public final String NO_ERROR = "No errors detected.";
+	public final JTextField errorField = new JTextField(NO_ERROR);
+
+	public void build(Controller controller) {
 		this.setLayout(new BorderLayout());
-		
 		GridLayout glayout = new GridLayout(3, 1);
-		glayout.setVgap(0);		
+		glayout.setVgap(0);
 		JPanel playPanel = new JPanel(glayout);
-		playPanel.add(createStatusPanel());
+		playPanel.add(createStatusPanel(controller));
 		playPanel.add(createInputPanel(controller));
 		playPanel.add(createMenuPanel(controller), BorderLayout.SOUTH);
 
@@ -40,33 +45,24 @@ public class GameplayPanel extends JPanel {
 
 		this.add(playPanel, BorderLayout.WEST);
 		this.add(mainOutputPanel, BorderLayout.EAST);
-	}
-	
-	public JButton getResetbutton() {
-		return resetButton;
+		
+		statusButton.setEnabled(false);
+		enableInputButtons(false);
+
 	}
 
-	void selectInputbutton(int x, int y, boolean bool){
+	public void selectInputbutton(int x, int y, boolean bool) {
 		inputButtons[x][y].setSelected(bool);
 	}
 
-	void setOutputbuttonText(int x, int y, int z, String text) {
+	public void setOutputbuttonText(int x, int y, int z, String text) {
 		outputButtons[x][y][z].setText(text);
 	}
-	
-	public void setStatuslabelText(String text) {
-		statusLabel.setText(text);
-	}
-	
-	void enableInputbutton(int x, int y, boolean bool) {
+
+	public void enableInputbutton(int x, int y, boolean bool) {
 		inputButtons[x][y].setEnabled(false);
 	}
-	
-	void enableResetButton(boolean bool) {
-		resetButton.setEnabled(bool);
-	}
-	
-	
+
 	public Vector getInputbuttonVector(JRadioButton src) {
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
@@ -77,19 +73,21 @@ public class GameplayPanel extends JPanel {
 		}
 		return null;
 	}
-	
-	public JPanel createStatusPanel() {
-		JPanel statusPanel = new JPanel(new BorderLayout());
-		statusLabel = new JLabel("");
-		statusPanel.add(statusLabel, BorderLayout.NORTH);
-		statusPanel.add(new JButton(Action.UNREADY.toString()), BorderLayout.SOUTH);
+
+	public JPanel createStatusPanel(Controller controller) {
+		JPanel statusPanel = new JPanel(new GridLayout(3, 1));
+		JLabel errorLabel = new JLabel("Error:");
+		errorField.setEditable(false);
+		statusPanel.add(errorLabel);
+		statusPanel.add(errorField);
+		statusPanel.add(statusLabel);
+		statusButton.addActionListener(controller);
+		statusPanel.add(statusButton);
 		return statusPanel;
 	}
-	
-	
-	public JPanel createInputPanel(Controller  controller) {
+
+	public JPanel createInputPanel(Controller controller) {
 		JPanel input = new JPanel(new GridLayout(Board.WIDTH, Board.HEIGHT));
-		inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
 		for (int x = 0; x < Board.WIDTH; x++) {
 			for (int y = 0; y < Board.DEPTH; y++) {
 				JRadioButton button = new JRadioButton();
@@ -101,18 +99,27 @@ public class GameplayPanel extends JPanel {
 		return input;
 	}
 
-	public JPanel createMenuPanel(Controller  controller) {
+	public void enableInputButtons(boolean bool) {
+		for (int x = 0; x < Board.WIDTH; x++) {
+			for (int y = 0; y < Board.DEPTH; y++) {
+				inputButtons[x][y].setEnabled(bool);
+			}
+		}
+	}
+
+	public JPanel createMenuPanel(Controller controller) {
 		JPanel menuPanel = new JPanel(new FlowLayout());
-		resetButton = new JButton("Play again");
 		resetButton.addActionListener(controller);
 		resetButton.setEnabled(false);
+		exitButton.addActionListener(controller);
+		exitButton.setEnabled(false);
 		menuPanel.add(resetButton);
+		menuPanel.add(exitButton);
 		return menuPanel;
 	}
 
 	public JPanel createColumnOutputPanel() {
 		JPanel fpanel = new JPanel(new FlowLayout());
-		outputButtons = new JButton[Board.WIDTH][Board.DEPTH][Board.HEIGHT];
 		GridLayout gLayout = new GridLayout(Board.HEIGHT, 1);
 		gLayout.setVgap(20);
 		JPanel mgpanel = new JPanel(gLayout);
@@ -131,6 +138,5 @@ public class GameplayPanel extends JPanel {
 		fpanel.add(mgpanel);
 		return fpanel;
 	}
-
 
 }

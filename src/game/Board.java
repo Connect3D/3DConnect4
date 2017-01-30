@@ -26,7 +26,6 @@ public class Board {
 		ending = Game.Ending.NOT_ENDED;
 	}
 	
-	
 	// copy constructor (more efficient than deepCopy function)
 	public Board(Board board) {
 		fields = new Mark[N_FIELDS];
