@@ -23,12 +23,15 @@ public enum Exit implements Command {
 	}
 	
 	
-	public static Exit parse(String[] command) throws CommandUnsupportedException {
+	public static Exit parse(String[] command) throws CommandUnsupportedException, CommandInvalidException {
 		if (command != null && command.length > 1) {
-			Exit result = NAME.inverse().get(command[0] + " " + command[1]);
-			if (result != null) {
-				return result;
+			if (command[0].equals("EXIT")) {
+				Exit result = NAME.inverse().get(command[0] + " " + command[1]);
+				if (result != null) {
+					return result;
+				}
 			}
+			throw new CommandInvalidException();
 		}
 		throw new CommandUnsupportedException();
 	}

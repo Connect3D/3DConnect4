@@ -25,11 +25,14 @@ public enum Error implements Command {
 	}
 	
 	
-	public static Error parse(String[] command) throws CommandUnsupportedException {
+	public static Error parse(String[] command) throws CommandUnsupportedException, CommandInvalidException {
 		if (command != null && command.length > 1) {
-			Error result = NAME.inverse().get(command[0] + " " + command[1]);
-			if (result != null) {
-				return result;
+			if (command[0].equals("ERROR")) {
+				Error result = NAME.inverse().get(command[0] + " " + command[1]);
+				if (result != null) {
+					return result;
+				}
+				throw new CommandInvalidException();
 			}
 		}
 		throw new CommandUnsupportedException();
