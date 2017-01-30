@@ -61,10 +61,10 @@ public enum Acknowledgement implements Command {
 		DIRECTION.put(LIST,        Command.Direction.SERVER_TO_CLIENT);
 		DIRECTION.put(LEADERBOARD, Command.Direction.SERVER_TO_CLIENT);
 		
-		PATTERN.put(OK,          Pattern.compile("^OK( \\S+)*$"));
-		PATTERN.put(SAY,         Pattern.compile("^SAY [A-Za-z0-9]{1-20}( \\S+)+$"));
-		PATTERN.put(LIST,        Pattern.compile("^LIST( [A-Za-z0-9]{1-20}:(READY|UNREADY))*$"));
-		PATTERN.put(LEADERBOARD, Pattern.compile("^LEADERBOARD( [A-Za-z0-9]{1-20}:-?\\d+)*$"));
+		PATTERN.put(OK,          Pattern.compile("OK( \\S+)*"));
+		PATTERN.put(SAY,         Pattern.compile("SAY [A-Za-z0-9]{1,20}( \\S+)+"));
+		PATTERN.put(LIST,        Pattern.compile("LIST( [A-Za-z0-9]{1,20}:(READY|UNREADY))*"));
+		PATTERN.put(LEADERBOARD, Pattern.compile("LEADERBOARD( [A-Za-z0-9]{1,20}:-?\\d+)*"));
 		
 	}
 	

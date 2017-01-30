@@ -20,8 +20,11 @@ public class Util {
 	
 	public static String join(String[] args) {
 		String result = "";
-		for (String arg : args) {
-			result += " " + arg;
+		if (args != null && args.length > 0) {
+			result += args[0];
+			for (int i = 1; i < args.length; ++i) {
+				result += " " + args[i];
+			}
 		}
 		return result;
 	}
