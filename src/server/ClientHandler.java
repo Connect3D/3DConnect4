@@ -12,10 +12,14 @@ import protocol.*;
 import protocol.command.*;
 import protocol.command.Error;			// needed to specify which error class we need
 import util.*;
-import util.exception.protocol.*;
+import util.exception.CommandForbiddenException;
+import util.exception.CommandInvalidException;
+import util.exception.CommandUnsupportedException;
+import util.exception.IllegalMoveException;
+import util.exception.NameUnavailableException;
 
 
-
+// TODO waiting for acks after send command
 // TODO implement disconnect will leave one player and ready the other
 // TODO remove all printStacktrace, console is owned by MessageUI and server
 
@@ -80,16 +84,18 @@ public class ClientHandler extends Observable implements Runnable {
 			catch (NameUnavailableException e) {
 				sendCommand(Error.NAME_UNAVAILABLE);
 			}
+			catch (IllegalMoveException e) {
+				sendCommand(Error.ILLEGAL_MOVE);
+			}
 			catch (IOException e) {
 				server.leave(this);
 				break;
 			}
-			
 		}
 	}
 	
 	
-	private void runAction(Action action, String[] args) throws NameUnavailableException, CommandForbiddenException {
+	private void runAction(Action action, String[] args) throws NameUnavailableException, CommandForbiddenException, IllegalMoveException {
 		
 		switch (action) {
 		
@@ -109,22 +115,24 @@ public class ClientHandler extends Observable implements Runnable {
 				break;
 				
 			case READY:
-				server.ready(this);						// throws commandForbidden if already in ready state ready
+				server.ready(this);							// throws commandForbidden
 				sendCommand(Acknowledgement.OK);
+				server.tryMakeGame();
 				break;
 				
-			case UNREADY:								// can throw forbidden if already unready
+			case UNREADY:									// throws commandForbidden
 				server.unready(this);
 				sendCommand(Acknowledgement.OK);
 				break;
 				
 			case START:
-				throw new CommandForbiddenException();						// server only command
+				throw new CommandForbiddenException();		// server only command
 				
 			case MOVE:
-				// TODO throw command forbidden if not in game
-				// TODO throw forbidden if not the players turn
-				// TODO throw invalid move if move is not okay
+				server.move(this, args[0], args[1]);
+				sendCommand(Acknowledgement.OK);
+				server.tryFinishGame(this);
+				server.forwardLastMove(this);
 				break;
 				
 			case SAY:
@@ -172,6 +180,12 @@ public class ClientHandler extends Observable implements Runnable {
 	//                                   //
 	///////////////////////////////////////
 	
+	// TODO wait for ack's
+	public synchronized void sendCommand(Command command, String[] arguments) {
+		sendCommand(command, Util.join(arguments));
+	}
+	
+	
 	public synchronized void sendCommand(Command command, String arguments) {
 		String args = Util.join(Util.split(arguments));
 		try {
@@ -183,11 +197,6 @@ public class ClientHandler extends Observable implements Runnable {
 			out.flush();
 		} 
 		catch (IOException e) { }
-	}
-	
-	
-	public synchronized void sendCommand(Command command, String[] arguments) {
-		sendCommand(command, Util.join(arguments));
 	}
 	
 	
