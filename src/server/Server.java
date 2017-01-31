@@ -103,14 +103,15 @@ public class Server implements Runnable {
 		if (!chat.contains(client) && clients.get(client) == ClientState.UNREADY) {
 			chat.add(client);
 		}
-		throw new CommandForbiddenException();
+		else {
+			throw new CommandForbiddenException();
+		}
 	}
 	
 	
 	public synchronized void ready(ClientHandler client) throws CommandForbiddenException {
 		if (clients.get(client) == ClientState.UNREADY) {
 			clients.put(client, ClientState.READY);
-			tryMakeGame();
 		}
 		else {
 			throw new CommandForbiddenException();
@@ -163,7 +164,9 @@ public class Server implements Runnable {
 			ServerSideGame game = games.getValue(client);
 			game.doMove(client, Integer.parseInt(x), Integer.parseInt(y));			// TODO moves doorsturen
 		}
-		throw new CommandForbiddenException();
+		else {
+			throw new CommandForbiddenException();
+		}
 	}
 	
 	
@@ -210,7 +213,7 @@ public class Server implements Runnable {
 	}
 	
 	
-	public synchronized void forwardLastMove(ClientHandler client) {		// TODO wait for ack
+	public synchronized void forwardLastMove(ClientHandler client) {
 		ServerSideGame game = games.getValue(client);
 		if (!game.isSync()) {
 			Move move = game.getLastMove();

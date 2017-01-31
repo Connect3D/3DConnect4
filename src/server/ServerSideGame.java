@@ -20,6 +20,7 @@ public class ServerSideGame {
 	
 	
 	public ServerSideGame(ClientHandler p1, ClientHandler p2) {
+		board = new Board();
 		players.put(Mark.X, p1);
 		players.put(Mark.O, p2);
 	}
