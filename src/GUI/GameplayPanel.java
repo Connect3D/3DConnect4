@@ -29,7 +29,7 @@ public class GameplayPanel extends JPanel {
 	public final JRadioButton[][] inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
 	public final JButton[][][] outputButtons = new JButton[Board.WIDTH][Board.DEPTH][Board.HEIGHT];
 	public final String NO_ERROR = "No errors detected.";
-	public final JTextField errorField = new JTextField(NO_ERROR);
+	public final JLabel errorField = new JLabel(NO_ERROR);
 
 	public void build(Controller controller) {
 		this.setLayout(new BorderLayout());
@@ -81,7 +81,6 @@ public class GameplayPanel extends JPanel {
 	public JPanel createStatusPanel(Controller controller) {
 		JPanel statusPanel = new JPanel(new GridLayout(3, 1));
 		JLabel errorLabel = new JLabel("Error:");
-		errorField.setEditable(false);
 		statusPanel.add(errorLabel);
 		statusPanel.add(errorField);
 		statusPanel.add(statusLabel);

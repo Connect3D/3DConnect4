@@ -134,14 +134,16 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				mainGUI.gameplayPanel.errorField.setText(command.toString());
 			}
 			if (command instanceof Exit) {
-				if (command.equals(Exit.FORFEITURE)) {
+				if (args[0].equals(Exit.FORFEITURE.toString())) {
 					mainGUI.gameplayPanel.statusLabel.setText("Game won");
 				}
-				if (command.equals(Exit.TIMEOUT)) {
+				if (args[0].equals(Exit.TIMEOUT.toString())) {
 					mainGUI.gameplayPanel.statusLabel.setText("Game lost");
 				} else {
-					mainGUI.gameplayPanel.statusLabel.setText(command.toString());
+					mainGUI.gameplayPanel.statusLabel.setText(args[0]);
 				}
+				client.setStatus(States.UNREADY);
+				mainGUI.gameplayPanel.switchStatusButtonText();
 				// TODO: Write a loop to disable input buttons
 				// mainGUI.gameplayPanel.inputButtons.setEnabled(false);
 				mainGUI.gameplayPanel.resetButton.setEnabled(true);
