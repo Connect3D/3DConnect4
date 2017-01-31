@@ -19,7 +19,7 @@ public class DebugClient implements Runnable {
 	
 	
 	public static void main(String[] args) throws Exception {
-		DebugClient client = new DebugClient();
+	DebugClient client = new DebugClient();
 		new Thread(client).start();
 		client.readConsole();
 	}

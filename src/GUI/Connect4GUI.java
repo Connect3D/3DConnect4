@@ -62,18 +62,8 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 
 	}
 
-	public static void main(String[] args) {
-		new Connect4GUI();
-	}
-
 	public void init() {
 		controller = new Controller();
-		//Player p1 = new HumanPlayer("Richard", Mark.X, controller);
-		//Player p2 = new HumanPlayer("Aart", Mark.O, controller);
-		//Game game = new Game(p1, p2);
-		//new Thread(game).start();
-		//game.addObserver(this);
-		//controller.setGame(game);
 		controller.setGUI(this);
 		clientPanel.build(controller);
 		gameplayPanel.build(controller);
@@ -119,10 +109,11 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 	public void update(Observable o, Object arg) {
 		if (o instanceof Game) {
 			Game game = (Game) o;
-			if (arg instanceof Game.Ending) {
-				gameplayPanel.statusLabel.setText(game.getEnding().toString());
-				gameplayPanel.resetButton.setEnabled(true);
-			}
+// 			Handled by the server  oi
+//			if (arg instanceof Game.Ending) {
+//				gameplayPanel.statusLabel.setText(game.getEnding().toString());
+//				gameplayPanel.resetButton.setEnabled(true);
+//			}
 			if (arg instanceof Move) {
 				Move move = (Move) arg;
 				Column column = move.column;
@@ -144,6 +135,7 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		}
 	}
 	
-
-
+	public static void main(String[] args) {
+		new Connect4GUI();
+	}
 }

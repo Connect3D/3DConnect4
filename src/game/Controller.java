@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 
 import GUI.Connect4GUI;
 import client.Client;
+import client.States;
 import game.player.HumanPlayer;
 import protocol.command.Acknowledgement;
 import protocol.command.Action;
@@ -37,6 +38,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	private Client client;
 	private Connect4GUI mainGUI;
 	private final CommandParser commandParser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
+	private Command prevCommand;
 
 	public void setGUI(Connect4GUI gui) {
 		mainGUI = gui;
@@ -45,9 +47,10 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	public void setGame(Game game) {
 		this.game = game;
 	}
-
+	//TODO: wait for OK's
 	// Parse and handle command
 	public void readCommand(String cmd) {
+		System.out.println(cmd);
 		Pair<Command, String[]> parsedCmd = null;
 		try {
 			parsedCmd = commandParser.parse(cmd);
@@ -60,76 +63,128 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		}
 		Command command = parsedCmd.first;
 		String[] args = parsedCmd.second;
-		if (command instanceof Action) {
+		if (command instanceof Action && !client.getStatus().equals(States.DISCONNECTED)) {
 			switch ((Action) command) {
 			case START:
-				mainGUI.createGame(new HumanPlayer(args[0], Mark.X, this), new HumanPlayer(args[1], Mark.O, this));
-				mainGUI.enableGameplay();
+				if (client.getStatus() == States.READY) {
+					mainGUI.createGame(new HumanPlayer(args[0], Mark.X, this), new HumanPlayer(args[1], Mark.O, this));
+					mainGUI.enableGameplay();
+					client.setStatus(States.INGAME);
+					client.sendMessage(Acknowledgement.OK.toString());
+				} else {
+					client.sendMessage(Error.FORBIDDEN.toString());
+				}
 				break;
 			case MOVE:
-				column = new Column(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-				if (game.isColumnFull(column)) {
-					client.sendMessage(Error.ILLEGAL_MOVE.toString());
-				} else {
-					notifyAll();
+				if (client.getStatus() == States.INGAME) {
+					column = new Column(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+					if (!game.isColumnFull(column)) {
+						notifyAll();
+						client.sendMessage(Acknowledgement.OK.toString());
+					} else {
+						client.sendMessage(Error.ILLEGAL_MOVE.toString());
+					}
 				}
 				break;
 			case SAY:
 				mainGUI.addMessage(Util.join(args));
+				client.sendMessage(Acknowledgement.OK.toString());
 				break;
+			default:
+				client.sendMessage(Error.COMMAND_UNSUPPORTED.toString());
 			}
 		}
 		if (command instanceof Acknowledgement) {
 			switch ((Acknowledgement) command) {
 			case OK:
-				mainGUI.gameplayPanel.errorField.setText(mainGUI.gameplayPanel.NO_ERROR);
+				if (prevCommand.equals(Action.CONNECT)) {
+					mainGUI.clientPanel.tfHostname.setEnabled(false);
+					mainGUI.clientPanel.tfName.setEnabled(false);
+					mainGUI.clientPanel.tfPort.setEnabled(false);
+					mainGUI.clientPanel.b1Connect.setEnabled(false);
+					client.setStatus(States.UNREADY);
+				}
+				if (prevCommand.equals(Action.UNREADY)) {
+					client.setStatus(States.UNREADY);
+				}
+				if (prevCommand.equals(Action.READY)) {
+					client.setStatus(States.READY);
+				}
+				if (prevCommand.equals(Action.MOVE)) {
+					notifyAll();
+				}
 				break;
 			}
+			mainGUI.gameplayPanel.errorField.setText(mainGUI.gameplayPanel.NO_ERROR);
 		}
 		if (command instanceof Error) {
 			mainGUI.gameplayPanel.errorField.setText(command.toString());
 		}
 		if (command instanceof Exit) {
+			if(command.equals(Exit.FORFEITURE)) {
+ 				mainGUI.gameplayPanel.statusLabel.setText("Game won");	
+			}
+			if(command.equals(Exit.TIMEOUT)) {
+				mainGUI.gameplayPanel.statusLabel.setText("Game lost");	
+			}
+			else {
 			mainGUI.gameplayPanel.statusLabel.setText(command.toString());
-
+			}
+			//TODO: Write a loop to disable input buttons
+			//mainGUI.gameplayPanel.inputButtons.setEnabled(false);
+			mainGUI.gameplayPanel.resetButton.setEnabled(true);
+			mainGUI.gameplayPanel.exitButton.setEnabled(true);
 		}
 	}
 
 	/**
-	 * Receives input from GUI buttons, calls an appropriate command of Game.
-	 * TODO: Parse msg into proper command. Catch exceptions
+	 * Receives input from GUI buttons, sends the appropriate command.
 	 */
 	@Override
 	public synchronized void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if ((src instanceof JButton)) {
 			JButton eventSource = (JButton) src;
+			//TODO: Handle exit, reset and disconnect.
 			if (mainGUI.gameplayPanel.exitButton.equals(eventSource)) {
 				client.sendMessage(Exit.FORFEITURE.toString());
 			}
 			if (mainGUI.gameplayPanel.resetButton.equals(eventSource)) {
 				// game.resetBoard();
+				client.sendMessage(Exit.FORFEITURE.toString());
 			}
 			if (mainGUI.clientPanel.b1Connect.equals(eventSource)) {
 				startConnecting();
+				prevCommand = Action.CONNECT;
+				client.sendMessage(Action.CONNECT + " " + client.getClientName());
 				client.sendMessage(Action.AVAILABLE.toString());
 			}
 			if (mainGUI.gameplayPanel.statusButton.equals(eventSource)) {
-				client.sendMessage(eventSource.getText());
-
+				prevCommand = (eventSource.getText() == Action.READY.toString()) ? Action.READY : Action.UNREADY;
+				client.sendMessage(prevCommand.toString());
 			}
 			if (client != null) {
 				if (src instanceof JRadioButton) {
 					Vector buttonPos = mainGUI.gameplayPanel.getInputbuttonVector((JRadioButton) src);
 					column = new Column(buttonPos.x, buttonPos.y);
-					notifyAll();
 					client.sendMessage("MOVE" + " " + buttonPos.x + " " + buttonPos.y);
 				}
 
 				if (src instanceof JTextField) {
-					client.sendMessage(Action.SAY + client.getClientName() + mainGUI.clientPanel.tfMyMessage.getText());
+					client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
 					mainGUI.clientPanel.tfMyMessage.setText("");
 				}
+			}
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		Object src = e.getSource();
+		if (src instanceof JTextField) {
+			JTextField srcTextField = (JTextField) src;
+			if (mainGUI.clientPanel.tfName.equals(srcTextField)) {
+				mainGUI.clientPanel.b1Connect.setEnabled(true);
 			}
 		}
 	}
@@ -167,20 +222,6 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 			client.start();
 		} catch (IOException e) {
 			System.out.println("ERROR: Client could not be created");
-		}
-		mainGUI.clientPanel.tfHostname.setEnabled(false);
-		mainGUI.clientPanel.tfName.setEnabled(false);
-		mainGUI.clientPanel.tfPort.setEnabled(false);
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		Object src = e.getSource();
-		if (src instanceof JTextField) {
-			JTextField srcTextField = (JTextField) src;
-			if (mainGUI.clientPanel.tfName.equals(srcTextField)) {
-				mainGUI.clientPanel.b1Connect.setEnabled(true);
-			}
 		}
 	}
 

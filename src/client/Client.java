@@ -32,7 +32,7 @@ public class Client extends Thread {
 	private BufferedReader in;
 	private BufferedWriter out;
 	private String message;
-	public States state;
+	private States state = States.DISCONNECTED;
 	private Controller controller;
 	
 	/**
@@ -51,11 +51,14 @@ public class Client extends Thread {
 		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
 		this.controller = controller;
-		setState(States.UNREADY);
 	}
 
 	public States getStatus() {
 		return state;
+	}
+	
+	public void setStatus(States state) {
+		this.state = state;
 	}
 	/**
 	 * Reads the messages in the socket connection. Each message will be
@@ -64,18 +67,13 @@ public class Client extends Thread {
 	public void run() {
 		BufferedReader terminal = new BufferedReader(new InputStreamReader(System.in));
 		(new Thread(new Reader())).start();
-		setState(States.UNREADY);
-		sendMessage(Action.CONNECT + " " + clientName);
 	}
 
-	public void setState(States state) {
-		this.state = state;
-	}
+
 
 	/** close the socket connection. */
 	public void shutdown() {
 		//sendMessage("[" + clientName + " has left]");
-		sendMessage(Action.DISCONNECT.toString());
 		mui.addMessage("Closing socket connection...");
 		try {
 			sock.close();
