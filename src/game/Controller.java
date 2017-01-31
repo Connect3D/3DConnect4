@@ -92,6 +92,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 						}
 						mainGUI.gameplayPanel.enableInputButtons(true);
 					}
+					mainGUI.updateStatusLabel();
 					break;
 				case SAY:
 					mainGUI.addMessage(Util.join(args));
@@ -102,50 +103,49 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				}
 			}
 			if (command instanceof Acknowledgement) {
-				switch ((Acknowledgement) command) {
-				case OK:
 					if (prevCommand.equals(Action.CONNECT)) {
 						mainGUI.clientPanel.tfHostname.setEnabled(false);
 						mainGUI.clientPanel.tfName.setEnabled(false);
 						mainGUI.clientPanel.tfPort.setEnabled(false);
 						mainGUI.clientPanel.b1Connect.setEnabled(false);
-						mainGUI.clientPanel.tfMyMessage.setEnabled(true);
+						//mainGUI.clientPanel.tfMyMessage.setEnabled(true);
 						mainGUI.gameplayPanel.statusButton.setEnabled(true);
 						client.setStatus(States.UNREADY);
 					    //client.sendMessage(Action.AVAILABLE.toString());
 					}
 					if (prevCommand.equals(Action.UNREADY)) {
+						mainGUI.gameplayPanel.switchStatusButtonText();
 						client.setStatus(States.UNREADY);
 					}
 					if (prevCommand.equals(Action.READY)) {
 						client.setStatus(States.READY);
 						mainGUI.gameplayPanel.switchStatusButtonText();
-
 					}
 					if (prevCommand.equals(Action.MOVE)) {
 						mainGUI.gameplayPanel.enableInputButtons(false);
+						mainGUI.updateStatusLabel();
 						notifyAll();
 					}
-					break;
-				}
-				mainGUI.gameplayPanel.errorField.setText(mainGUI.gameplayPanel.NO_ERROR);
+				mainGUI.clientPanel.errorField.setText(mainGUI.clientPanel.NO_ERROR);
 			}
 			if (command instanceof Error) {
-				mainGUI.gameplayPanel.errorField.setText(command.toString());
+				mainGUI.clientPanel.errorField.setText(command.toString());
 			}
 			if (command instanceof Exit) {
-				if (args[0].equals(Exit.FORFEITURE.toString())) {
+				Exit exitCmd = (Exit) command;
+				
+				if (exitCmd.name().equals(Exit.FORFEITURE.toString())) {
 					mainGUI.gameplayPanel.statusLabel.setText("Game won");
 				}
-				if (args[0].equals(Exit.TIMEOUT.toString())) {
+				if (exitCmd.name().equals(Exit.TIMEOUT.toString())) {
 					mainGUI.gameplayPanel.statusLabel.setText("Game lost");
 				} else {
-					mainGUI.gameplayPanel.statusLabel.setText(args[0]);
+					mainGUI.gameplayPanel.statusLabel.setText(exitCmd.name());
 				}
 				client.setStatus(States.UNREADY);
 				mainGUI.gameplayPanel.switchStatusButtonText();
-				// TODO: Write a loop to disable input buttons
-				// mainGUI.gameplayPanel.inputButtons.setEnabled(false);
+				mainGUI.gameplayPanel.statusButton.setEnabled(false);
+				mainGUI.gameplayPanel.enableInputButtons(false);
 				mainGUI.gameplayPanel.resetButton.setEnabled(true);
 				mainGUI.gameplayPanel.exitButton.setEnabled(true);
 			}
@@ -187,8 +187,8 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 			}
 
 			if (src instanceof JTextField) {
-				client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
-				mainGUI.clientPanel.tfMyMessage.setText("");
+				//client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
+				//mainGUI.clientPanel.tfMyMessage.setText("");
 			}
 		}
 	}
