@@ -175,16 +175,6 @@ public class Server implements Runnable {
 	//                             //
 	/////////////////////////////////
 	
-	private String joinMessage(String name) {
-		return "<" + name + " has joined the server>";
-	}
-	
-	
-	private String leaveMessage(String name) {
-		return "<" + name + " has left the server>";
-	}
-	
-	
 	public synchronized void tryMakeGame() {
 		LinkedList<ClientHandler> ready = getClientsInState(ClientState.READY);
 		while (ready.size() > 1) {
@@ -220,6 +210,16 @@ public class Server implements Runnable {
 			other.sendCommand(Action.MOVE, move.column.x + " " + move.column.y);
 			game.setSync();
 		}
+	}
+	
+	
+	private String joinMessage(String name) {
+		return "<" + name + " has joined the server>";
+	}
+	
+	
+	private String leaveMessage(String name) {
+		return "<" + name + " has left the server>";
 	}
 	
 	

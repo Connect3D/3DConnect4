@@ -12,11 +12,7 @@ import protocol.*;
 import protocol.command.*;
 import protocol.command.Error;			// needed to specify which error class we need
 import util.*;
-import util.exception.CommandForbiddenException;
-import util.exception.CommandInvalidException;
-import util.exception.CommandUnsupportedException;
-import util.exception.IllegalMoveException;
-import util.exception.NameUnavailableException;
+import util.exception.*;
 
 
 // TODO waiting for acks after send command
@@ -131,8 +127,8 @@ public class ClientHandler extends Observable implements Runnable {
 			case MOVE:
 				server.move(this, args[0], args[1]);
 				sendCommand(Acknowledgement.OK);
-				server.tryFinishGame(this);
 				server.forwardLastMove(this);
+				server.tryFinishGame(this);
 				break;
 				
 			case SAY:

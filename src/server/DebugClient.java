@@ -18,15 +18,20 @@ public class DebugClient implements Runnable {
 	private final BufferedWriter console_out;
 	
 	
+	InetAddress REMOTE_ADRESS = InetAddress.getByName("130.89.95.25");
+	
 	public static void main(String[] args) throws Exception {
-	DebugClient client = new DebugClient();
+		DebugClient client = new DebugClient();
 		new Thread(client).start();
 		client.readConsole();
 	}
 
 	
 	public DebugClient() throws Exception {
-		socket = new Socket(InetAddress.getLocalHost(), 2727);
+		//InetAddress REMOTE_ADDRESS = InetAddress.getByName("2001:67c:2564:a130:350f:4f74:beed:238f");
+		InetAddress REMOTE_ADDRESS = InetAddress.getByName("130.89.176.65");
+		socket = new Socket(REMOTE_ADDRESS, 2727);
+		//socket = new Socket(InetAddress.getLocalHost(), 2727);
 		socket_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		socket_out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		console_in = new BufferedReader(new InputStreamReader(System.in));
