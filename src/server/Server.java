@@ -67,7 +67,6 @@ public class Server implements Runnable {
 		}
 	}
 	
-	
 	// TODO quit all ongoing games
 	public synchronized void shutDown() throws IOException {
 		console.addMessage("Shutting down server");

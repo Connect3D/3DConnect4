@@ -87,12 +87,6 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		cc.add(mainpanel);
 	}
 
-//	TODO Implement (or in client)
-	public void enableGameplay() {
-		gameplayPanel.enableInputButtons(true);
-		gameplayPanel.statusButton.setEnabled(true);
-		gameplayPanel.exitButton.setEnabled(true);
-	}
 //	
 //	String text = eventSource.getText();
 //	States newState = text.equals(States.READY.toString()) ? States.READY : States.UNREADY;

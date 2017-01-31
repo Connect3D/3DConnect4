@@ -48,10 +48,10 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		this.game = game;
 	}
 
-	// TODO: wait for OK's
-	// Parse and handle command
-	public void readCommand(String cmd) {
+	// TODO: Only enable buttons when it is one's turn.
+	public synchronized void readCommand(String cmd) {
 		if (cmd != null) {
+			mainGUI.addMessage("Server message: " + cmd);
 			Pair<Command, String[]> parsedCmd = null;
 			try {
 				parsedCmd = commandParser.parse(cmd);
@@ -70,9 +70,12 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 					if (client.getStatus() == States.READY) {
 						mainGUI.createGame(new HumanPlayer(args[0], Mark.X, this),
 								new HumanPlayer(args[1], Mark.O, this));
-						mainGUI.enableGameplay();
+						mainGUI.gameplayPanel.resetButton.setEnabled(true);
+						mainGUI.gameplayPanel.exitButton.setEnabled(true);
 						client.setStatus(States.INGAME);
-						mainGUI.gameplayPanel.enableInputButtons(true);
+						if (client.getClientName().equals(args[0])) {
+							mainGUI.gameplayPanel.enableInputButtons(true);
+						}
 						client.sendMessage(Acknowledgement.OK.toString());
 					} else {
 						client.sendMessage(Error.FORBIDDEN.toString());
@@ -87,6 +90,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 						} else {
 							client.sendMessage(Error.ILLEGAL_MOVE.toString());
 						}
+						mainGUI.gameplayPanel.enableInputButtons(true);
 					}
 					break;
 				case SAY:
@@ -105,13 +109,13 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 						mainGUI.clientPanel.tfName.setEnabled(false);
 						mainGUI.clientPanel.tfPort.setEnabled(false);
 						mainGUI.clientPanel.b1Connect.setEnabled(false);
+						mainGUI.clientPanel.tfMyMessage.setEnabled(true);
 						mainGUI.gameplayPanel.statusButton.setEnabled(true);
 						client.setStatus(States.UNREADY);
-						// client.sendMessage(Action.AVAILABLE.toString());
+					    //client.sendMessage(Action.AVAILABLE.toString());
 					}
 					if (prevCommand.equals(Action.UNREADY)) {
 						client.setStatus(States.UNREADY);
-						mainGUI.gameplayPanel.enableInputButtons(false);
 					}
 					if (prevCommand.equals(Action.READY)) {
 						client.setStatus(States.READY);
@@ -119,6 +123,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 
 					}
 					if (prevCommand.equals(Action.MOVE)) {
+						mainGUI.gameplayPanel.enableInputButtons(false);
 						notifyAll();
 					}
 					break;
@@ -170,17 +175,18 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				prevCommand = (eventSource.getText() == Action.READY.toString()) ? Action.READY : Action.UNREADY;
 				client.sendMessage(prevCommand.toString());
 			}
-			if (client != null) {
-				if (src instanceof JRadioButton) {
-					Vector buttonPos = mainGUI.gameplayPanel.getInputbuttonVector((JRadioButton) src);
-					column = new Column(buttonPos.x, buttonPos.y);
-					client.sendMessage("MOVE" + " " + buttonPos.x + " " + buttonPos.y);
-				}
+		}
+		if (client != null) {
+			if (src instanceof JRadioButton) {
+				Vector buttonPos = mainGUI.gameplayPanel.getInputbuttonVector((JRadioButton) src);
+				column = new Column(buttonPos.x, buttonPos.y);
+				client.sendMessage("MOVE" + " " + buttonPos.x + " " + buttonPos.y);
+				prevCommand = Action.MOVE;
+			}
 
-				if (src instanceof JTextField) {
-					client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
-					mainGUI.clientPanel.tfMyMessage.setText("");
-				}
+			if (src instanceof JTextField) {
+				client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
+				mainGUI.clientPanel.tfMyMessage.setText("");
 			}
 		}
 	}
@@ -211,7 +217,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	}
 
 	public void startConnecting() {
-		String name = mainGUI.clientPanel.tfName.getText();
+		String name = mainGUI.clientPanel.tfName.getText().trim();
 		int port = 0;
 		InetAddress iaddress = null;
 		try {

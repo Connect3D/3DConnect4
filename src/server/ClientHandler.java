@@ -160,17 +160,17 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	
 	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) {
-		sendCommand(Action.SAY, "ack");
+		//sendCommand(Action.SAY, "ack");
 	}
 	
 	
 	private void runError(Error error, String[] args) {
-		sendCommand(Action.SAY, "err");
+		//sendCommand(Action.SAY, "err");
 	}
 	
 	
 	private void runExit(Exit exit, String[] args) {
-		sendCommand(Action.SAY, "exit");
+		//sendCommand(Action.SAY, "exit");
 	}
 	
 	
