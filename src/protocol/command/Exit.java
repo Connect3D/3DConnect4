@@ -36,10 +36,11 @@ public enum Exit implements Command {
 		throw new CommandUnsupportedException();
 	}
 	
-	
+	//CHANGED THIS ONE
 	public static boolean isValid(Exit e, String s, Command.Direction d) throws CommandForbiddenException, CommandInvalidException {
 		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(e) == d || DIRECTION.get(e) == Command.Direction.BIDIRECTIONAL)) {
-			if (PATTERN.get(e).matcher("\n" + s + "\n").matches()) {
+			//if (PATTERN.get(e).matcher("\n" + s + "\n").matches()) {
+			if (PATTERN.get(e).matcher(s).matches()) {
 				return true;
 			}
 			throw new CommandInvalidException();

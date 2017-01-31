@@ -16,8 +16,7 @@ import util.exception.*;
 public class CommandParser {
 	
 	public final Command.Direction direction;
-	
-	
+
 	public CommandParser(Command.Direction d) {
 		direction = d;
 	}
