@@ -2,8 +2,6 @@ package protocol;
 
 import java.util.regex.Pattern;
 
-
-
 public class Name {
 
 	public static final int MIN_LENGTH = 1;

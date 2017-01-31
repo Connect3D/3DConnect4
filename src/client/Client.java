@@ -8,9 +8,11 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import game.Controller;
 import game.Game;
 import game.Mark;
 import game.player.HumanPlayer;
+import protocol.command.Action;
 import util.MessageUI;
 
 /**
@@ -30,11 +32,13 @@ public class Client extends Thread {
 	private BufferedReader in;
 	private BufferedWriter out;
 	private String message;
-
+	public States state;
+	private Controller controller;
+	
 	/**
 	 * Constructs a Client-object and tries to make a socket connection.
 	 */
-	public Client(String name, InetAddress host, int port, MessageUI m) throws IOException {
+	public Client(String name, InetAddress host, int port, MessageUI m, Controller controller) throws IOException {
 		clientName = name;
 		mui = m;
 		// try to open a Socket to the server
@@ -46,8 +50,13 @@ public class Client extends Thread {
 		}
 		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
+		this.controller = controller;
+		setState(States.UNREADY);
 	}
 
+	public States getStatus() {
+		return state;
+	}
 	/**
 	 * Reads the messages in the socket connection. Each message will be
 	 * forwarded to the MessageUI
@@ -55,13 +64,18 @@ public class Client extends Thread {
 	public void run() {
 		BufferedReader terminal = new BufferedReader(new InputStreamReader(System.in));
 		(new Thread(new Reader())).start();
-		sendMessage(clientName);
+		setState(States.UNREADY);
+		sendMessage(Action.CONNECT + " " + clientName);
+	}
+
+	public void setState(States state) {
+		this.state = state;
 	}
 
 	/** close the socket connection. */
 	public void shutdown() {
-		sendMessage("[" + clientName + " has left]");
-
+		//sendMessage("[" + clientName + " has left]");
+		sendMessage(Action.DISCONNECT.toString());
 		mui.addMessage("Closing socket connection...");
 		try {
 			sock.close();
@@ -75,8 +89,6 @@ public class Client extends Thread {
 		return clientName;
 	}
 
-	
-	//ASK WHETHER THIS IS A GOOD SOLUTION OR THE OBSERVER PATTERN SHOULD BE APPLIED.
 	public void sendMessage(String message) {
 		try {
 			out.write(message);
@@ -87,13 +99,14 @@ public class Client extends Thread {
 		}
 	}
 
+	//TODO: Listen, parse, send back, or process
 	class Reader implements Runnable {
 		public void run() {
 			try {
 				String msg = "";
 				while (msg != null) {
 					msg = in.readLine();
-					mui.addMessage(msg);
+					controller.readCommand(msg);
 				}
 			} catch (IOException e) {
 				shutdown();

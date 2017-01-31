@@ -10,8 +10,6 @@ import util.exception.protocol.CommandForbiddenException;
 import util.exception.protocol.CommandInvalidException;
 import util.exception.protocol.CommandUnsupportedException;
 
-
-
 public enum Action implements Command {
 	
 	CONNECT,

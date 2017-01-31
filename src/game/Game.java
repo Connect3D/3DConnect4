@@ -23,7 +23,10 @@ public class Game extends Observable implements Runnable {
 	public int getColumnHeigth(Column column) {
 		return board.getColumnHeight(column);
 	}
-
+	
+	public boolean isColumnFull(Column column) {
+		return board.isColumnFull(column);
+	}
 	
 	public void run() {
 		while (board.getEnding() == Ending.NOT_ENDED) {

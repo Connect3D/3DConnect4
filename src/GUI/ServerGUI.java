@@ -72,8 +72,6 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		p1.add(pp, BorderLayout.WEST);
 		p1.add(bConnect, BorderLayout.EAST);
 		
-		// Panel p2 - Messages
-
 		JPanel p2 = new JPanel();
 		p2.setLayout(new BorderLayout());
 
