@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 import com.google.common.collect.EnumHashBiMap;
 
 import util.exception.*;
+import util.exception.protocol.CommandForbiddenException;
+import util.exception.protocol.CommandInvalidException;
+import util.exception.protocol.CommandUnsupportedException;
 
 
 
@@ -73,13 +76,13 @@ public enum Error implements Command {
 		DIRECTION.put(ILLEGAL_MOVE,         Command.Direction.BIDIRECTIONAL);
 		DIRECTION.put(SERVER_SHUTTING_DOWN, Command.Direction.SERVER_TO_CLIENT);
 		
-		PATTERN.put(UNKNOWN_ERROR,        Pattern.compile("ERROR 0( \\S+)+"));
-		PATTERN.put(COMMAND_UNSUPPORTED,  Pattern.compile("ERROR 1( \\S+)+"));
-		PATTERN.put(COMMAND_INVALID,      Pattern.compile("ERROR 2( \\S+)+"));
-		PATTERN.put(NAME_UNAVAILABLE,     Pattern.compile("ERROR 3( \\S+)+"));
-		PATTERN.put(FORBIDDEN,            Pattern.compile("ERROR 4( \\S+)+"));
-		PATTERN.put(ILLEGAL_MOVE,         Pattern.compile("ERROR 5( \\S+)+"));
-		PATTERN.put(SERVER_SHUTTING_DOWN, Pattern.compile("ERROR 6( \\S+)+"));
+		PATTERN.put(UNKNOWN_ERROR,        Pattern.compile("ERROR 0( \\S+)*"));
+		PATTERN.put(COMMAND_UNSUPPORTED,  Pattern.compile("ERROR 1( \\S+)*"));
+		PATTERN.put(COMMAND_INVALID,      Pattern.compile("ERROR 2( \\S+)*"));
+		PATTERN.put(NAME_UNAVAILABLE,     Pattern.compile("ERROR 3( \\S+)*"));
+		PATTERN.put(FORBIDDEN,            Pattern.compile("ERROR 4( \\S+)*"));
+		PATTERN.put(ILLEGAL_MOVE,         Pattern.compile("ERROR 5( \\S+)*"));
+		PATTERN.put(SERVER_SHUTTING_DOWN, Pattern.compile("ERROR 6( \\S+)*"));
 
 	}
 	

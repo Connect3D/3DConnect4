@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 import com.google.common.collect.EnumHashBiMap;
 
 import util.exception.*;
+import util.exception.protocol.CommandForbiddenException;
+import util.exception.protocol.CommandInvalidException;
+import util.exception.protocol.CommandUnsupportedException;
 
 
 
@@ -88,12 +91,12 @@ public enum Action implements Command {
 		DIRECTION.put(ACCEPT,      Command.Direction.CLIENT_TO_SERVER);
 		DIRECTION.put(DECLINE,     Command.Direction.CLIENT_TO_SERVER);
 		
-		PATTERN.put(CONNECT,     Pattern.compile("CONNECT [A-Za-z0-9]{1,20}"));
+		PATTERN.put(CONNECT,     Pattern.compile("CONNECT \\S+"));
 		PATTERN.put(DISCONNECT,  Pattern.compile("DISCONNECT"));
 		PATTERN.put(READY,       Pattern.compile("READY"));
 		PATTERN.put(UNREADY,     Pattern.compile("UNREADY"));
 		PATTERN.put(START,       Pattern.compile("START [A-Za-z0-9]{1,20} [A-Za-z0-9]{1,20}"));
-		PATTERN.put(MOVE,        Pattern.compile("MOVE [0-3] [0-3]"));
+		PATTERN.put(MOVE,        Pattern.compile("MOVE -?[0-9]+ -?[0-9]+"));
 		PATTERN.put(SAY,         Pattern.compile("SAY( \\S+)+"));
 		PATTERN.put(AVAILABLE,   Pattern.compile("AVAILABLE"));
 		PATTERN.put(LIST,        Pattern.compile("LIST"));

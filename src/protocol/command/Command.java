@@ -1,6 +1,7 @@
 package protocol.command;
 
 import util.exception.*;
+import util.exception.protocol.CommandUnsupportedException;
 
 
 

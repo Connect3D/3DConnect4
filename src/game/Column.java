@@ -21,8 +21,14 @@ public class Column {
 		y = other.y;
 	}
 	
+	
 	public boolean equals(Column other) {
 		return x == other.x && y == other.y;
+	}
+	
+	
+	public static boolean isValid(int x, int y) {
+		return x >= 0 && x < Board.WIDTH && y >= 0 && y < Board.DEPTH;
 	}
 	
 }

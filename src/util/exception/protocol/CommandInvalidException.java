@@ -1,4 +1,4 @@
-package util.exception;
+package util.exception.protocol;
 
 
 public class CommandInvalidException extends Exception {

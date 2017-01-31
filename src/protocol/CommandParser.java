@@ -10,6 +10,9 @@ import protocol.command.Exit;
 import util.Pair;
 import util.Util;
 import util.exception.*;
+import util.exception.protocol.CommandForbiddenException;
+import util.exception.protocol.CommandInvalidException;
+import util.exception.protocol.CommandUnsupportedException;
 
 
 

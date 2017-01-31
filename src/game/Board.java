@@ -36,10 +36,12 @@ public class Board {
 		ending = board.ending.copy();
 	}
 	
-	public int getColumnHeigth(Column column) {
+	
+	public int getColumnHeight(Column column) {
 		return cascade(column).z;
 	}
 
+	
 	// pass by value to avoid messing with board from outside of class
 	public Game.Ending getEnding() {
 		return ending.copy();

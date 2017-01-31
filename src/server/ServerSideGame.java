@@ -1,49 +1,50 @@
 package server;
 
-import java.util.Observable;
-import java.util.Observer;
+import java.util.EnumMap;
 
-import game.Column;
-import game.Game;
-import game.Mark;
-import game.Move;
-import game.player.HumanPlayer;
-import util.ProvidesMoves;
+import game.*;
+import util.exception.protocol.*;
 
-public class ServerSideGame implements Observer, ProvidesMoves {
 
-	private Game game;
-	public final ClientHandler player1;
-	public final ClientHandler player2;
+
+public class ServerSideGame {
+	
+	private final EnumMap<Mark, ClientHandler> players = new EnumMap<Mark, ClientHandler>(Mark.class);
+	private Board board;
+	private Mark onTurn = Mark.X;
+	private boolean ended = false;
 	
 	
 	public ServerSideGame(ClientHandler p1, ClientHandler p2) {
-		player1 = p1;
-		player2 = p2;
-		game = new Game(new HumanPlayer("name", Mark.X, this), new HumanPlayer("name", Mark.O, this));
-		game.addObserver(this);
-		Thread t = new Thread(game);
-		t.start();
+		players.put(Mark.X, p1);
+		players.put(Mark.O, p2);
 	}
 
-
-	public void update(Observable arg0, Object arg1) {
-		if (arg1 instanceof Game.Ending) {
-			// game has ended
+	
+	public void doMove(ClientHandler client, int x, int y) throws IllegalMoveException, CommandForbiddenException {
+		if (players.get(onTurn) == client && !ended) {
+			if (Column.isValid(x, y)) {
+				Column col = new Column(x, y);
+				if (!board.isColumnFull(col)) {
+					board.doMove(new Move(col, onTurn));
+					onTurn = onTurn.opposite();
+					if (board.getEnding() != Game.Ending.NOT_ENDED) {
+						ended = true;
+					}
+				}
+			}
+			else {
+				throw new IllegalMoveException();
+			}
 		}
-		else if (arg1 instanceof Move) {
-			// move was done
+		else {
+			throw new CommandForbiddenException();
 		}
 	}
-
-
-	@Override
-	public Column waitForMove() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	
+	public Game.Ending getEnding() {
+		return board.getEnding();
 	}
-	
-	
-	
 	
 }
