@@ -21,7 +21,7 @@ public class Game extends Observable implements Runnable {
 	}
 	
 	public int getColumnHeigth(Column column) {
-		return board.getColumnHeigth(column);
+		return board.getColumnHeight(column);
 	}
 	
 	public boolean isColumnFull(Column column) {

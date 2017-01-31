@@ -7,30 +7,27 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Observable;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import protocol.*;
-import protocol.command.Acknowledgement;
-import protocol.command.Action;
-import protocol.command.Command;
-import protocol.command.Error;
-import protocol.command.Exit;
+import protocol.command.*;
+import protocol.command.Error;			// needed to specify which error class we need
 import util.*;
-import util.exception.*;
+import util.exception.CommandForbiddenException;
+import util.exception.CommandInvalidException;
+import util.exception.CommandUnsupportedException;
+import util.exception.IllegalMoveException;
+import util.exception.NameUnavailableException;
 
 
+// TODO waiting for acks after send command
 // TODO implement disconnect will leave one player and ready the other
 // TODO remove all printStacktrace, console is owned by MessageUI and server
 
 public class ClientHandler extends Observable implements Runnable {
 
-	public static final long SHUTDOWN_DELAY = 1000l;				// 1 second
-	public static final long MAX_ACKNOWLEDGEMENT_DELAY = 5000l;     // 5 seconds
-	public static final long MAX_THINKING_TIME = 600000l;           // 10 minutes
+	//public static final long MAX_ACKNOWLEDGEMENT_DELAY = 5000l;     // 5 seconds
+	//public static final long MAX_THINKING_TIME = 600000l;           // 10 minutes
 	
-	private final Timer timer = new Timer();
 	private final CommandParser parser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
 	
 	private final Server server;
@@ -41,9 +38,6 @@ public class ClientHandler extends Observable implements Runnable {
 	//private Pair<Command, String[]> lastCommandSend = null;
 	//private boolean acknowledgementPending = false;
 	//private boolean inGame = false;
-	
-	private AtomicBoolean isShuttingDown = new AtomicBoolean(false);
-	
 	
 	
 	public ClientHandler(Server serverArg, Socket sockArg) throws IOException {
@@ -62,9 +56,9 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	public void run() {	// TODO synchronize where necessary
 		
-		while (!isShuttingDown.get()) {
+		while (true) {
 			try {
-				Pair<Command, String[]> command = parser.parse(in.readLine());			// Command.parse(in.readLine(), true);
+				Pair<Command, String[]> command = parser.parse(in.readLine());			// does this throw ioEception or gice null
 				if (command.first instanceof Action) {
 					runAction((Action) command.first, command.second);
 				}
@@ -79,7 +73,7 @@ public class ClientHandler extends Observable implements Runnable {
 				}
 			}
 			catch (CommandInvalidException e) {
-				sendCommand(Error.COMMAND_INVALID);			// maybe depending on whether waiting for ack or not
+				sendCommand(Error.COMMAND_INVALID);			// TODO dependent on timing of command
 			}
 			catch (CommandUnsupportedException e) {
 				sendCommand(Error.COMMAND_UNSUPPORTED);
@@ -87,33 +81,95 @@ public class ClientHandler extends Observable implements Runnable {
 			catch (CommandForbiddenException e) {
 				sendCommand(Error.FORBIDDEN);
 			}
+			catch (NameUnavailableException e) {
+				sendCommand(Error.NAME_UNAVAILABLE);
+			}
+			catch (IllegalMoveException e) {
+				sendCommand(Error.ILLEGAL_MOVE);
+			}
 			catch (IOException e) {
-				shutDown();
-			} 
+				server.leave(this);
+				break;
+			}
 		}
 	}
 	
 	
-	private void runAction(Action action, String[] args) {
-		server.console.addMessage("action");
-		sendCommand(Action.SAY, "action");
+	private void runAction(Action action, String[] args) throws NameUnavailableException, CommandForbiddenException, IllegalMoveException {
+		
+		switch (action) {
+		
+			case CONNECT:
+				server.connect(this, args[0]);			// will throw error if name is invalid
+				sendCommand(Acknowledgement.OK);		// will only run if no error was thrown
+				break;
+				
+			case DISCONNECT:							// unacknowledged
+				try {
+					in.close();
+					out.close();
+					socket.close();
+				}
+				catch (IOException e) { }
+				server.leave(this);
+				break;
+				
+			case READY:
+				server.ready(this);							// throws commandForbidden
+				sendCommand(Acknowledgement.OK);
+				server.tryMakeGame();
+				break;
+				
+			case UNREADY:									// throws commandForbidden
+				server.unready(this);
+				sendCommand(Acknowledgement.OK);
+				break;
+				
+			case START:
+				throw new CommandForbiddenException();		// server only command
+				
+			case MOVE:
+				server.move(this, args[0], args[1]);
+				sendCommand(Acknowledgement.OK);
+				server.tryFinishGame(this);
+				server.forwardLastMove(this);
+				break;
+				
+			case SAY:
+				server.broadcast(this, Util.join(args));					// unacknowledged
+				break;
+				
+			case AVAILABLE:
+				server.joinChat(this);
+				sendCommand(Acknowledgement.OK);
+				break;
+				
+			case LIST:									// unsupported commands can be ignored
+				break;
+			case LEADERBOARD:
+				break;
+			case CHALLENGE:
+				break;
+			case ACCEPT:
+				break;
+			case DECLINE:
+				break;
+		}
+		
 	}
 	
 	
 	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) {
-		server.console.addMessage("action");
 		sendCommand(Action.SAY, "ack");
 	}
 	
 	
 	private void runError(Error error, String[] args) {
-		server.console.addMessage("action");
 		sendCommand(Action.SAY, "err");
 	}
 	
 	
 	private void runExit(Exit exit, String[] args) {
-		server.console.addMessage("action");
 		sendCommand(Action.SAY, "exit");
 	}
 	
@@ -123,6 +179,12 @@ public class ClientHandler extends Observable implements Runnable {
 	//    Sending commands over socket   //
 	//                                   //
 	///////////////////////////////////////
+	
+	// TODO wait for ack's
+	public synchronized void sendCommand(Command command, String[] arguments) {
+		sendCommand(command, Util.join(arguments));
+	}
+	
 	
 	public synchronized void sendCommand(Command command, String arguments) {
 		String args = Util.join(Util.split(arguments));
@@ -138,54 +200,12 @@ public class ClientHandler extends Observable implements Runnable {
 	}
 	
 	
-	public synchronized void sendCommand(Command command, String[] arguments) {
-		sendCommand(command, Util.join(arguments));
-	}
-	
-	
 	public synchronized void sendCommand(Command command) {
 		try {
 			out.write(command.toString() + "\n");
 			out.flush();
 		}
 		catch (IOException e) { }
-	}
-	
-	
-	//////////////////////////////////////////
-	//                                      //
-	//    functionality for shutting down   //
-	//                                      //
-	//////////////////////////////////////////
-	
-	public synchronized void shutDown() {
-		sendCommand(Action.DISCONNECT);
-		server.leave(this);
-		timer.schedule(new Shutdown(this), SHUTDOWN_DELAY);
-		isShuttingDown.set(true);;
-	}
-	
-	
-	// private shutdown class for delayed shutdowns
-	private class Shutdown extends TimerTask {
-		
-		ClientHandler client;
-		
-		public Shutdown(ClientHandler c) {
-			client = c;
-		}
-		
-		public void run() {
-			try {
-				synchronized (client) {
-					in.close();
-					out.close();
-					socket.close();
-				}
-			} 
-			catch (IOException e) { }
-		}
-		
 	}
 	
 }

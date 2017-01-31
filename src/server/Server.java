@@ -5,11 +5,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.LinkedList;
 
+import com.google.common.collect.HashBiMap;
+
+import game.Game;
+import game.Move;
 import protocol.Name;
-import util.MessageUI;
+import protocol.command.*;
+import util.*;
+import util.exception.*;
+
+
 
 /*
  * Whenever a new client connects to the server their connection will be accepted,
@@ -22,17 +29,15 @@ import util.MessageUI;
 public class Server implements Runnable {
 	
 	public static final String SERVER_NAME = "server";
-	public static final long SHUTDOWN_DELAY = 3000l;                // 3 seconds
 	
 	private final HashMap<ClientHandler, ClientState> clients = new HashMap<ClientHandler, ClientState>();
-	private final HashMap<ClientHandler, String> names = new HashMap<ClientHandler, String>();
+	private final DoubleKeyHashMap<ClientHandler, ServerSideGame> games = new DoubleKeyHashMap<ClientHandler, ServerSideGame>();
+	
 	private final HashSet<ClientHandler> chat = new HashSet<ClientHandler>();
+	private final HashBiMap<ClientHandler, String> names = HashBiMap.create();
 	
-	private final Timer shutdownTimer = new Timer();
 	private final ServerSocket serverSocket;
-	public final MessageUI console;
-	
-	private boolean isShuttingDown = false;
+	private final MessageUI console;
 	
 	
 	public Server(int port, MessageUI messageUi) throws IOException{
@@ -46,21 +51,13 @@ public class Server implements Runnable {
 	
 	
 	public void run() {
-		while (true) {			// TODO check if this works cleanly
+		while (true) {
 			try {
 				Socket socket = serverSocket.accept();
 				synchronized (this) {
-					try {
-						if (isShuttingDown) {
-							socket.close();
-						}
-						else {
-							ClientHandler client = new ClientHandler(this, socket);
-							clients.put(client, ClientState.PENDING);
-							new Thread(client).start();
-						}
-					} 
-					catch (IOException e) { }
+					ClientHandler client = new ClientHandler(this, socket);
+					clients.put(client, ClientState.PENDING);
+					new Thread(client).start();
 				}
 			}
 			catch (IOException e) {		// shutdown() function closes socket which makes this exception occur
@@ -69,144 +66,169 @@ public class Server implements Runnable {
 			}
 		}
 	}
-
-
-
 	
 	
-	public synchronized void broadcast(String msg) {
-		//for (ClientHandler client : chat) {
-			//client.send(msg);
-		//}
-	}
-	
-	
-	public synchronized String getName(ClientHandler client) {
-		return names.get(client);
-	}
-	
-	
-	public synchronized ClientState getState(ClientHandler client) {
-		return clients.get(client);
-	}
-	
-	
-	//////////////////////////////////////////////////////////
-	//                                                      //
-	//    commands for connected clients to change state    //
-	//                                                      //
-	//////////////////////////////////////////////////////////
-	
-	public synchronized boolean joinChat(ClientHandler client) {
-		if (clients.get(client) == ClientState.UNREADY) {
-			chat.add(client);
-			return true;
-		}
-		return false;
-	}
-	
-	
-	// TODO start new game if possible
-	public synchronized boolean ready(ClientHandler client) {
-		if (clients.get(client) == ClientState.UNREADY) {
-			clients.put(client, ClientState.READY);
-			return true;
-		}
-		return false;
-	}
-	
-	
-	public synchronized boolean unready(ClientHandler client) {
-		if (clients.get(client) == ClientState.READY) {
-			clients.put(client, ClientState.UNREADY);
-			return true;
-		}
-		return false;
-	}
-	
-	
-	public synchronized boolean join(ClientHandler client, String name) {
-		if (clients.get(client) == ClientState.PENDING && Name.valid(name) && !names.containsValue(name)) {
-			clients.put(client, ClientState.UNREADY);
-			names.put(client, name);
-			broadcast("SAY " + SERVER_NAME + joinMessage(name));
-			console.addMessage(joinMessage(name));
-			return true;
-		}
-		return false;
-	}
-
-	
-	// TODO make leaving automatic when client disconnects
-	// TODO make sure if in game other person is put in (un)ready, unless server closing
-	public synchronized void leave(ClientHandler client) {
-		if (clients.get(client) != ClientState.PENDING) {
-			broadcast("SAY " + SERVER_NAME + leaveMessage(names.get(client)));
+	// TODO quit all ongoing games
+	public synchronized void shutDown() throws IOException {
+		console.addMessage("Shutting down server");
+		for (ClientHandler client : clients.keySet()) {
+			client.sendCommand(Action.DISCONNECT);
 			console.addMessage(leaveMessage(names.get(client)));
 		}
-		remove(client);
+		serverSocket.close();
 	}
 
 	
-	/////////////////////////////////////////
-	//                                     //
-	//    private utility functionality    //
-	//                                     //
-	/////////////////////////////////////////
+	public synchronized void broadcast(String name, String message) {
+		for (ClientHandler c : chat) {
+			c.sendCommand(Acknowledgement.SAY, name + " " + message);
+		}
+	}
 	
-	private synchronized void remove(ClientHandler client) {
+	
+	public synchronized void broadcast(ClientHandler client, String message) {
+		for (ClientHandler c : chat) {
+			c.sendCommand(Acknowledgement.SAY, names.get(client) + " " + message);
+		}
+	}
+	
+	
+	///////////////////////////////////////////////////////////////
+	//                                                           //
+	//    Functionality for clientHandlers to perform actions    //
+	//                                                           //
+	///////////////////////////////////////////////////////////////
+	
+	public synchronized void joinChat(ClientHandler client) throws CommandForbiddenException {
+		if (!chat.contains(client) && clients.get(client) == ClientState.UNREADY) {
+			chat.add(client);
+		}
+		throw new CommandForbiddenException();
+	}
+	
+	
+	public synchronized void ready(ClientHandler client) throws CommandForbiddenException {
+		if (clients.get(client) == ClientState.UNREADY) {
+			clients.put(client, ClientState.READY);
+			tryMakeGame();
+		}
+		else {
+			throw new CommandForbiddenException();
+		}
+	}
+	
+	
+	public synchronized void unready(ClientHandler client) throws CommandForbiddenException {
+		if (clients.get(client) == ClientState.READY) {
+			clients.put(client, ClientState.UNREADY);
+		}
+		else {
+			throw new CommandForbiddenException();
+		}
+	}
+	
+	
+	public synchronized void connect(ClientHandler client, String name) throws NameUnavailableException, CommandForbiddenException {
+		if (clients.get(client) == ClientState.PENDING) {
+			if (Name.valid(name) && !names.containsValue(name) && !name.equals(SERVER_NAME)) {		// isvalid returns false on null
+				clients.put(client, ClientState.UNREADY);
+				names.put(client, name);
+				broadcast(SERVER_NAME, joinMessage(name));
+				console.addMessage(joinMessage(name));
+			}
+			else {
+				throw new NameUnavailableException();
+			}
+		}
+		else {
+			throw new CommandForbiddenException();
+		}
+	}
+
+	
+	// TODO move other to unready if was in game, and server not closing
+	public synchronized void leave(ClientHandler client) {					//disconnecting is always allowed, so no exceptions are thrown
+		if (clients.get(client) != ClientState.PENDING) {
+			console.addMessage(leaveMessage(names.get(client)));
+			broadcast(SERVER_NAME, leaveMessage(names.get(client)));
+		}
 		clients.remove(client);
 		names.remove(client);
 		chat.remove(client);
 	}
 	
 	
+	public synchronized void move(ClientHandler client, String x, String y) throws CommandForbiddenException, IllegalMoveException {
+		if (games.hasKey(client)) {
+			ServerSideGame game = games.getValue(client);
+			game.doMove(client, Integer.parseInt(x), Integer.parseInt(y));			// TODO moves doorsturen
+		}
+		throw new CommandForbiddenException();
+	}
+	
+	
+	/////////////////////////////////
+	//                             //
+	//    Utility functionality    //
+	//                             //
+	/////////////////////////////////
+	
 	private String joinMessage(String name) {
-		return " <" + name + " has joined the server>";
+		return "<" + name + " has joined the server>";
 	}
 	
 	
 	private String leaveMessage(String name) {
-		return " <" + name + " has left the server>";
+		return "<" + name + " has left the server>";
 	}
 	
 	
-	//////////////////////////////////////////
-	//                                      //
-	//    functionality for shutting down   //
-	//                                      //
-	//////////////////////////////////////////
-	
-	
-	// TODO quit all ongoing games
-	public synchronized void shutDown() {
-		console.addMessage("Shutting down server");
-		chat.clear();			// makes sure noone gets bothered by eachothers disconnect messages
-		for (ClientHandler client : clients.keySet()) {
-			client.shutDown();
-		}
-		shutdownTimer.schedule(new Shutdown(this), SHUTDOWN_DELAY);
-		isShuttingDown = true;
-	}
-	
-	
-	// class for delayed shutdown
-	private class Shutdown extends TimerTask {
-		
-		private Server server;
-		
-		public Shutdown(Server s) {
-			server = s;
-		}
-		
-		public void run() {
-			try {
-				synchronized (server) {
-					server.serverSocket.close();
-				}
-			} 
-			catch (IOException e) { }
+	public synchronized void tryMakeGame() {
+		LinkedList<ClientHandler> ready = getClientsInState(ClientState.READY);
+		while (ready.size() > 1) {
+			ClientHandler p1 = (ClientHandler) ready.pop();
+			ClientHandler p2 = (ClientHandler) ready.pop();
+			clients.put(p1, ClientState.INGAME);
+			clients.put(p2, ClientState.INGAME);
+			games.put(p1, p2, new ServerSideGame(p1, p2));
+			p1.sendCommand(Action.START, names.get(p1) + " " + names.get(p2));
+			p2.sendCommand(Action.START, names.get(p1) + " " + names.get(p2));
 		}
 	}
 	
+	
+	public synchronized void tryFinishGame(ClientHandler client) {
+		ServerSideGame game = games.getValue(client);
+		ClientHandler opponent = games.getOtherKey(client);
+		if (game.getEnding() != Game.Ending.NOT_ENDED) {			// game has ended
+			clients.put(client, ClientState.UNREADY);
+			clients.put(opponent, ClientState.UNREADY);
+			games.remove(game);
+			client.sendCommand(game.getEndingFor(client));
+			opponent.sendCommand(game.getEndingFor(opponent));
+		}
+	}
+	
+	
+	public synchronized void forwardLastMove(ClientHandler client) {		// TODO wait for ack
+		ServerSideGame game = games.getValue(client);
+		if (!game.isSync()) {
+			Move move = game.getLastMove();
+			ClientHandler other = game.getPlayer(move.mark.opposite());
+			other.sendCommand(Action.MOVE, move.column.x + " " + move.column.y);
+			game.setSync();
+		}
+	}
+	
+	
+	private synchronized LinkedList<ClientHandler> getClientsInState(ClientState state) {
+		LinkedList<ClientHandler> result = new LinkedList<ClientHandler>();
+		for (ClientHandler c : clients.keySet()) {
+			if (clients.get(c) == state) {
+				result.add(c);
+			}
+		}
+		return result;
+	}
+
 }

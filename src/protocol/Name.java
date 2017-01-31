@@ -11,7 +11,10 @@ public class Name {
 	
 	
 	public static boolean valid(String name) {
-		return REGEX_PATTERN.matcher(name).matches();
+		if (name != null) {
+			return REGEX_PATTERN.matcher(name).matches();
+		}
+		return false;
 	}
 	
 }
