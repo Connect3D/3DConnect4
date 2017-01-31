@@ -2,9 +2,7 @@ package GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.InetAddress;
@@ -20,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import client.Client;
 import game.Board;
 import game.Column;
 import game.Controller;

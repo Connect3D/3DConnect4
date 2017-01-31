@@ -25,7 +25,7 @@ public class GameplayPanel extends JPanel {
 	public final JButton resetButton = new JButton("Play again");
 	public final JButton exitButton = new JButton("Exit");
 	public final JLabel statusLabel = new JLabel("");
-	public final JButton statusButton = new JButton(States.UNREADY.toString());
+	public final JButton statusButton = new JButton(States.READY.toString());
 	public final JRadioButton[][] inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
 	public final JButton[][][] outputButtons = new JButton[Board.WIDTH][Board.DEPTH][Board.HEIGHT];
 	public final String NO_ERROR = "No errors detected.";
@@ -49,6 +49,10 @@ public class GameplayPanel extends JPanel {
 		statusButton.setEnabled(false);
 		enableInputButtons(false);
 
+	}
+	
+	public void switchStatusButtonText() {
+		statusButton.setText(statusButton.getText() == Action.READY.toString() ? Action.UNREADY.toString() : Action.READY.toString());
 	}
 
 	public void selectInputbutton(int x, int y, boolean bool) {
