@@ -18,7 +18,7 @@ import game.Controller;
 import game.Game;
 import game.Mark;
 import protocol.command.Action;
-import util.Vector;
+import util.container.Vector;
 
 public class GameplayPanel extends JPanel {
 
