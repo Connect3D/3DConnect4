@@ -37,12 +37,13 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 	private Controller controller;
 	private static final int DIM = 4;
 	private Mark currentMark;
-
+	public static final String USAGE = 
+			"Run argument: HUMAN, for a human game, else provide no argument.";
 	
-	public Connect4GUI(boolean humanGame) {
+	public Connect4GUI(String playerType) {
 		super("Connect4_3D_View");
 
-		init(humanGame);
+		init(playerType.equals("HUMAN") ? true : false);
 		setSize(900, 500);
 
 		buildGUI();
@@ -137,6 +138,13 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 
 	
 	public static void main(String[] args) {
-		new Connect4GUI(false); //args: true for human players, false for random computer players.
+		if (args == null) {
+			new Connect4GUI("computer");
+		}
+		if (args.length == 1) {
+			new Connect4GUI(args[0]); 
+		} else {
+			System.out.println(USAGE);
+		}
 	}
 }
