@@ -12,6 +12,7 @@ import protocol.*;
 import protocol.command.*;
 import protocol.command.Error;			// needed to specify which error class we need
 import util.*;
+import util.container.Pair;
 import util.exception.*;
 
 

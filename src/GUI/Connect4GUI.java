@@ -28,7 +28,7 @@ import game.Move;
 import game.player.HumanPlayer;
 import game.player.Player;
 import util.MessageUI;
-import util.Vector;
+import util.container.Vector;
 import util.exception.ColumnFullException;
 
 public class Connect4GUI extends JFrame implements Observer, MessageUI {
