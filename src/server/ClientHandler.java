@@ -54,14 +54,14 @@ public class ClientHandler extends Observable implements Runnable {
 	 * @param sockArg
 	 * @throws IOException
 	 */
-	/* @requires serverArg != null
-	 * 			 sockArg != null
-	 * @ensures  server = serverArg
-	 * 			 socket = sockArg
-	 * 			 in != null
-	 * 			 out != null
-	 * 			 parser != null
-	 * 		     parser.direction == client to server. */
+	/* @requires serverArg != null;
+	 * 			 sockArg != null;
+	 * @ensures  server = serverArg;
+	 * 			 socket = sockArg;
+	 * 			 in != null;
+	 * 			 out != null;
+	 * 			 parser != null;
+	 * 		     parser.direction == client to server.; */
 	public ClientHandler(Server serverArg, Socket sockArg) throws IOException {
 		server = serverArg;
 		socket = sockArg;
@@ -138,8 +138,8 @@ public class ClientHandler extends Observable implements Runnable {
 	 * @throws IllegalMoveException  	   if a move is send that is not possible
 	 */
 	
-	/* @require action != null
-	 *		    args.length < 2 */
+	/* @require action != null;
+	 *		    args.length < 2; */
 	private void runAction(Action action, String[] args) throws 
 		NameUnavailableException, 
 		CommandForbiddenException, 
@@ -217,8 +217,8 @@ public class ClientHandler extends Observable implements Runnable {
 	 * @param args						    Possible arguments stating further information.
 	 * @throws CommandForbiddenException	if the command is not an acknowledgement.
 	 */
-	/* @requires acknowledgment != null
-	 *  		 args.length < 2 */
+	/* @requires acknowledgment != null;
+	 *  		 args.length < 2; */
 	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) throws 
 		CommandForbiddenException {
 		switch (acknowledgement) {
@@ -248,8 +248,8 @@ public class ClientHandler extends Observable implements Runnable {
 	 * @param args	stating further information
 	 * @throws CommandForbiddenException thrown if the client must not send this as an exit command.
 	 */
-	/* @requires exit != null
-	 *  		 args.length < 2 */
+	/* @requires exit != null;
+	 *  		 args.length < 2; */
 	private void runExit(Exit exit, String[] args) throws 
 		CommandForbiddenException {
 		if (exit == Exit.FORFEITURE) {
@@ -264,7 +264,7 @@ public class ClientHandler extends Observable implements Runnable {
 	 * Sends a command without arguments over the outgoing socket connection.
 	 * @param command
 	 */
-	/* @requires command < 2 */
+	/* @requires command < 2; */
 	public synchronized void sendCommand(Command command) {
 		try {
 			out.write(command.toString() + "\n");
@@ -278,8 +278,8 @@ public class ClientHandler extends Observable implements Runnable {
 	 * @param command
 	 * @param arguments
 	 */
-	/* @requires command != null
-	 *  		 arguments.length > 1 */
+	/* @requires command != null;
+	 *  		 arguments.length > 1;*/
 	public synchronized void sendCommand(Command command, String[] arguments) {
 		sendCommand(command, Util.join(arguments));
 	}
@@ -291,8 +291,8 @@ public class ClientHandler extends Observable implements Runnable {
 	 * @param command
 	 * @param arguments
 	 */
-	/* @requires command != null
-	 *  		 arguments != null */
+	/* @requires command != null;
+	 *  		 arguments != null; */
 	public synchronized void sendCommand(Command command, String arguments) {
 		String args = Util.join(Util.split(arguments));
 		try {

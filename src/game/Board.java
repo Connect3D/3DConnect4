@@ -28,10 +28,10 @@ public class Board {
 	/**
 	 * Creates a board, fills it with empty fields and gives it an ending state of not ended.
 	 */
-	/* @ensures fields.length = N_FIELDS
+	/* @ensures fields.length = N_FIELDS;
 	 * 			(\forall int i; 0 <= i && i < fields.length;
  					fields[i] == Mark.EMPTY); 
- 				ending == Ending.NOT_ENDED */
+ 				ending == Ending.NOT_ENDED; */
 		
 	public Board() {
 		fields = new Mark[N_FIELDS];
@@ -44,11 +44,11 @@ public class Board {
 	 * Constructor that copies a board.
 	 * @param board. The board to be copied.
 	 */
-	/* @requires board != null
+	/* @requires board != null;
 	 * @ensures fields.length = N_FIELDS
 	 * 			(\forall int i; 0 <= i && i < fields.length;
  	 *				fields[i] == Mark.EMPTY); 
-     *				ending == Ending.NOT_ENDED */
+     *				ending == Ending.NOT_ENDED; */
 	public Board(Board board) {
 		fields = new Mark[N_FIELDS];
 		for (int i = 0; i < N_FIELDS; ++i) {
@@ -71,7 +71,7 @@ public class Board {
 	 * @return height of the column.
 	 */
 	/* @requires column != null;
-	 * @ensures\result >= 0 & /result < HEIGHT. */
+	 * @ensures\result >= 0 & /result < HEIGHT; */
 	public int getColumnHeight(Column column) {
 		return cascade(column).z;
 	}
@@ -91,7 +91,7 @@ public class Board {
 	 * @param column 	the column to be checked.
 	 * @return if the column has all positions not empty.
 	 */
-	/* @require column != null */
+	/* @require column != null; */
 	public boolean isColumnFull(Column column) {
 		return fields[Position.indexOf(column.x, column.y, HEIGHT - 1)] != Mark.EMPTY;
 	}
@@ -101,7 +101,7 @@ public class Board {
 	 * Returns an arraylist of all the columns that are not full.
 	 * @return arraylist of non-empty columns.
 	 */
-	/* @ensures\result >= 0 & \result < WIDTH * DEPTH */
+	/* @ensures\result >= 0 & \result < WIDTH * DEPTH; */
 	public ArrayList<Column> possibleColumns() {
 		ArrayList<Column> possible = new ArrayList<Column>();
 		for (int x = 0; x < WIDTH; ++x) {
@@ -128,7 +128,7 @@ public class Board {
 	 * and fills the lowest empty field with the mark of the move.
 	 * @param move 	the move with a column and a mark.
 	 */
-	/* @ensures notEmptyFields.length >= old.otEmptyFields.length
+	/* @ensures notEmptyFields.length >= old.otEmptyFields.length;
 	 */
 	public void doMove(Move move) {
 		Position position = cascade(move.column);
@@ -152,7 +152,7 @@ public class Board {
      * @return ending state of the game from a given position and mark.
      */
 	/* @ensures \result == DRAW ||  \result == X_WINS ||
-	 * 		    \result == O_WINS ||  \result == NOT_ENDED */
+	 * 		    \result == O_WINS ||  \result == NOT_ENDED; */
 	private Game.Ending checkEndingFor(Position position, Mark mark) {
 		if (isFull()) {
 			return Game.Ending.DRAW;
@@ -193,8 +193,8 @@ public class Board {
 	 * @param column the column on which the cascading function is performed.
 	 * @return the position of the lowest empty position.
 	 */
-	/* @requires column != null
-	 * @ensures \result instanceof position || \result instance of ColumnFullException */
+	/* @requires column != null;
+	 * @ensures \result instanceof position || \result instance of ColumnFullException; */
 	private Position cascade(Column column) {
 		for (int z = 0; z < HEIGHT; ++z) {
 			if (fields[Position.indexOf(column.x, column.y, z)] == Mark.EMPTY) {
@@ -212,10 +212,10 @@ public class Board {
 	 * @param direction direction with a 0 or 1 for x, y and z.
 	 * @return amount of equals marks from a position looking into a direction.
 	 */
-	/* @require position != null
-	 *  		mark != null
-	 *  		direction != null
-	 *  @ensures result >= 0 && ( \result < WIDTH || \result < DEPTH|| \result < HEIGHT)  */
+	/* @require position != null;
+	 *  		mark != null;
+	 *  		direction != null;
+	 *  @ensures result >= 0 && ( \result < WIDTH || \result < DEPTH|| \result < HEIGHT);  */
 	private int consecutiveMarks(Position position, Mark mark, Direction direction) {
 		Position next = position.inDirection(direction);
 		int amount = 0;
