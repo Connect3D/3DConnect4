@@ -12,8 +12,8 @@ import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import GUI.Connect4GUI;
 import client.Client;
+import client.Connect4GUI;
 import client.States;
 import game.player.HumanPlayer;
 import protocol.command.Acknowledgement;
@@ -103,37 +103,39 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				}
 			}
 			if (command instanceof Acknowledgement) {
-					if (prevCommand.equals(Action.CONNECT)) {
-						mainGUI.clientPanel.tfHostname.setEnabled(false);
-						mainGUI.clientPanel.tfName.setEnabled(false);
-						mainGUI.clientPanel.tfPort.setEnabled(false);
-						mainGUI.clientPanel.b1Connect.setEnabled(false);
-						//mainGUI.clientPanel.tfMyMessage.setEnabled(true);
-						mainGUI.gameplayPanel.statusButton.setEnabled(true);
-						client.setStatus(States.UNREADY);
-					    //client.sendMessage(Action.AVAILABLE.toString());
-					}
-					if (prevCommand.equals(Action.UNREADY)) {
-						mainGUI.gameplayPanel.switchStatusButtonText();
-						client.setStatus(States.UNREADY);
-					}
-					if (prevCommand.equals(Action.READY)) {
-						client.setStatus(States.READY);
-						mainGUI.gameplayPanel.switchStatusButtonText();
-					}
-					if (prevCommand.equals(Action.MOVE)) {
-						mainGUI.gameplayPanel.enableInputButtons(false);
-						mainGUI.updateStatusLabel();
-						notifyAll();
-					}
+				if (prevCommand.equals(Action.CONNECT)) {
+					mainGUI.clientPanel.tfHostname.setEnabled(false);
+					mainGUI.clientPanel.tfName.setEnabled(false);
+					mainGUI.clientPanel.tfPort.setEnabled(false);
+					mainGUI.clientPanel.b1Connect.setEnabled(false);
+					// mainGUI.clientPanel.tfMyMessage.setEnabled(true);
+					mainGUI.gameplayPanel.statusButton.setEnabled(true);
+					client.setStatus(States.UNREADY);
+					// client.sendMessage(Action.AVAILABLE.toString());
+				}
+				if (prevCommand.equals(Action.UNREADY)) {
+					mainGUI.gameplayPanel.switchStatusButtonText();
+					client.setStatus(States.UNREADY);
+				}
+				if (prevCommand.equals(Action.READY)) {
+					client.setStatus(States.READY);
+					mainGUI.gameplayPanel.switchStatusButtonText();
+				}
+				if (prevCommand.equals(Action.MOVE)) {
+					mainGUI.gameplayPanel.enableInputButtons(false);
+					mainGUI.updateStatusLabel();
+					notifyAll();
+				}
 				mainGUI.clientPanel.errorField.setText(mainGUI.clientPanel.NO_ERROR);
 			}
 			if (command instanceof Error) {
 				mainGUI.clientPanel.errorField.setText(command.toString());
+				if (((Error) command).name().equals(Error.SERVER_SHUTTING_DOWN)) {
+					client.shutdown();
+				}
 			}
 			if (command instanceof Exit) {
 				Exit exitCmd = (Exit) command;
-				
 				if (exitCmd.name().equals(Exit.FORFEITURE.toString())) {
 					mainGUI.gameplayPanel.statusLabel.setText("Game won");
 				}
@@ -187,8 +189,9 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 			}
 
 			if (src instanceof JTextField) {
-				//client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
-				//mainGUI.clientPanel.tfMyMessage.setText("");
+				// client.sendMessage(Action.SAY +
+				// mainGUI.clientPanel.tfMyMessage.getText());
+				// mainGUI.clientPanel.tfMyMessage.setText("");
 			}
 		}
 	}

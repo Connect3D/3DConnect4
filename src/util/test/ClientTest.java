@@ -1,7 +1,8 @@
 package util.test;
 
 import client.Client;
-import GUI.Connect4GUI;
+import client.Connect4GUI;
+
 import static org.junit.Assert.*;
 
 import org.junit.Before;

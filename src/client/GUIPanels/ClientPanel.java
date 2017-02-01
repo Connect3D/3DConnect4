@@ -1,4 +1,4 @@
-package GUI;
+package client.GUIPanels;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -14,6 +14,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import client.Client;
+import client.Connect4GUI;
 import game.Controller;
 import protocol.command.Action;
 import util.MessageUI;
@@ -35,7 +36,7 @@ public class ClientPanel extends JPanel implements MessageUI {
 		JPanel pp = new JPanel(new GridLayout(3, 2));
 
 		JLabel tlHostname = new JLabel("Hostname: ");
-		tfHostname = new JTextField(getHostAddress(), 12);
+		tfHostname = new JTextField(Connect4GUI.getHostAddress(), 12);
 		JLabel tlPort = new JLabel("Port: ");
 
 		JLabel tlName = new JLabel("Name: ");
@@ -56,34 +57,17 @@ public class ClientPanel extends JPanel implements MessageUI {
 		BorderLayout p2Layout = new BorderLayout(0, -30);
 		JPanel p2 = new JPanel(p2Layout);
 		
-		//JLabel tlMyMessage = new JLabel("MyMessage");
-		//tfMyMessage.addActionListener(controller);
-		//tfMyMessage.setEditable(false);
-
-		//p2.add(tlMyMessage);
-		//p2.add(tfMyMessage, BorderLayout.SOUTH);
-		
 		p2.add(errorField);
 		
 		JPanel p3 = new JPanel(new BorderLayout());
 		p3.setPreferredSize(new Dimension(100, 200));
 		taMessages.setEditable(false);
 
-		//p3.add(tlMessages, BorderLayout.NORTH);
 		p3.add(taMessages, BorderLayout.SOUTH);
 
 		this.add(p1, BorderLayout.NORTH);
 		this.add(p2);
 		this.add(p3, BorderLayout.SOUTH);
-	}
-	
-	public String getHostAddress() {
-		try {
-			InetAddress iaddr = InetAddress.getLocalHost();
-			return iaddr.getHostName();
-		} catch (UnknownHostException e) {
-			return "?unknowns?";
-		}
 	}
 	
 	@Override

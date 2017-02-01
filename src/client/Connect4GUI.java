@@ -1,4 +1,4 @@
-package GUI;
+package client;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -18,7 +18,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import client.Client;
+import client.GUIPanels.ClientPanel;
+import client.GUIPanels.GameplayPanel;
 import game.Board;
 import game.Column;
 import game.Controller;
@@ -37,7 +38,6 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 	public final GameplayPanel gameplayPanel = new GameplayPanel();
 	private Controller controller;
 	private static final int DIM = 4;
-    private final Mark thisPlayerMark = Mark.X;
     private Mark currentMark;
 	public Connect4GUI() {
 		super("Connect4_3D_View");
@@ -124,13 +124,21 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 				if (game.getBoardState().isColumnFull(column)) {
 					gameplayPanel.enableInputbutton(column.x, column.y, false);
 				}
-				
 			}
 		}
 	}
 	
 	public void updateStatusLabel() {
 		gameplayPanel.statusLabel.setText(currentMark + "'s turn");
+	}
+	
+	public static String getHostAddress() {
+		try {
+			InetAddress iaddr = InetAddress.getLocalHost();
+			return iaddr.getHostName();
+		} catch (UnknownHostException e) {
+			return "?unknowns?";
+		}
 	}
 	
 	public static void main(String[] args) {
