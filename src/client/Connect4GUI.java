@@ -17,7 +17,6 @@ import javax.swing.JPanel;
 import client.GUIPanels.ClientPanel;
 import client.GUIPanels.GameplayPanel;
 import game.Column;
-import game.Controller;
 import game.Game;
 import game.Mark;
 import game.Move;
