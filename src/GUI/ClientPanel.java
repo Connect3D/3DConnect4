@@ -1,6 +1,7 @@
 package GUI;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.net.InetAddress;
@@ -23,8 +24,10 @@ public class ClientPanel extends JPanel implements MessageUI {
 	public JTextField tfHostname;
 	public final JTextField tfPort = new JTextField("2727", 5);
 	public final JTextField tfName = new JTextField(" ", 12);
-	public final JTextField tfMyMessage = new JTextField(" ", 34);
+	//public final JTextField tfMyMessage = new JTextField(" ", 34);
 	public final JTextArea taMessages = new JTextArea("", 10, 34);	
+	public final String NO_ERROR = "No errors detected.";
+	public final JLabel errorField = new JLabel(NO_ERROR);
 	
 	public void build(Controller controller) {
 		this.setLayout(new BorderLayout(0, 20));
@@ -53,19 +56,20 @@ public class ClientPanel extends JPanel implements MessageUI {
 		BorderLayout p2Layout = new BorderLayout(0, -30);
 		JPanel p2 = new JPanel(p2Layout);
 		
-		JLabel tlMyMessage = new JLabel("MyMessage");
-		tfMyMessage.addActionListener(controller);
-		tfMyMessage.setEditable(false);
+		//JLabel tlMyMessage = new JLabel("MyMessage");
+		//tfMyMessage.addActionListener(controller);
+		//tfMyMessage.setEditable(false);
 
-		p2.add(tlMyMessage);
-		p2.add(tfMyMessage, BorderLayout.SOUTH);
-
-		JPanel p3 = new JPanel(new BorderLayout(0, 10));
-
-		JLabel tlMessages = new JLabel("Messages:");
+		//p2.add(tlMyMessage);
+		//p2.add(tfMyMessage, BorderLayout.SOUTH);
+		
+		p2.add(errorField);
+		
+		JPanel p3 = new JPanel(new BorderLayout());
+		p3.setPreferredSize(new Dimension(100, 200));
 		taMessages.setEditable(false);
 
-		p3.add(tlMessages);
+		//p3.add(tlMessages, BorderLayout.NORTH);
 		p3.add(taMessages, BorderLayout.SOUTH);
 
 		this.add(p1, BorderLayout.NORTH);

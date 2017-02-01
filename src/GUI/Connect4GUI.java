@@ -2,9 +2,7 @@ package GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.InetAddress;
@@ -20,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import client.Client;
 import game.Board;
 import game.Column;
 import game.Controller;
@@ -39,7 +38,7 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 	private Controller controller;
 	private static final int DIM = 4;
     private final Mark thisPlayerMark = Mark.X;
-    
+    private Mark currentMark;
 	public Connect4GUI() {
 		super("Connect4_3D_View");
 
@@ -88,12 +87,6 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		cc.add(mainpanel);
 	}
 
-//	TODO Implement (or in client)
-	public void enableGameplay() {
-		gameplayPanel.enableInputButtons(true);
-		gameplayPanel.statusButton.setEnabled(true);
-		gameplayPanel.exitButton.setEnabled(true);
-	}
 //	
 //	String text = eventSource.getText();
 //	States newState = text.equals(States.READY.toString()) ? States.READY : States.UNREADY;
@@ -118,6 +111,7 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 				Move move = (Move) arg;
 				Column column = move.column;
 				Mark mark = move.mark;
+				currentMark = mark;
 				try {
 					TimeUnit.MILLISECONDS.sleep(100);
 					gameplayPanel.selectInputbutton(column.x, column.y, false);
@@ -130,9 +124,13 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 				if (game.getBoardState().isColumnFull(column)) {
 					gameplayPanel.enableInputbutton(column.x, column.y, false);
 				}
-				gameplayPanel.statusLabel.setText(mark.opposite() + "'s turn");
+				
 			}
 		}
+	}
+	
+	public void updateStatusLabel() {
+		gameplayPanel.statusLabel.setText(currentMark + "'s turn");
 	}
 	
 	public static void main(String[] args) {

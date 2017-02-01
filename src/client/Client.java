@@ -87,7 +87,7 @@ public class Client extends Thread {
 		return clientName;
 	}
 
-	public void sendMessage(String message) {
+	public synchronized void sendMessage(String message) {
 		try {
 			out.write(message);
 			out.newLine();

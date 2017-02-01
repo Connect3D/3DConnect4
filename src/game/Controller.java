@@ -37,7 +37,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	private Game game;
 	private Client client;
 	private Connect4GUI mainGUI;
-	private final CommandParser commandParser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
+	private final CommandParser commandParser = new CommandParser(Command.Direction.SERVER_TO_CLIENT);
 	private Command prevCommand;
 
 	public void setGUI(Connect4GUI gui) {
@@ -47,93 +47,108 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	public void setGame(Game game) {
 		this.game = game;
 	}
-	//TODO: wait for OK's
-	// Parse and handle command
-	public void readCommand(String cmd) {
-		System.out.println(cmd);
-		Pair<Command, String[]> parsedCmd = null;
-		try {
-			parsedCmd = commandParser.parse(cmd);
-		} catch (CommandUnsupportedException e) {
-			client.sendMessage(Error.COMMAND_UNSUPPORTED.toString());
-		} catch (CommandForbiddenException e) {
-			client.sendMessage(Error.FORBIDDEN.toString());
-		} catch (CommandInvalidException e) {
-			client.sendMessage(Error.COMMAND_INVALID.toString());
-		}
-		Command command = parsedCmd.first;
-		String[] args = parsedCmd.second;
-		if (command instanceof Action && !client.getStatus().equals(States.DISCONNECTED)) {
-			switch ((Action) command) {
-			case START:
-				if (client.getStatus() == States.READY) {
-					mainGUI.createGame(new HumanPlayer(args[0], Mark.X, this), new HumanPlayer(args[1], Mark.O, this));
-					mainGUI.enableGameplay();
-					client.setStatus(States.INGAME);
-					client.sendMessage(Acknowledgement.OK.toString());
-				} else {
-					client.sendMessage(Error.FORBIDDEN.toString());
-				}
-				break;
-			case MOVE:
-				if (client.getStatus() == States.INGAME) {
-					column = new Column(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-					if (!game.isColumnFull(column)) {
-						notifyAll();
+
+	// TODO: Only enable buttons when it is one's turn.
+	public synchronized void readCommand(String cmd) {
+		if (cmd != null) {
+			mainGUI.addMessage("Server message: " + cmd);
+			Pair<Command, String[]> parsedCmd = null;
+			try {
+				parsedCmd = commandParser.parse(cmd);
+			} catch (CommandUnsupportedException e) {
+				client.sendMessage(Error.COMMAND_UNSUPPORTED.toString());
+			} catch (CommandForbiddenException e) {
+				client.sendMessage(Error.FORBIDDEN.toString());
+			} catch (CommandInvalidException e) {
+				client.sendMessage(Error.COMMAND_INVALID.toString());
+			}
+			Command command = parsedCmd.first;
+			String[] args = parsedCmd.second;
+			if (command instanceof Action && !client.getStatus().equals(States.DISCONNECTED)) {
+				switch ((Action) command) {
+				case START:
+					if (client.getStatus() == States.READY) {
+						mainGUI.createGame(new HumanPlayer(args[0], Mark.X, this),
+								new HumanPlayer(args[1], Mark.O, this));
+						mainGUI.gameplayPanel.resetButton.setEnabled(true);
+						mainGUI.gameplayPanel.exitButton.setEnabled(true);
+						client.setStatus(States.INGAME);
+						if (client.getClientName().equals(args[0])) {
+							mainGUI.gameplayPanel.enableInputButtons(true);
+						}
 						client.sendMessage(Acknowledgement.OK.toString());
 					} else {
-						client.sendMessage(Error.ILLEGAL_MOVE.toString());
+						client.sendMessage(Error.FORBIDDEN.toString());
 					}
+					break;
+				case MOVE:
+					if (client.getStatus() == States.INGAME) {
+						column = new Column(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+						if (!game.isColumnFull(column)) {
+							notifyAll();
+							client.sendMessage(Acknowledgement.OK.toString());
+						} else {
+							client.sendMessage(Error.ILLEGAL_MOVE.toString());
+						}
+						mainGUI.gameplayPanel.enableInputButtons(true);
+					}
+					mainGUI.updateStatusLabel();
+					break;
+				case SAY:
+					mainGUI.addMessage(Util.join(args));
+					client.sendMessage(Acknowledgement.OK.toString());
+					break;
+				default:
+					client.sendMessage(Error.COMMAND_UNSUPPORTED.toString());
 				}
-				break;
-			case SAY:
-				mainGUI.addMessage(Util.join(args));
-				client.sendMessage(Acknowledgement.OK.toString());
-				break;
-			default:
-				client.sendMessage(Error.COMMAND_UNSUPPORTED.toString());
 			}
-		}
-		if (command instanceof Acknowledgement) {
-			switch ((Acknowledgement) command) {
-			case OK:
-				if (prevCommand.equals(Action.CONNECT)) {
-					mainGUI.clientPanel.tfHostname.setEnabled(false);
-					mainGUI.clientPanel.tfName.setEnabled(false);
-					mainGUI.clientPanel.tfPort.setEnabled(false);
-					mainGUI.clientPanel.b1Connect.setEnabled(false);
-					client.setStatus(States.UNREADY);
+			if (command instanceof Acknowledgement) {
+					if (prevCommand.equals(Action.CONNECT)) {
+						mainGUI.clientPanel.tfHostname.setEnabled(false);
+						mainGUI.clientPanel.tfName.setEnabled(false);
+						mainGUI.clientPanel.tfPort.setEnabled(false);
+						mainGUI.clientPanel.b1Connect.setEnabled(false);
+						//mainGUI.clientPanel.tfMyMessage.setEnabled(true);
+						mainGUI.gameplayPanel.statusButton.setEnabled(true);
+						client.setStatus(States.UNREADY);
+					    //client.sendMessage(Action.AVAILABLE.toString());
+					}
+					if (prevCommand.equals(Action.UNREADY)) {
+						mainGUI.gameplayPanel.switchStatusButtonText();
+						client.setStatus(States.UNREADY);
+					}
+					if (prevCommand.equals(Action.READY)) {
+						client.setStatus(States.READY);
+						mainGUI.gameplayPanel.switchStatusButtonText();
+					}
+					if (prevCommand.equals(Action.MOVE)) {
+						mainGUI.gameplayPanel.enableInputButtons(false);
+						mainGUI.updateStatusLabel();
+						notifyAll();
+					}
+				mainGUI.clientPanel.errorField.setText(mainGUI.clientPanel.NO_ERROR);
+			}
+			if (command instanceof Error) {
+				mainGUI.clientPanel.errorField.setText(command.toString());
+			}
+			if (command instanceof Exit) {
+				Exit exitCmd = (Exit) command;
+				
+				if (exitCmd.name().equals(Exit.FORFEITURE.toString())) {
+					mainGUI.gameplayPanel.statusLabel.setText("Game won");
 				}
-				if (prevCommand.equals(Action.UNREADY)) {
-					client.setStatus(States.UNREADY);
+				if (exitCmd.name().equals(Exit.TIMEOUT.toString())) {
+					mainGUI.gameplayPanel.statusLabel.setText("Game lost");
+				} else {
+					mainGUI.gameplayPanel.statusLabel.setText(exitCmd.name());
 				}
-				if (prevCommand.equals(Action.READY)) {
-					client.setStatus(States.READY);
-				}
-				if (prevCommand.equals(Action.MOVE)) {
-					notifyAll();
-				}
-				break;
+				client.setStatus(States.UNREADY);
+				mainGUI.gameplayPanel.switchStatusButtonText();
+				mainGUI.gameplayPanel.statusButton.setEnabled(false);
+				mainGUI.gameplayPanel.enableInputButtons(false);
+				mainGUI.gameplayPanel.resetButton.setEnabled(true);
+				mainGUI.gameplayPanel.exitButton.setEnabled(true);
 			}
-			mainGUI.gameplayPanel.errorField.setText(mainGUI.gameplayPanel.NO_ERROR);
-		}
-		if (command instanceof Error) {
-			mainGUI.gameplayPanel.errorField.setText(command.toString());
-		}
-		if (command instanceof Exit) {
-			if(command.equals(Exit.FORFEITURE)) {
- 				mainGUI.gameplayPanel.statusLabel.setText("Game won");	
-			}
-			if(command.equals(Exit.TIMEOUT)) {
-				mainGUI.gameplayPanel.statusLabel.setText("Game lost");	
-			}
-			else {
-			mainGUI.gameplayPanel.statusLabel.setText(command.toString());
-			}
-			//TODO: Write a loop to disable input buttons
-			//mainGUI.gameplayPanel.inputButtons.setEnabled(false);
-			mainGUI.gameplayPanel.resetButton.setEnabled(true);
-			mainGUI.gameplayPanel.exitButton.setEnabled(true);
 		}
 	}
 
@@ -145,7 +160,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		Object src = e.getSource();
 		if ((src instanceof JButton)) {
 			JButton eventSource = (JButton) src;
-			//TODO: Handle exit, reset and disconnect.
+			// TODO: Handle exit, reset and disconnect.
 			if (mainGUI.gameplayPanel.exitButton.equals(eventSource)) {
 				client.sendMessage(Exit.FORFEITURE.toString());
 			}
@@ -157,23 +172,23 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				startConnecting();
 				prevCommand = Action.CONNECT;
 				client.sendMessage(Action.CONNECT + " " + client.getClientName());
-				client.sendMessage(Action.AVAILABLE.toString());
 			}
 			if (mainGUI.gameplayPanel.statusButton.equals(eventSource)) {
 				prevCommand = (eventSource.getText() == Action.READY.toString()) ? Action.READY : Action.UNREADY;
 				client.sendMessage(prevCommand.toString());
 			}
-			if (client != null) {
-				if (src instanceof JRadioButton) {
-					Vector buttonPos = mainGUI.gameplayPanel.getInputbuttonVector((JRadioButton) src);
-					column = new Column(buttonPos.x, buttonPos.y);
-					client.sendMessage("MOVE" + " " + buttonPos.x + " " + buttonPos.y);
-				}
+		}
+		if (client != null) {
+			if (src instanceof JRadioButton) {
+				Vector buttonPos = mainGUI.gameplayPanel.getInputbuttonVector((JRadioButton) src);
+				column = new Column(buttonPos.x, buttonPos.y);
+				client.sendMessage("MOVE" + " " + buttonPos.x + " " + buttonPos.y);
+				prevCommand = Action.MOVE;
+			}
 
-				if (src instanceof JTextField) {
-					client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
-					mainGUI.clientPanel.tfMyMessage.setText("");
-				}
+			if (src instanceof JTextField) {
+				//client.sendMessage(Action.SAY + mainGUI.clientPanel.tfMyMessage.getText());
+				//mainGUI.clientPanel.tfMyMessage.setText("");
 			}
 		}
 	}
@@ -204,7 +219,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	}
 
 	public void startConnecting() {
-		String name = mainGUI.clientPanel.tfName.getText();
+		String name = mainGUI.clientPanel.tfName.getText().trim();
 		int port = 0;
 		InetAddress iaddress = null;
 		try {

@@ -160,22 +160,24 @@ public class ClientHandler extends Observable implements Runnable {
 	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) {
 		// ignore
 		// possibly forbidden
+		//sendCommand(Action.SAY, "ack");
 	}
 	
 	
 	private void runError(Error error, String[] args) {
 		// to stuff
+		//sendCommand(Action.SAY, "err");
 	}
 	
 	
 	private void runExit(Exit exit, String[] args) {
-		
 		if (exit == Exit.FORFEITURE) {
 			server.tryForfeitGame(this);		// todo throw forbidden if not in game
 		}
 		else {
 			// TODO throw forbidden error
 		}
+		//sendCommand(Action.SAY, "exit");
 	}
 	
 	
