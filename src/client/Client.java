@@ -12,6 +12,7 @@ import game.Controller;
 import game.Game;
 import game.Mark;
 import game.player.HumanPlayer;
+import protocol.ClientState;
 import protocol.command.Action;
 import util.MessageUI;
 
@@ -32,7 +33,7 @@ public class Client extends Thread {
 	private BufferedReader in;
 	private BufferedWriter out;
 	private String message;
-	private States state = States.DISCONNECTED;
+	private ClientState state = ClientState.PENDING;
 	private Controller controller;
 	
 	/**
@@ -53,11 +54,11 @@ public class Client extends Thread {
 		this.controller = controller;
 	}
 
-	public States getStatus() {
+	public ClientState getClientState() {
 		return state;
 	}
 	
-	public void setStatus(States state) {
+	public void setClientState(ClientState state) {
 		this.state = state;
 	}
 	/**

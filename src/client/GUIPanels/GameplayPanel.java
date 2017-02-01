@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import client.States;
+import protocol.ClientState;
 import game.Board;
 import game.Controller;
 import game.Game;
@@ -25,7 +25,7 @@ public class GameplayPanel extends JPanel {
 	public final JButton resetButton = new JButton("Play again");
 	public final JButton exitButton = new JButton("Exit");
 	public final JLabel statusLabel = new JLabel("");
-	public final JButton statusButton = new JButton(States.READY.toString());
+	public final JButton statusButton = new JButton(ClientState.READY.toString());
 	public final JRadioButton[][] inputButtons = new JRadioButton[Board.WIDTH][Board.DEPTH];
 	public final JButton[][][] outputButtons = new JButton[Board.WIDTH][Board.DEPTH][Board.HEIGHT];
 

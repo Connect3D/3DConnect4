@@ -11,25 +11,18 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 
 import client.GUIPanels.ClientPanel;
 import client.GUIPanels.GameplayPanel;
-import game.Board;
 import game.Column;
 import game.Controller;
 import game.Game;
 import game.Mark;
 import game.Move;
-import game.player.HumanPlayer;
 import game.player.Player;
 import util.MessageUI;
-import util.container.Vector;
 import util.exception.ColumnFullException;
 
 public class Connect4GUI extends JFrame implements Observer, MessageUI {

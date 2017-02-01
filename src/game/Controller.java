@@ -14,7 +14,7 @@ import javax.swing.JTextField;
 
 import client.Client;
 import client.Connect4GUI;
-import client.States;
+import protocol.ClientState;
 import game.player.HumanPlayer;
 import protocol.command.Acknowledgement;
 import protocol.command.Action;
@@ -64,15 +64,15 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 			}
 			Command command = parsedCmd.first;
 			String[] args = parsedCmd.second;
-			if (command instanceof Action && !client.getStatus().equals(States.DISCONNECTED)) {
+			if (command instanceof Action && !client.getClientState().equals(ClientState.PENDING)) {
 				switch ((Action) command) {
 				case START:
-					if (client.getStatus() == States.READY) {
+					if (client.getClientState() == ClientState.READY) {
 						mainGUI.createGame(new HumanPlayer(args[0], Mark.X, this),
 								new HumanPlayer(args[1], Mark.O, this));
 						mainGUI.gameplayPanel.resetButton.setEnabled(true);
 						mainGUI.gameplayPanel.exitButton.setEnabled(true);
-						client.setStatus(States.INGAME);
+						client.setClientState(ClientState.INGAME);
 						if (client.getClientName().equals(args[0])) {
 							mainGUI.gameplayPanel.enableInputButtons(true);
 						}
@@ -82,7 +82,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 					}
 					break;
 				case MOVE:
-					if (client.getStatus() == States.INGAME) {
+					if (client.getClientState() == ClientState.INGAME) {
 						column = new Column(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 						if (!game.isColumnFull(column)) {
 							notifyAll();
@@ -110,15 +110,15 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 					mainGUI.clientPanel.b1Connect.setEnabled(false);
 					// mainGUI.clientPanel.tfMyMessage.setEnabled(true);
 					mainGUI.gameplayPanel.statusButton.setEnabled(true);
-					client.setStatus(States.UNREADY);
+					client.setClientState(ClientState.UNREADY);
 					// client.sendMessage(Action.AVAILABLE.toString());
 				}
 				if (prevCommand.equals(Action.UNREADY)) {
 					mainGUI.gameplayPanel.switchStatusButtonText();
-					client.setStatus(States.UNREADY);
+					client.setClientState(ClientState.UNREADY);
 				}
 				if (prevCommand.equals(Action.READY)) {
-					client.setStatus(States.READY);
+					client.setClientState(ClientState.READY);
 					mainGUI.gameplayPanel.switchStatusButtonText();
 				}
 				if (prevCommand.equals(Action.MOVE)) {
@@ -144,7 +144,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				} else {
 					mainGUI.gameplayPanel.statusLabel.setText(exitCmd.name());
 				}
-				client.setStatus(States.UNREADY);
+				client.setClientState(ClientState.UNREADY);
 				mainGUI.gameplayPanel.switchStatusButtonText();
 				mainGUI.gameplayPanel.statusButton.setEnabled(false);
 				mainGUI.gameplayPanel.enableInputButtons(false);
@@ -160,7 +160,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 	@Override
 	public synchronized void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		if ((src instanceof JButton)) {
+		if (src instanceof JButton) {
 			JButton eventSource = (JButton) src;
 			// TODO: Handle exit, reset and disconnect.
 			if (mainGUI.gameplayPanel.exitButton.equals(eventSource)) {
@@ -176,7 +176,9 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				client.sendMessage(Action.CONNECT + " " + client.getClientName());
 			}
 			if (mainGUI.gameplayPanel.statusButton.equals(eventSource)) {
-				prevCommand = (eventSource.getText() == Action.READY.toString()) ? Action.READY : Action.UNREADY;
+				prevCommand = (eventSource.getText() == Action.READY.toString())
+														? Action.READY 
+														: Action.UNREADY;
 				client.sendMessage(prevCommand.toString());
 			}
 		}
