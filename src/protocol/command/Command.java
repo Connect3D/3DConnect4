@@ -21,7 +21,7 @@ public interface Command {
 				if (direction == Direction.CLIENT_TO_SERVER) {
 					return Type.ACTION;
 				}
-				if (direction == Direction.SERVER_TO_CLIENT){
+				if (direction == Direction.SERVER_TO_CLIENT) {
 					return Type.ACKNOWLEDGEMENT;
 				}
 			} else if (Action.NAME.containsValue(array[0])) {

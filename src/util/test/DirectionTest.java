@@ -1,18 +1,18 @@
 package util.test;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import game.Direction;
+
+
 
 public class DirectionTest {
 
-	
 	
 	@Test
 	public void test() {
 	}
 
+	
 	@Test
 	public void testIterating() {
 		int n = 0;
