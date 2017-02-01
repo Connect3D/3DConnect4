@@ -8,6 +8,7 @@ import game.Column;
 
 public class RandomStrategy implements Strategy {
 
+	
 	public Column pickColumn(Board board) {
 		ArrayList<Column> possible = board.possibleColumns();
 		int index = ThreadLocalRandom.current().nextInt(0, possible.size());

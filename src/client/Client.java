@@ -70,6 +70,8 @@ public class Client extends Thread {
 		//sendMessage("[" + clientName + " has left]");
 		mui.addMessage("Closing socket connection...");
 		try {
+			in.close();
+			out.close();
 			sock.close();
 		} catch (IOException e) {
 			e.printStackTrace();
