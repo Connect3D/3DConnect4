@@ -13,7 +13,7 @@ public class ServerTui implements MessageUI {
 	public static final String OPEN_COMMAND = "open";
 	public static final String CLOSE_COMMAND = "close";
 	public static final String QUIT_COMMAND = "quit";
-	public static final String USAGE = "available commands: open <port>, close, quit";	// TODO make better 
+	public static final String USAGE = "available commands: open <port>, close, quit";
 	
 	private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 	private Server server = null;
@@ -64,8 +64,7 @@ public class ServerTui implements MessageUI {
 						addMessage(USAGE);
 						break;
 				}
-			}
-			else {
+			} else {
 				addMessage(USAGE);
 			}
 		}

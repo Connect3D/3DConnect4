@@ -16,12 +16,8 @@ import util.container.Pair;
 import util.exception.*;
 
 
-// TODO waiting for acks after send command
-// TODO implement disconnect will leave one player and ready the other
-// TODO remove all printStacktrace, console is owned by MessageUI and server
 
 public class ClientHandler extends Observable implements Runnable {
-
 	
 	public final Socket socket;				// public so the server can close the clienthandler
 	
@@ -54,36 +50,27 @@ public class ClientHandler extends Observable implements Runnable {
 		
 		while (true) {
 			try {
-				Pair<Command, String[]> command = parser.parse(in.readLine());			// does this throw ioEception or gice null
+				Pair<Command, String[]> command = parser.parse(in.readLine());
 				if (command.first instanceof Action) {
 					runAction((Action) command.first, command.second);
-				}
-				else if (command.first instanceof Exit) {
+				} else if (command.first instanceof Exit) {
 					runExit((Exit) command.first, command.second);
-				}
-				else if (command.first instanceof Acknowledgement) {
+				} else if (command.first instanceof Acknowledgement) {
 					runAcknowledgement((Acknowledgement) command.first, command.second);
-				}
-				else if (command.first instanceof Error) {
+				} else if (command.first instanceof Error) {
 					runError((Error) command.first, command.second);
 				}
-			}
-			catch (CommandInvalidException e) {
+			} catch (CommandInvalidException e) {
 				sendCommand(Error.COMMAND_INVALID);			// TODO dependent on timing of command
-			}
-			catch (CommandUnsupportedException e) {
+			} catch (CommandUnsupportedException e) {
 				sendCommand(Error.COMMAND_UNSUPPORTED);
-			}
-			catch (CommandForbiddenException e) {
+			} catch (CommandForbiddenException e) {
 				sendCommand(Error.FORBIDDEN);
-			}
-			catch (NameUnavailableException e) {
+			} catch (NameUnavailableException e) {
 				sendCommand(Error.NAME_UNAVAILABLE);
-			}
-			catch (IllegalMoveException e) {
+			} catch (IllegalMoveException e) {
 				sendCommand(Error.ILLEGAL_MOVE);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				server.tryForfeitGame(this);
 				server.leave(this);
 				break;
@@ -92,7 +79,10 @@ public class ClientHandler extends Observable implements Runnable {
 	}
 	
 	
-	private void runAction(Action action, String[] args) throws NameUnavailableException, CommandForbiddenException, IllegalMoveException {
+	private void runAction(Action action, String[] args) throws 
+		NameUnavailableException, 
+		CommandForbiddenException, 
+		IllegalMoveException {
 		
 		switch (action) {
 		
@@ -106,8 +96,7 @@ public class ClientHandler extends Observable implements Runnable {
 					in.close();
 					out.close();
 					socket.close();
-				}
-				catch (IOException e) { }
+				} catch (IOException e) { }				// no catch is necessary, if server 
 				server.tryForfeitGame(this);
 				server.leave(this);
 				break;
@@ -132,9 +121,9 @@ public class ClientHandler extends Observable implements Runnable {
 				server.forwardLastMove(this);
 				server.tryFinishGame(this);
 				if (server.getOpponent(this) != null) {
-					server.TIMER.start(TimeOutTimer.Type.MOVE_TIMEOUT, server.getOpponent(this));
+					server.timer.start(TimeOutTimer.Type.MOVE_TIMEOUT, server.getOpponent(this));
 				}
-				server.TIMER.cancel(TimeOutTimer.Type.MOVE_TIMEOUT, this);
+				server.timer.cancel(TimeOutTimer.Type.MOVE_TIMEOUT, this);
 				break;
 				
 			case SAY:
@@ -161,24 +150,21 @@ public class ClientHandler extends Observable implements Runnable {
 	}
 	
 	
-	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) throws CommandForbiddenException {
-		
+	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) throws 
+		CommandForbiddenException {
 		switch (acknowledgement) {
-		
 			case OK:
 				break;
-				
 			case SAY:
-				throw new CommandForbiddenException();			// clients can only send SAY as a command, not as an ack
-				
+				// clients can only send SAY as a command, not as an ack
+				throw new CommandForbiddenException();
 			case LIST:
-				throw new CommandForbiddenException();			// clients can only send LIST as a command, not as an ack
-				
+				// clients can only send LIST as a command, not as an ack
+				throw new CommandForbiddenException();
 			case LEADERBOARD:
-				throw new CommandForbiddenException();			// clients can only send LEADERBOARD as a command, not as an ack
-		
+				// clients can only send LEADERBOARD as a command, not as an ack
+				throw new CommandForbiddenException();
 		}
-		
 	}
 	
 	
@@ -188,14 +174,13 @@ public class ClientHandler extends Observable implements Runnable {
 	}
 	
 	
-	private void runExit(Exit exit, String[] args) {
+	private void runExit(Exit exit, String[] args) throws 
+		CommandForbiddenException {
 		if (exit == Exit.FORFEITURE) {
 			server.tryForfeitGame(this);		// todo throw forbidden if not in game
+		} else {
+			throw new CommandForbiddenException();
 		}
-		else {
-			// TODO throw forbidden error
-		}
-		//sendCommand(Action.SAY, "exit");
 	}
 	
 	
@@ -205,7 +190,6 @@ public class ClientHandler extends Observable implements Runnable {
 	//                                   //
 	///////////////////////////////////////
 	
-	// TODO wait for ack's
 	public synchronized void sendCommand(Command command, String[] arguments) {
 		sendCommand(command, Util.join(arguments));
 	}
@@ -220,8 +204,7 @@ public class ClientHandler extends Observable implements Runnable {
 			}
 			out.write("\n");
 			out.flush();
-		} 
-		catch (IOException e) { }
+		} catch (IOException e) { }
 	}
 	
 	
@@ -229,13 +212,7 @@ public class ClientHandler extends Observable implements Runnable {
 		try {
 			out.write(command.toString() + "\n");
 			out.flush();
-		}
-		catch (IOException e) { }
+		} catch (IOException e) { }
 	}
-
 	
 }
-
-
-
-
