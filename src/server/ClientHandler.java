@@ -22,15 +22,13 @@ import util.exception.*;
 
 public class ClientHandler extends Observable implements Runnable {
 
-	//public static final long MAX_ACKNOWLEDGEMENT_DELAY = 5000l;     // 5 seconds
-	//public static final long MAX_THINKING_TIME = 600000l;           // 10 minutes
-	
-	private final CommandParser parser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
 	
 	public final Socket socket;				// public so the server can close the clienthandler
+	
 	private final Server server;
 	private final BufferedReader in;
 	private final BufferedWriter out;
+	private final CommandParser parser;
 	
 	//private Pair<Command, String[]> lastCommandSend = null;
 	//private boolean acknowledgementPending = false;
@@ -42,6 +40,7 @@ public class ClientHandler extends Observable implements Runnable {
 		socket = sockArg;
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+		parser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
 	}
 	
 	
@@ -132,6 +131,10 @@ public class ClientHandler extends Observable implements Runnable {
 				sendCommand(Acknowledgement.OK);
 				server.forwardLastMove(this);
 				server.tryFinishGame(this);
+				if (server.getOpponent(this) != null) {
+					server.TIMER.start(TimeOutTimer.Type.MOVE_TIMEOUT, server.getOpponent(this));
+				}
+				server.TIMER.cancel(TimeOutTimer.Type.MOVE_TIMEOUT, this);
 				break;
 				
 			case SAY:

@@ -31,6 +31,7 @@ import util.exception.*;
 public class Server implements Runnable {
 	
 	public static final String SERVER_NAME = "server";
+	public final TimeOutTimer TIMER = new TimeOutTimer(this);
 	
 	private final HashMap<ClientHandler, ClientState> clients = new HashMap<ClientHandler, ClientState>();
 	private final DoubleKeyHashMap<ClientHandler, ServerSideGame> games = new DoubleKeyHashMap<ClientHandler, ServerSideGame>();
@@ -148,7 +149,6 @@ public class Server implements Runnable {
 	}
 
 
-
 	public synchronized void leave(ClientHandler client) {					//disconnecting is always allowed, so no exceptions are thrown
 		if (clients.get(client) != ClientState.PENDING) {
 			console.addMessage(leaveMessage(names.get(client)));
@@ -226,6 +226,11 @@ public class Server implements Runnable {
 			other.sendCommand(Action.MOVE, move.column.x + " " + move.column.y);
 			game.setSync();
 		}
+	}
+	
+	
+	public synchronized ClientHandler getOpponent(ClientHandler client) {
+		return games.getOtherKey(client);
 	}
 	
 	

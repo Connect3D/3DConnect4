@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 
+
 public class DebugClient implements Runnable {
 
 	private final Socket socket;
@@ -19,7 +20,6 @@ public class DebugClient implements Runnable {
 	
 	private boolean stop = false;
 	
-	InetAddress REMOTE_ADRESS = InetAddress.getByName("130.89.95.25");
 	
 	public static void main(String[] args) throws Exception {
 		DebugClient client = new DebugClient();
@@ -47,6 +47,7 @@ public class DebugClient implements Runnable {
 				console_out.flush();
 			}
 			catch (IOException e) {
+				stop = true;
 				closeStreams();
 				break;
 			}
@@ -54,7 +55,7 @@ public class DebugClient implements Runnable {
 	}
 	
 	
-	public void readConsole() {
+	public void readConsole() throws InterruptedException {
 		while (!stop) {
 			try {
 				socket_out.write(console_in.readLine() + "\n");
@@ -62,6 +63,7 @@ public class DebugClient implements Runnable {
 			}
 			catch (IOException e) {
 				closeStreams();
+				stop = true;
 				break;
 			}
 		}
@@ -70,7 +72,6 @@ public class DebugClient implements Runnable {
 	
 	private void closeStreams() {
 		try {
-			stop = true;
 			socket_in.close();
 			socket_out.close();
 			console_in.close();
