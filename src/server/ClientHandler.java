@@ -84,6 +84,7 @@ public class ClientHandler extends Observable implements Runnable {
 				sendCommand(Error.ILLEGAL_MOVE);
 			}
 			catch (IOException e) {
+				server.tryForfeitGame(this);
 				server.leave(this);
 				break;
 			}
@@ -107,6 +108,7 @@ public class ClientHandler extends Observable implements Runnable {
 					socket.close();
 				}
 				catch (IOException e) { }
+				server.tryForfeitGame(this);
 				server.leave(this);
 				break;
 				
@@ -156,17 +158,24 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	
 	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) {
-		sendCommand(Action.SAY, "ack");
+		// ignore
+		// possibly forbidden
 	}
 	
 	
 	private void runError(Error error, String[] args) {
-		sendCommand(Action.SAY, "err");
+		// to stuff
 	}
 	
 	
 	private void runExit(Exit exit, String[] args) {
-		sendCommand(Action.SAY, "exit");
+		
+		if (exit == Exit.FORFEITURE) {
+			server.tryForfeitGame(this);		// todo throw forbidden if not in game
+		}
+		else {
+			// TODO throw forbidden error
+		}
 	}
 	
 	

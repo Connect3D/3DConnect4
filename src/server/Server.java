@@ -203,6 +203,20 @@ public class Server implements Runnable {
 	}
 	
 	
+	// never run after leave
+	public synchronized void tryForfeitGame(ClientHandler client) {
+		ServerSideGame game = games.getValue(client);
+		ClientHandler opponent = games.getOtherKey(client);
+		if (game.getEnding() == Game.Ending.NOT_ENDED) {			// only if game has not ended
+			clients.put(client, ClientState.UNREADY);
+			clients.put(opponent, ClientState.UNREADY);
+			games.remove(game);
+			client.sendCommand(Exit.LOST);
+			opponent.sendCommand(Exit.FORFEITURE);
+		}
+	}
+	
+	
 	public synchronized void forwardLastMove(ClientHandler client) {
 		ServerSideGame game = games.getValue(client);
 		if (!game.isSync()) {
