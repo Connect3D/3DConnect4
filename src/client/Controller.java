@@ -12,11 +12,14 @@ import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import client.GUIPanels.ClientPanel;
 import protocol.ClientState;
 import game.Column;
 import game.Game;
 import game.Mark;
+import game.player.ComputerPlayer;
 import game.player.HumanPlayer;
+import game.player.strategy.RandomStrategy;
 import protocol.command.Acknowledgement;
 import protocol.command.Action;
 import protocol.command.Command;
@@ -31,30 +34,40 @@ import util.exception.CommandForbiddenException;
 import util.exception.CommandInvalidException;
 import util.exception.CommandUnsupportedException;
 
-//ERRORS AND ACKNOWLEDGEMENT
+
+
 public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 
 	private Column column;
 	private Game game;
 	private Client client;
 	private Connect4GUI mainGUI;
-	private final CommandParser commandParser = new CommandParser(Command.Direction.SERVER_TO_CLIENT);
+	private final CommandParser commandParser 
+		= new CommandParser(Command.Direction.SERVER_TO_CLIENT);
 	private Command prevCommand;
+	private boolean humanGame;
 
+	
+	public Controller(boolean humanGame)  {
+		this.humanGame = humanGame;
+	}
+	
+	
 	public void setGUI(Connect4GUI gui) {
 		mainGUI = gui;
 	}
 
+	
 	public void setGame(Game game) {
 		this.game = game;
 	}
 
+	
 	// TODO: Only enable buttons when it is one's turn.
 	public synchronized void readCommand(String cmd) {
 		if (cmd != null) {
 			mainGUI.addMessage("Server message: " + cmd);
 			Pair<Command, String[]> parsedCmd = getParsedCommand(cmd);
-
 			Command command = parsedCmd.first;
 			String[] args = parsedCmd.second;
 			if (command instanceof Action && !client.getClientState().equals(ClientState.PENDING)) {
@@ -71,6 +84,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 			}
 		}
 	}
+	
 
 	private Pair<Command, String[]> getParsedCommand(String cmd) {
 		try {
@@ -85,54 +99,58 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		return null;
 	}
 
+	
 	public void handleAction(Command command, String[] args) {
 		switch ((Action) command) {
-		case START:
-			if (client.getClientState() == ClientState.READY) {
-				mainGUI.createGame(new HumanPlayer(args[0], Mark.X, this), new HumanPlayer(args[1], Mark.O, this));
-				mainGUI.gameplayPanel.resetButton.setEnabled(true);
-				mainGUI.gameplayPanel.exitButton.setEnabled(true);
-				client.setClientState(ClientState.INGAME);
-				if (client.getClientName().equals(args[0])) {
-					mainGUI.gameplayPanel.enableInputButtons(true);
-				}
-				client.sendMessage(Acknowledgement.OK.toString());
-			} else {
-				client.sendMessage(Error.FORBIDDEN.toString());
-			}
-			break;
-		case MOVE:
-			if (client.getClientState() == ClientState.INGAME) {
-				column = new Column(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-				if (!game.isColumnFull(column)) {
-					notifyAll();
+			case START:
+				if (client.getClientState() == ClientState.READY) {
+					mainGUI.createGame(
+							humanGame 
+								? new HumanPlayer(args[0], Mark.X, this)
+							    : new ComputerPlayer(args[0], Mark.X, new RandomStrategy(), this),
+							new HumanPlayer(args[1], Mark.O, this));
+					mainGUI.gameplayPanel.resetButton.setEnabled(true);
+					mainGUI.gameplayPanel.exitButton.setEnabled(true);
+					if (client.getClientName().equals(args[0])) {
+						mainGUI.gameplayPanel.enableInputButtons(true);
+					}
+					client.setClientState(ClientState.INGAME);
 					client.sendMessage(Acknowledgement.OK.toString());
 				} else {
-					client.sendMessage(Error.ILLEGAL_MOVE.toString());
+					client.sendMessage(Error.FORBIDDEN.toString());
 				}
-				mainGUI.gameplayPanel.enableInputButtons(true);
-			}
-			mainGUI.updateStatusLabel();
-			break;
-		case SAY:
-			mainGUI.addMessage(Util.join(args));
-			client.sendMessage(Acknowledgement.OK.toString());
-			break;
-		default:
-			client.sendMessage(Error.COMMAND_UNSUPPORTED.toString());
+				break;
+			case MOVE:
+				if (client.getClientState() == ClientState.INGAME) {
+					column = new Column(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+					if (!game.isColumnFull(column)) {
+						notifyAll();
+						client.sendMessage(Acknowledgement.OK.toString());
+					} else {
+						client.sendMessage(Error.ILLEGAL_MOVE.toString());
+					}
+					mainGUI.gameplayPanel.enableInputButtons(true);
+				}
+				mainGUI.updateStatusLabel();
+				break;
+			case SAY:
+				mainGUI.addMessage(Util.join(args));
+				client.sendMessage(Acknowledgement.OK.toString());
+				break;
+			default:
+				client.sendMessage(Error.COMMAND_UNSUPPORTED.toString());
 		}
 	}
 
+	
 	public void handleAck() {
 		if (prevCommand.equals(Action.CONNECT)) {
 			mainGUI.clientPanel.tfHostname.setEnabled(false);
 			mainGUI.clientPanel.tfName.setEnabled(false);
 			mainGUI.clientPanel.tfPort.setEnabled(false);
 			mainGUI.clientPanel.b1Connect.setEnabled(false);
-			// mainGUI.clientPanel.tfMyMessage.setEnabled(true);
 			mainGUI.gameplayPanel.statusButton.setEnabled(true);
 			client.setClientState(ClientState.UNREADY);
-			// client.sendMessage(Action.AVAILABLE.toString());
 		}
 		if (prevCommand.equals(Action.UNREADY)) {
 			mainGUI.gameplayPanel.switchStatusButtonText();
@@ -147,9 +165,10 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 			mainGUI.updateStatusLabel();
 			notifyAll();
 		}
-		mainGUI.clientPanel.errorField.setText(mainGUI.clientPanel.NO_ERROR);
+		mainGUI.clientPanel.errorField.setText(ClientPanel.NO_ERROR);
 	}
 
+	
 	public void handleError(Command command) {
 		mainGUI.clientPanel.errorField.setText(command.toString());
 		if (((Error) command).name().equals(Error.SERVER_SHUTTING_DOWN)) {
@@ -157,6 +176,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		}
 	}
 
+	
 	public void handleExit(Command command) {
 		Exit exitCmd = (Exit) command;
 		if (exitCmd.name().equals(Exit.FORFEITURE.toString())) {
@@ -175,6 +195,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		mainGUI.gameplayPanel.exitButton.setEnabled(true);
 	}
 
+	
 	/**
 	 * Receives input from GUI buttons, sends the appropriate command.
 	 */
@@ -183,12 +204,10 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		Object src = e.getSource();
 		if (src instanceof JButton) {
 			JButton eventSource = (JButton) src;
-			// TODO: Handle exit, reset and disconnect.
 			if (mainGUI.gameplayPanel.exitButton.equals(eventSource)) {
 				client.sendMessage(Exit.FORFEITURE.toString());
 			}
 			if (mainGUI.gameplayPanel.resetButton.equals(eventSource)) {
-				// game.resetBoard();
 				client.sendMessage(Exit.FORFEITURE.toString());
 			}
 			if (mainGUI.clientPanel.b1Connect.equals(eventSource)) {
@@ -197,26 +216,28 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 				client.sendMessage(Action.CONNECT + " " + client.getClientName());
 			}
 			if (mainGUI.gameplayPanel.statusButton.equals(eventSource)) {
-				prevCommand = (eventSource.getText() == Action.READY.toString()) ? Action.READY : Action.UNREADY;
+				prevCommand = (eventSource.getText() == Action.READY.toString())
+													? Action.READY 
+													: Action.UNREADY;
 				client.sendMessage(prevCommand.toString());
 			}
 		}
 		if (client != null) {
 			if (src instanceof JRadioButton) {
 				Vector buttonPos = mainGUI.gameplayPanel.getInputbuttonVector((JRadioButton) src);
-				column = new Column(buttonPos.x, buttonPos.y);
-				client.sendMessage("MOVE" + " " + buttonPos.x + " " + buttonPos.y);
-				prevCommand = Action.MOVE;
-			}
-
-			if (src instanceof JTextField) {
-				// client.sendMessage(Action.SAY +
-				// mainGUI.clientPanel.tfMyMessage.getText());
-				// mainGUI.clientPanel.tfMyMessage.setText("");
+				sendMove(buttonPos.x, buttonPos.y);
 			}
 		}
 	}
 
+	
+	public void sendMove(int x, int y) {
+		column = new Column(x, y);
+		client.sendMessage("MOVE" + " " + x + " " + y);
+		prevCommand = Action.MOVE;
+	}
+
+	
 	@Override
 	public void keyTyped(KeyEvent e) {
 		Object src = e.getSource();
@@ -228,6 +249,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		}
 	}
 
+	
 	@Override
 	public synchronized Column waitForMove() {
 		try {
@@ -242,6 +264,7 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		return choice;
 	}
 
+	
 	public void startConnecting() {
 		String name = mainGUI.clientPanel.tfName.getText().trim();
 		int port = 0;
@@ -264,10 +287,12 @@ public class Controller implements ActionListener, KeyListener, ProvidesMoves {
 		}
 	}
 
+	
 	@Override
 	public void keyPressed(KeyEvent e) {
 	}
 
+	
 	@Override
 	public void keyReleased(KeyEvent e) {
 	}

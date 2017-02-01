@@ -21,33 +21,41 @@ public class Direction {
 	}
 	
 	
-	public final Axis x_axis;
-	public final Axis y_axis;
-	public final Axis z_axis;
+	public final Axis xaxis;
+	public final Axis yaxis;
+	public final Axis zaxis;
 	
 	
 	public Direction(Axis x, Axis y, Axis z) {
-		x_axis = x;
-		y_axis = y;
-		z_axis = z;
+		xaxis = x;
+		yaxis = y;
+		zaxis = z;
 	}
 	
 	
 	public Direction opposite() {
-		return new Direction(this.x_axis.opposite(), this.y_axis.opposite(), this.z_axis.opposite());
+		return new Direction(this.xaxis.opposite(), 
+				this.yaxis.opposite(), this.zaxis.opposite());
 	}
 	
 	
 	public Direction next() {
-		if (z_axis != Axis.POSITIVE) return new Direction(x_axis, y_axis, z_axis.increment());
-		if (y_axis != Axis.POSITIVE) return new Direction(x_axis, y_axis.increment(), z_axis.increment());
-		if (x_axis != Axis.POSITIVE) return new Direction(x_axis.increment(), y_axis.increment(), z_axis.increment());
-		else return null;
+		if (zaxis != Axis.POSITIVE) {
+			return new Direction(xaxis, yaxis, zaxis.increment());
+		}
+		if (yaxis != Axis.POSITIVE) {
+			return new Direction(xaxis, yaxis.increment(), zaxis.increment());
+		}
+		if (xaxis != Axis.POSITIVE) {
+			return new Direction(xaxis.increment(), yaxis.increment(), zaxis.increment());
+		} else {
+			return null;
+		}
 	}
 	
 	
 	public boolean equals(Direction other) {
-		return x_axis == other.x_axis && y_axis == other.y_axis && z_axis == other.z_axis;
+		return xaxis == other.xaxis && yaxis == other.yaxis && zaxis == other.zaxis;
 	}
 	
 	
@@ -57,20 +65,32 @@ public class Direction {
 		NEGATIVE, NEUTRAL, POSITIVE;
 		
 		public Axis opposite() {
-			if (this == NEGATIVE) return POSITIVE;
-			if (this == POSITIVE) return NEGATIVE;
+			if (this == NEGATIVE) {
+				return POSITIVE;
+			}
+			if (this == POSITIVE) {
+				return NEGATIVE;
+			}
 			return NEUTRAL;
 		}
 		
 		public Axis increment() {
-			if (this == NEGATIVE) return NEUTRAL;
-			if (this == NEUTRAL) return POSITIVE;
+			if (this == NEGATIVE) {
+				return NEUTRAL;
+			}
+			if (this == NEUTRAL) {
+				return POSITIVE;
+			}
 			return NEGATIVE;
 		}
 		
 		public int toInt() {
-			if (this == NEGATIVE) return -1;
-			if (this == POSITIVE) return 1;
+			if (this == NEGATIVE) {
+				return -1;
+			}
+			if (this == POSITIVE) { 
+				return 1;
+			}
 			return 0;
 		}
 		

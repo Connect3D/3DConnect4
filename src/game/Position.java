@@ -11,13 +11,13 @@ public class Position {
 	public final int z;
 	
 	
-	public Position(int _x, int _y, int _z) {
-		if (!isValid(_x, _y, _z)) {
-			throw new InvalidPositionException(_x, _y, _z);
+	public Position(int x, int y, int z) {
+		if (!isValid(x, y, z)) {
+			throw new InvalidPositionException(x, y, z);
 		}
-		x = _x;
-		y = _y;
-		z = _z;
+		this.x = x;
+		this.y = y;
+		this.z = z;
 	}
 	
 	
@@ -41,8 +41,10 @@ public class Position {
 	
 	// returns null if new position is invalid
 	public Position inDirection(Direction direction) {
-		if (isValid(x + direction.x_axis.toInt(), y + direction.y_axis.toInt(), z + direction.z_axis.toInt())) {
-			return new Position(x + direction.x_axis.toInt(), y + direction.y_axis.toInt(), z + direction.z_axis.toInt());
+		if (isValid(x + direction.xaxis.toInt(), y + direction.yaxis.toInt(),
+				z + direction.zaxis.toInt())) {
+			return new Position(x + direction.xaxis.toInt(), y + direction.yaxis.toInt(),
+					z + direction.zaxis.toInt());
 		}
 		return null;
 	}

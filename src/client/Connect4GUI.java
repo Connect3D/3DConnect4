@@ -24,18 +24,25 @@ import game.player.Player;
 import util.MessageUI;
 import util.exception.ColumnFullException;
 
+
+
 public class Connect4GUI extends JFrame implements Observer, MessageUI {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public final ClientPanel clientPanel = new ClientPanel();
 	public final GameplayPanel gameplayPanel = new GameplayPanel();
 	private Controller controller;
 	private static final int DIM = 4;
 	private Mark currentMark;
 
-	public Connect4GUI() {
+	
+	public Connect4GUI(boolean humanGame) {
 		super("Connect4_3D_View");
 
-		init();
+		init(humanGame);
 		setSize(900, 500);
 
 		buildGUI();
@@ -54,13 +61,15 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 
 	}
 
-	public void init() {
-		controller = new Controller();
+	
+	public void init(boolean humanGame) {
+		controller = new Controller(humanGame);
 		controller.setGUI(this);
 		clientPanel.build(controller);
 		gameplayPanel.build(controller);
 	}
 
+	
 	public void createGame(Player p1, Player p2) {
 		Game game = new Game(p1, p2);
 		new Thread(game).start();
@@ -68,6 +77,7 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		controller.setGame(game);
 	}
 
+	
 	public void buildGUI() {
 		JPanel mainpanel = new JPanel(new FlowLayout());
 		BorderLayout blayout = new BorderLayout();
@@ -80,10 +90,12 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		cc.add(mainpanel);
 	}
 
+	
 	public void addMessage(String msg) {
 		clientPanel.addMessage(msg);
 	}
 
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof Game && arg instanceof Move) {
@@ -95,7 +107,8 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 			try {
 				TimeUnit.MILLISECONDS.sleep(100);
 				gameplayPanel.selectInputbutton(column.x, column.y, false);
-				gameplayPanel.setOutputbuttonText(column.x, column.y, game.getColumnHeigth(column) - 1,
+				gameplayPanel.setOutputbuttonText(column.x, column.y, 
+						game.getColumnHeigth(column) - 1,
 						mark.toString());
 			} catch (InterruptedException e1) {
 			} catch (ColumnFullException e) {
@@ -107,10 +120,12 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		}
 	}
 
+	
 	public void updateStatusLabel() {
 		gameplayPanel.statusLabel.setText(currentMark + "'s turn");
 	}
 
+	
 	public static String getHostAddress() {
 		try {
 			InetAddress iaddr = InetAddress.getLocalHost();
@@ -120,7 +135,8 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		}
 	}
 
+	
 	public static void main(String[] args) {
-		new Connect4GUI();
+		new Connect4GUI(false); //args: true for human players, false for random computer players.
 	}
 }

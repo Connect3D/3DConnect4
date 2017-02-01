@@ -5,7 +5,7 @@ import game.Column;
 
 public interface ProvidesMoves {
 
-	public Column waitForMove();
 	
+	public Column waitForMove();
 	
 }

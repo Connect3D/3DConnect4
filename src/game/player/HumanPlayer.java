@@ -1,7 +1,6 @@
 package game.player;
 
 import java.util.ArrayList;
-
 import game.Board;
 import game.Column;
 import game.Mark;
@@ -9,9 +8,11 @@ import game.Move;
 import util.ProvidesMoves;
 
 
+
 public class HumanPlayer extends Player {
 
 	private ProvidesMoves input;
+	
 	
 	public HumanPlayer(String n, Mark m, ProvidesMoves p) {
 		super(n, m);

@@ -31,8 +31,10 @@ public enum Acknowledgement implements Command {
 	}
 	
 	
-	public static boolean isValid(Acknowledgement a, String s, Command.Direction d) throws CommandForbiddenException, CommandInvalidException {
-		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(a) == d || DIRECTION.get(a) == Command.Direction.BIDIRECTIONAL)) {
+	public static boolean isValid(Acknowledgement a, String s, Command.Direction d)
+			throws CommandForbiddenException, CommandInvalidException {
+		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(a) == d 
+				|| DIRECTION.get(a) == Command.Direction.BIDIRECTIONAL)) {
 			if (PATTERN.get(a).matcher(s).matches()) {
 				return true;
 			}
@@ -42,14 +44,17 @@ public enum Acknowledgement implements Command {
 	}
 	
 	
-	public static final EnumHashBiMap<Acknowledgement, String> NAME = EnumHashBiMap.create(Acknowledgement.class);
-	public static final EnumMap<Acknowledgement, Command.Direction> DIRECTION = new EnumMap<Acknowledgement, Command.Direction>(Acknowledgement.class);
-	public static final EnumMap<Acknowledgement, Pattern> PATTERN = new EnumMap<Acknowledgement, Pattern>(Acknowledgement.class);
+	public static final EnumHashBiMap<Acknowledgement, String> NAME 
+		= EnumHashBiMap.create(Acknowledgement.class);
+	public static final EnumMap<Acknowledgement, Command.Direction> DIRECTION 
+		= new EnumMap<Acknowledgement, Command.Direction>(Acknowledgement.class);
+	public static final EnumMap<Acknowledgement, Pattern> PATTERN 
+		= new EnumMap<Acknowledgement, Pattern>(Acknowledgement.class);
 	
 	
 	static {
 		
-		NAME.put(OK,          "OK" );
+		NAME.put(OK,          "OK");
 		NAME.put(SAY,         "SAY");
 		NAME.put(LIST,        "LIST");
 		NAME.put(LEADERBOARD, "LEADEBROARD");

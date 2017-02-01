@@ -17,8 +17,6 @@ public class PositionTest {
 		assertTrue(p2.index() == 63);
 		assertTrue(p3.index() == 24);
 		assertTrue(p4.index() == 54);
-		//Position p5 = new Position(5, 0, 0);
-		//Position p6 = new Position(0, 0, -1)
 	}
 
 }

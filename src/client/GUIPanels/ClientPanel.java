@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -13,22 +11,27 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import client.Client;
 import client.Connect4GUI;
 import client.Controller;
-import protocol.command.Action;
 import util.MessageUI;
+
+
 
 public class ClientPanel extends JPanel implements MessageUI {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public final JButton b1Connect = new JButton("Connect");
 	public JTextField tfHostname;
 	public final JTextField tfPort = new JTextField("2727", 5);
 	public final JTextField tfName = new JTextField(" ", 12);
 	//public final JTextField tfMyMessage = new JTextField(" ", 34);
 	public final JTextArea taMessages = new JTextArea("", 10, 34);	
-	public final String NO_ERROR = "No errors detected.";
+	public final static String NO_ERROR = "No errors detected.";
 	public final JLabel errorField = new JLabel(NO_ERROR);
+	
 	
 	public void build(Controller controller) {
 		this.setLayout(new BorderLayout(0, 20));
@@ -69,6 +72,7 @@ public class ClientPanel extends JPanel implements MessageUI {
 		this.add(p2);
 		this.add(p3, BorderLayout.SOUTH);
 	}
+	
 	
 	@Override
 	public void addMessage(String msg) {

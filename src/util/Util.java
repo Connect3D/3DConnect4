@@ -28,10 +28,10 @@ public class Util {
 	}
 	
 	
-	public static boolean isInt(String input){
-	    try{
+	public static boolean isInt(String input) {
+	    try {
 	        Integer.parseInt(input);
-	    }catch(NumberFormatException e){
+	    } catch (NumberFormatException e) {
 	        return false;
 	    }
 	    return true;

@@ -8,11 +8,15 @@ public class Column {
 	public final int y;
 	
 	
-	public Column(int _x, int _y) {
-		if (_x < 0 || _x >= Board.WIDTH) throw new InvalidColumnException(_x, _y);
-		if (_y < 0 || _y >= Board.DEPTH) throw new InvalidColumnException(_x, _y);
-		x = _x;
-		y = _y;
+	public Column(int x, int y) {
+		if (x < 0 || x >= Board.WIDTH) {
+			throw new InvalidColumnException(x, y);
+		}
+		if (y < 0 || y >= Board.DEPTH) {
+			throw new InvalidColumnException(x, y);
+		}
+		this.x = x;
+		this.y = y;
 	}
 	
 	

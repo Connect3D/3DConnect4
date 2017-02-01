@@ -23,7 +23,8 @@ public enum Exit implements Command {
 	}
 	
 	
-	public static Exit parse(String[] command) throws CommandUnsupportedException, CommandInvalidException {
+	public static Exit parse(String[] command) 
+			throws CommandUnsupportedException, CommandInvalidException {
 		if (command != null && command.length > 1) {
 			if (command[0].equals("EXIT")) {
 				Exit result = NAME.inverse().get(command[0] + " " + command[1]);
@@ -37,8 +38,10 @@ public enum Exit implements Command {
 	}
 	
 	//CHANGED THIS ONE
-	public static boolean isValid(Exit e, String s, Command.Direction d) throws CommandForbiddenException, CommandInvalidException {
-		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(e) == d || DIRECTION.get(e) == Command.Direction.BIDIRECTIONAL)) {
+	public static boolean isValid(Exit e, String s, Command.Direction d) 
+			throws CommandForbiddenException, CommandInvalidException {
+		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(e) == d 
+				|| DIRECTION.get(e) == Command.Direction.BIDIRECTIONAL)) {
 			//if (PATTERN.get(e).matcher("\n" + s + "\n").matches()) {
 			if (PATTERN.get(e).matcher(s).matches()) {
 				return true;
@@ -49,9 +52,12 @@ public enum Exit implements Command {
 	}
 	
 	
-	public static final EnumHashBiMap<Exit, String> NAME = EnumHashBiMap.create(Exit.class);
-	public static final EnumMap<Exit, Command.Direction> DIRECTION = new EnumMap<Exit, Command.Direction>(Exit.class);
-	public static final EnumMap<Exit, Pattern> PATTERN = new EnumMap<Exit, Pattern>(Exit.class);
+	public static final EnumHashBiMap<Exit, String> NAME 
+		= EnumHashBiMap.create(Exit.class);
+	public static final EnumMap<Exit, Command.Direction> DIRECTION 
+		= new EnumMap<Exit, Command.Direction>(Exit.class);
+	public static final EnumMap<Exit, Pattern> PATTERN
+		= new EnumMap<Exit, Pattern>(Exit.class);
 	
 	
 	static {

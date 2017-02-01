@@ -2,9 +2,7 @@ package game;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import util.exception.ColumnFullException;
-
 
 public class Board {
 	
@@ -75,7 +73,8 @@ public class Board {
 	
 	public String getRowAsString(int y, int z) {
 		String row = "|";
-		Direction direction = new Direction(Direction.Axis.POSITIVE, Direction.Axis.NEUTRAL, Direction.Axis.NEUTRAL);
+		Direction direction = new Direction(
+				Direction.Axis.POSITIVE, Direction.Axis.NEUTRAL, Direction.Axis.NEUTRAL);
 		for (Position p = new Position(0, y, z); p != null; p = p.inDirection(direction)) {
 			row += " " + fields[p.index()].toString() + " |";
 		}
@@ -89,19 +88,25 @@ public class Board {
 	
 	
 	private Game.Ending checkEndingFor(Position position, Mark mark) {
-		if (isFull()) return Game.Ending.DRAW;
+		if (isFull()) {
+			return Game.Ending.DRAW;
+		}
 		for (Direction d = Direction.begin(); !d.equals(Direction.center()); d = d.next()) {
-			int consecutive = 1 + consecutiveMarks(position, mark, d) + consecutiveMarks(position, mark, d.opposite());
+			int consecutive = 1 + consecutiveMarks(position, mark, d) 
+				+ consecutiveMarks(position, mark, d.opposite());
 			if (consecutive >= Game.CONSECUTIVE_MARKS_TO_WIN) {
-				if (mark == Mark.X) return Game.Ending.X_WINS;
-				if (mark == Mark.O) return Game.Ending.O_WINS;
+				if (mark == Mark.X) {
+					return Game.Ending.X_WINS;
+				}
+				if (mark == Mark.O) {
+					return Game.Ending.O_WINS;
+				}
 			}
 		}
 		return Game.Ending.NOT_ENDED;
 	}
 	
 	
-	// does not need to be public, because getEnding() also tells if the board is full (DRAW) and is much faster
 	private boolean isFull() {
 		for (int x = 0; x < WIDTH; ++x) {
 			for (int y = 0; y < DEPTH; ++y) {
@@ -112,7 +117,6 @@ public class Board {
 		}
 		return true;
 	}
-	
 	
 	private Position cascade(Column column) {
 		for (int z = 0; z < HEIGHT; ++z) {

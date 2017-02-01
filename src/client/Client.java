@@ -8,20 +8,11 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import game.Game;
-import game.Mark;
-import game.player.HumanPlayer;
 import protocol.ClientState;
-import protocol.command.Action;
 import util.MessageUI;
 
-/**
- * P2 prac wk4. <br>
- * Client.
- * 
- * @author Theo Ruys
- * @version 2005.02.21
- */
+
+
 public class Client extends Thread {
 	private static final String USAGE = "usage: " + Client.class.getName()
 			+ " <name> <address> <port> or <name> <port> ";
@@ -31,14 +22,14 @@ public class Client extends Thread {
 	private Socket sock;
 	private BufferedReader in;
 	private BufferedWriter out;
-	private String message;
 	private ClientState state = ClientState.PENDING;
 	private Controller controller;
 	
 	/**
 	 * Constructs a Client-object and tries to make a socket connection.
 	 */
-	public Client(String name, InetAddress host, int port, MessageUI m, Controller controller) throws IOException {
+	public Client(String name, InetAddress host, int port, MessageUI m, Controller controller) 
+			throws IOException {
 		clientName = name;
 		mui = m;
 		// try to open a Socket to the server
@@ -46,31 +37,34 @@ public class Client extends Thread {
 			sock = new Socket(host, port);
 		} catch (IOException e) {
 			mui.addMessage("ERROR: could not create a socket on " + host + " and port " + port);
+			mui.addMessage(USAGE);
 			System.exit(0);
 		}
 		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
 		this.controller = controller;
 	}
+	
 
 	public ClientState getClientState() {
 		return state;
 	}
 	
-	public void setClientState(ClientState state) {
-		this.state = state;
+	
+	public void setClientState(ClientState cstate) {
+		state = cstate;
 	}
+	
+	
 	/**
 	 * Reads the messages in the socket connection. Each message will be
 	 * forwarded to the MessageUI
 	 */
 	public void run() {
-		BufferedReader terminal = new BufferedReader(new InputStreamReader(System.in));
 		(new Thread(new Reader())).start();
 	}
 
-
-
+	
 	/** close the socket connection. */
 	public void shutdown() {
 		//sendMessage("[" + clientName + " has left]");
@@ -82,14 +76,16 @@ public class Client extends Thread {
 		}
 	}
 
+
 	/** returns the client name. */
 	public String getClientName() {
 		return clientName;
 	}
 
-	public synchronized void sendMessage(String message) {
+	
+	public synchronized void sendMessage(String msg) {
 		try {
-			out.write(message);
+			out.write(msg);
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {
@@ -97,7 +93,7 @@ public class Client extends Thread {
 		}
 	}
 
-	//TODO: Listen, parse, send back, or process
+	
 	class Reader implements Runnable {
 		public void run() {
 			try {

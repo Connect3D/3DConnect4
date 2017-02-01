@@ -2,7 +2,6 @@ package game.player.strategy;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
-
 import game.Board;
 import game.Column;
 

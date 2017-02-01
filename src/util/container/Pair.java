@@ -2,12 +2,12 @@ package util.container;
 
 
 
-public class Pair<T1, T2> {
+public class Pair<T, K> {
 
-	public final T1 first;
-	public final T2 second;
+	public final T first;
+	public final K second;
 	
-	public Pair(T1 f, T2 s) {
+	public Pair(T f, K s) {
 		first = f;
 		second = s;
 	}

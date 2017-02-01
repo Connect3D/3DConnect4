@@ -25,7 +25,8 @@ public enum Error implements Command {
 	}
 	
 	
-	public static Error parse(String[] command) throws CommandUnsupportedException, CommandInvalidException {
+	public static Error parse(String[] command) 
+			throws CommandUnsupportedException, CommandInvalidException {
 		if (command != null && command.length > 1) {
 			if (command[0].equals("ERROR")) {
 				Error result = NAME.inverse().get(command[0] + " " + command[1]);
@@ -39,8 +40,10 @@ public enum Error implements Command {
 	}
 	
 	
-	public static boolean isValid(Error e, String s, Command.Direction d) throws CommandForbiddenException, CommandInvalidException {
-		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(e) == d || DIRECTION.get(e) == Command.Direction.BIDIRECTIONAL)) {
+	public static boolean isValid(Error e, String s, Command.Direction d) 
+			throws CommandForbiddenException, CommandInvalidException {
+		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(e) == d
+				|| DIRECTION.get(e) == Command.Direction.BIDIRECTIONAL)) {
 			if (PATTERN.get(e).matcher(s).matches()) {
 				return true;
 			}
@@ -50,9 +53,12 @@ public enum Error implements Command {
 	}
 	
 	
-	public static final EnumHashBiMap<Error, String> NAME = EnumHashBiMap.create(Error.class);
-	public static final EnumMap<Error, Command.Direction> DIRECTION = new EnumMap<Error, Command.Direction>(Error.class);
-	public static final EnumMap<Error, Pattern> PATTERN = new EnumMap<Error, Pattern>(Error.class);
+	public static final EnumHashBiMap<Error, String> NAME 
+		= EnumHashBiMap.create(Error.class);
+	public static final EnumMap<Error, Command.Direction> DIRECTION 
+		= new EnumMap<Error, Command.Direction>(Error.class);
+	public static final EnumMap<Error, Pattern> PATTERN 
+		= new EnumMap<Error, Pattern>(Error.class);
 	
 	
 	static {

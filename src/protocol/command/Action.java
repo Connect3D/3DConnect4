@@ -40,8 +40,10 @@ public enum Action implements Command {
 	}
 	
 	
-	public static boolean isValid(Action a, String s, Command.Direction d) throws CommandForbiddenException, CommandInvalidException {
-		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(a) == d || DIRECTION.get(a) == Command.Direction.BIDIRECTIONAL)) {
+	public static boolean isValid(Action a, String s, Command.Direction d) 
+			throws CommandForbiddenException, CommandInvalidException {
+		if (d != Command.Direction.BIDIRECTIONAL && (DIRECTION.get(a) == d 
+				|| DIRECTION.get(a) == Command.Direction.BIDIRECTIONAL)) {
 			if (PATTERN.get(a).matcher(s).matches()) {
 				return true;
 			}
@@ -51,9 +53,12 @@ public enum Action implements Command {
 	}
 	
 	
-	public static final EnumHashBiMap<Action, String> NAME = EnumHashBiMap.create(Action.class);
-	public static final EnumMap<Action, Command.Direction> DIRECTION = new EnumMap<Action, Command.Direction>(Action.class);
-	public static final EnumMap<Action, Pattern> PATTERN = new EnumMap<Action, Pattern>(Action.class);
+	public static final EnumHashBiMap<Action, String> NAME 
+		= EnumHashBiMap.create(Action.class);
+	public static final EnumMap<Action, Command.Direction> DIRECTION 
+		= new EnumMap<Action, Command.Direction>(Action.class);
+	public static final EnumMap<Action, Pattern> PATTERN
+		= new EnumMap<Action, Pattern>(Action.class);
 	
 	
 	static {
