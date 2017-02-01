@@ -4,14 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
-import game.Board;
-import game.Direction;
 import game.Direction.Axis;
-import game.Column;
-import game.Game;
-import game.Mark;
-import game.Move;
-import game.Position;
+import game.*;
 
 
 
@@ -21,8 +15,7 @@ public class BoardTest {
 
 	
 	/**
-	 * Sets the instance variable to an initial value. All test methods should
-	 * be preceded by a call to this method.
+	 * Sets the instance variable to an initial value.
 	 */
 	@Before
 	public void setUp() {

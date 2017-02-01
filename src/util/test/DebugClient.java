@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 
+
 public class DebugClient implements Runnable {
 
 	private final Socket socket;
@@ -48,6 +49,7 @@ public class DebugClient implements Runnable {
 				consoleOut.write(socketIn.readLine() + "\n");
 				consoleOut.flush();
 			} catch (IOException e) {
+				stop = true;
 				closeStreams();
 				break;
 			}
@@ -55,12 +57,13 @@ public class DebugClient implements Runnable {
 	}
 	
 	
-	public void readConsole() {
+	public void readConsole() throws InterruptedException {
 		while (!stop) {
 			try {
 				socketOut.write(consoleIn.readLine() + "\n");
 				socketOut.flush();
 			} catch (IOException e) {
+				stop = true;
 				closeStreams();
 				break;
 			}

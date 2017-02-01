@@ -31,24 +31,27 @@ import util.exception.*;
 public class Server implements Runnable {
 	
 	public static final String SERVER_NAME = "server";
+	public final TimeOutTimer timer;
 	
-	private final HashMap<ClientHandler, ClientState> clients = new HashMap<ClientHandler, ClientState>();
-	private final DoubleKeyHashMap<ClientHandler, ServerSideGame> games = new DoubleKeyHashMap<ClientHandler, ServerSideGame>();
+	private final HashMap<ClientHandler, ClientState> clients;
+	private final DoubleKeyHashMap<ClientHandler, ServerSideGame> games;
 	
-	private final HashSet<ClientHandler> chat = new HashSet<ClientHandler>();
-	private final HashBiMap<ClientHandler, String> names = HashBiMap.create();
+	private final HashSet<ClientHandler> chat;
+	private final HashBiMap<ClientHandler, String> names;
 	
 	private final ServerSocket serverSocket;
 	private final MessageUI console;
 	
 	
-	public Server(int port, MessageUI messageUi) throws IOException{
+	public Server(int port, MessageUI messageUi) throws IOException {
 		console = messageUi;
-		try {
-			serverSocket = new ServerSocket(port);
-		} catch (IOException e) {
-			throw new IOException("ERROR: serversocket could not be created on port " + port);
-		}
+		clients = new HashMap<ClientHandler, ClientState>();
+		games = new DoubleKeyHashMap<ClientHandler, ServerSideGame>();
+		chat = new HashSet<ClientHandler>();
+		names = HashBiMap.create();
+		timer = new TimeOutTimer(this);
+		// we do not want to catch the exception, becuase we dont want the server object to exist
+		serverSocket = new ServerSocket(port);			
 	}
 	
 	
@@ -61,8 +64,7 @@ public class Server implements Runnable {
 					clients.put(client, ClientState.PENDING);
 					new Thread(client).start();
 				}
-			}
-			catch (IOException e) {		// shutdown() function closes socket which makes this exception occur
+			} catch (IOException e) {		// shutdown() causes this exception
 				console.addMessage("Server shut down succesfully");
 				break;
 			}
@@ -103,8 +105,7 @@ public class Server implements Runnable {
 	public synchronized void joinChat(ClientHandler client) throws CommandForbiddenException {
 		if (!chat.contains(client) && clients.get(client) == ClientState.UNREADY) {
 			chat.add(client);
-		}
-		else {
+		} else {
 			throw new CommandForbiddenException();
 		}
 	}
@@ -113,8 +114,7 @@ public class Server implements Runnable {
 	public synchronized void ready(ClientHandler client) throws CommandForbiddenException {
 		if (clients.get(client) == ClientState.UNREADY) {
 			clients.put(client, ClientState.READY);
-		}
-		else {
+		} else {
 			throw new CommandForbiddenException();
 		}
 	}
@@ -123,33 +123,32 @@ public class Server implements Runnable {
 	public synchronized void unready(ClientHandler client) throws CommandForbiddenException {
 		if (clients.get(client) == ClientState.READY) {
 			clients.put(client, ClientState.UNREADY);
-		}
-		else {
+		} else {
 			throw new CommandForbiddenException();
 		}
 	}
 	
 	
-	public synchronized void connect(ClientHandler client, String name) throws NameUnavailableException, CommandForbiddenException {
+	public synchronized void connect(ClientHandler client, String name) throws 
+		NameUnavailableException, 
+		CommandForbiddenException {
 		if (clients.get(client) == ClientState.PENDING) {
-			if (Name.valid(name) && !names.containsValue(name) && !name.equals(SERVER_NAME)) {		// isvalid returns false on null
+			if (Name.valid(name) && !names.containsValue(name) && !name.equals(SERVER_NAME)) {
 				clients.put(client, ClientState.UNREADY);
 				names.put(client, name);
 				broadcast(SERVER_NAME, joinMessage(name));
 				console.addMessage(joinMessage(name));
-			}
-			else {
+			} else {
 				throw new NameUnavailableException();
 			}
-		}
-		else {
+		} else {
 			throw new CommandForbiddenException();
 		}
 	}
 
-
-
-	public synchronized void leave(ClientHandler client) {					//disconnecting is always allowed, so no exceptions are thrown
+	
+	//disconnecting is always allowed, so throws no exceptions
+	public synchronized void leave(ClientHandler client) {
 		if (clients.get(client) != ClientState.PENDING) {
 			console.addMessage(leaveMessage(names.get(client)));
 			broadcast(SERVER_NAME, leaveMessage(names.get(client)));
@@ -160,12 +159,13 @@ public class Server implements Runnable {
 	}
 	
 	
-	public synchronized void move(ClientHandler client, String x, String y) throws CommandForbiddenException, IllegalMoveException {
+	public synchronized void move(ClientHandler client, String x, String y) throws 
+		CommandForbiddenException, 
+		IllegalMoveException {
 		if (games.hasKey(client)) {
 			ServerSideGame game = games.getValue(client);
 			game.doMove(client, Integer.parseInt(x), Integer.parseInt(y));
-		}
-		else {
+		} else {
 			throw new CommandForbiddenException();
 		}
 	}
@@ -206,9 +206,9 @@ public class Server implements Runnable {
 	
 	// never run after leave
 	public synchronized void tryForfeitGame(ClientHandler client) {
-		ServerSideGame game = games.getValue(client);				// returns null if no game exists
+		ServerSideGame game = games.getValue(client);
 		ClientHandler opponent = games.getOtherKey(client);
-		if (game != null && game.getEnding() == Game.Ending.NOT_ENDED) {			// only if game has not ended
+		if (game != null && game.getEnding() == Game.Ending.NOT_ENDED) {
 			clients.put(client, ClientState.UNREADY);
 			clients.put(opponent, ClientState.UNREADY);
 			games.remove(game);
@@ -226,6 +226,11 @@ public class Server implements Runnable {
 			other.sendCommand(Action.MOVE, move.column.x + " " + move.column.y);
 			game.setSync();
 		}
+	}
+	
+	
+	public synchronized ClientHandler getOpponent(ClientHandler client) {
+		return games.getOtherKey(client);
 	}
 	
 	
