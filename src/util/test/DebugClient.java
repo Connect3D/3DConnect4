@@ -1,4 +1,4 @@
-package server;
+package util.test;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,6 +17,7 @@ public class DebugClient implements Runnable {
 	private final BufferedReader console_in;
 	private final BufferedWriter console_out;
 	
+	private boolean stop = false;
 	
 	InetAddress REMOTE_ADRESS = InetAddress.getByName("130.89.95.25");
 	
@@ -29,9 +30,9 @@ public class DebugClient implements Runnable {
 	
 	public DebugClient() throws Exception {
 		//InetAddress REMOTE_ADDRESS = InetAddress.getByName("2001:67c:2564:a130:350f:4f74:beed:238f");
-		InetAddress REMOTE_ADDRESS = InetAddress.getByName("130.89.176.65");
-		socket = new Socket(REMOTE_ADDRESS, 2727);
-		//socket = new Socket(InetAddress.getLocalHost(), 2727);
+		//InetAddress REMOTE_ADDRESS = InetAddress.getByName("130.89.176.65");
+		//socket = new Socket(REMOTE_ADDRESS, 2727);
+		socket = new Socket(InetAddress.getLocalHost(), 2727);
 		socket_in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		socket_out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		console_in = new BufferedReader(new InputStreamReader(System.in));
@@ -40,11 +41,11 @@ public class DebugClient implements Runnable {
 	
 	
 	public void run() {
-		while (socket.isConnected()) {
+		while (!stop) {
 			try {
 				console_out.write(socket_in.readLine() + "\n");
 				console_out.flush();
-			} 
+			}
 			catch (IOException e) {
 				closeStreams();
 				break;
@@ -54,7 +55,7 @@ public class DebugClient implements Runnable {
 	
 	
 	public void readConsole() {
-		while (socket.isConnected()) {
+		while (!stop) {
 			try {
 				socket_out.write(console_in.readLine() + "\n");
 				socket_out.flush();
@@ -69,6 +70,7 @@ public class DebugClient implements Runnable {
 	
 	private void closeStreams() {
 		try {
+			stop = true;
 			socket_in.close();
 			socket_out.close();
 			console_in.close();

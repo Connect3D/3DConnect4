@@ -26,8 +26,8 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	private final CommandParser parser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
 	
+	public final Socket socket;				// public so the server can close the clienthandler
 	private final Server server;
-	private final Socket socket;
 	private final BufferedReader in;
 	private final BufferedWriter out;
 	
@@ -84,6 +84,7 @@ public class ClientHandler extends Observable implements Runnable {
 				sendCommand(Error.ILLEGAL_MOVE);
 			}
 			catch (IOException e) {
+				server.tryForfeitGame(this);
 				server.leave(this);
 				break;
 			}
@@ -107,6 +108,7 @@ public class ClientHandler extends Observable implements Runnable {
 					socket.close();
 				}
 				catch (IOException e) { }
+				server.tryForfeitGame(this);
 				server.leave(this);
 				break;
 				
@@ -155,17 +157,40 @@ public class ClientHandler extends Observable implements Runnable {
 	}
 	
 	
-	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) {
-		//sendCommand(Action.SAY, "ack");
+	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) throws CommandForbiddenException {
+		
+		switch (acknowledgement) {
+		
+			case OK:
+				break;
+				
+			case SAY:
+				throw new CommandForbiddenException();			// clients can only send SAY as a command, not as an ack
+				
+			case LIST:
+				throw new CommandForbiddenException();			// clients can only send LIST as a command, not as an ack
+				
+			case LEADERBOARD:
+				throw new CommandForbiddenException();			// clients can only send LEADERBOARD as a command, not as an ack
+		
+		}
+		
 	}
 	
 	
 	private void runError(Error error, String[] args) {
+		// to stuff
 		//sendCommand(Action.SAY, "err");
 	}
 	
 	
 	private void runExit(Exit exit, String[] args) {
+		if (exit == Exit.FORFEITURE) {
+			server.tryForfeitGame(this);		// todo throw forbidden if not in game
+		}
+		else {
+			// TODO throw forbidden error
+		}
 		//sendCommand(Action.SAY, "exit");
 	}
 	
@@ -203,6 +228,7 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 		catch (IOException e) { }
 	}
+
 	
 }
 
