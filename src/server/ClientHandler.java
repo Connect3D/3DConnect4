@@ -19,6 +19,7 @@ import util.exception.*;
 /**
  * 
  * @author Aart Odding
+ * 
  * Client handler thread communicating between client and server.
  * After the initial connection between the client and the server has been established,
  * the server passes the control over to a clienthandler thread
@@ -28,8 +29,9 @@ import util.exception.*;
  * All information over the socket is send in the form of commands. 
  * Either action commands, exit codes, acknowledgment
  * s or received commands from the client or error commands.
- * All commands from the client that are not valid are catched in the run method,
- * the client handler informs the client with error codes according to the throws exception.
+ * All commands from the client that are not valid throw exceptions and are catched in 
+ * the run method, the client handler informs the client with error codes according to 
+ * the exceptions that have been thrown
  * 
  */
 public class ClientHandler extends Observable implements Runnable {
@@ -99,8 +101,6 @@ public class ClientHandler extends Observable implements Runnable {
 					runExit((Exit) command.first, command.second);
 				} else if (command.first instanceof Acknowledgement) {
 					runAcknowledgement((Acknowledgement) command.first, command.second);
-				} else if (command.first instanceof Error) {
-					runError((Error) command.first, command.second);
 				}
 			} catch (CommandInvalidException e) {
 				sendCommand(Error.COMMAND_INVALID);			// TODO dependent on timing of command
@@ -131,6 +131,7 @@ public class ClientHandler extends Observable implements Runnable {
 	/**
 	 * Handles the received action commands from the client and throws exceptions, 
 	 * catched by the run method, accordingly.
+	 * 
 	 * @param action					    the action commands send from the client
 	 * @param args						    the arguments given with the command
 	 * @throws NameUnavailableException     if the client uses an unavailable name
@@ -195,7 +196,8 @@ public class ClientHandler extends Observable implements Runnable {
 				server.joinChat(this);
 				sendCommand(Acknowledgement.OK);
 				break;
-			case LIST:									// unsupported commands can be ignored
+				
+			case LIST:										// unsupported commands can be ignored
 				break;
 			case LEADERBOARD:
 				break;
@@ -208,6 +210,7 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 		
 	}
+	
 	
 	/**
 	 * Handles an acknowledgement (an answer to a send command) from the client. 
@@ -236,11 +239,6 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 	}
 	
-	
-	private void runError(Error error, String[] args) {
-		// to stuff
-		//sendCommand(Action.SAY, "err");
-	}
 	
 	/**
 	 * Handles exit commands from the client on which the server is called to forfeit this game. 
