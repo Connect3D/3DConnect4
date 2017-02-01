@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import game.Controller;
 import game.Game;
 import game.Mark;
 import game.player.HumanPlayer;

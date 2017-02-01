@@ -15,7 +15,7 @@ import javax.swing.JTextField;
 
 import client.Client;
 import client.Connect4GUI;
-import game.Controller;
+import client.Controller;
 import protocol.command.Action;
 import util.MessageUI;
 

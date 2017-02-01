@@ -12,9 +12,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import client.Controller;
 import protocol.ClientState;
 import game.Board;
-import game.Controller;
 import game.Game;
 import game.Mark;
 import protocol.command.Action;
