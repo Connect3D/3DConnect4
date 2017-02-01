@@ -13,6 +13,7 @@ import game.Game;
 import game.Move;
 import protocol.Name;
 import protocol.command.*;
+import protocol.ClientState;
 import util.*;
 import util.exception.*;
 
@@ -67,12 +68,12 @@ public class Server implements Runnable {
 		}
 	}
 	
-	// TODO quit all ongoing games
+	
 	public synchronized void shutDown() throws IOException {
 		console.addMessage("Shutting down server");
 		for (ClientHandler client : clients.keySet()) {
 			client.sendCommand(Action.DISCONNECT);
-			console.addMessage(leaveMessage(names.get(client)));
+			client.socket.close();
 		}
 		serverSocket.close();
 	}
@@ -145,8 +146,8 @@ public class Server implements Runnable {
 		}
 	}
 
-	
-	// TODO move other to unready if was in game, and server not closing
+
+
 	public synchronized void leave(ClientHandler client) {					//disconnecting is always allowed, so no exceptions are thrown
 		if (clients.get(client) != ClientState.PENDING) {
 			console.addMessage(leaveMessage(names.get(client)));
@@ -161,7 +162,7 @@ public class Server implements Runnable {
 	public synchronized void move(ClientHandler client, String x, String y) throws CommandForbiddenException, IllegalMoveException {
 		if (games.hasKey(client)) {
 			ServerSideGame game = games.getValue(client);
-			game.doMove(client, Integer.parseInt(x), Integer.parseInt(y));			// TODO moves doorsturen
+			game.doMove(client, Integer.parseInt(x), Integer.parseInt(y));
 		}
 		else {
 			throw new CommandForbiddenException();
@@ -204,9 +205,9 @@ public class Server implements Runnable {
 	
 	// never run after leave
 	public synchronized void tryForfeitGame(ClientHandler client) {
-		ServerSideGame game = games.getValue(client);
+		ServerSideGame game = games.getValue(client);				// returns null if no game exists
 		ClientHandler opponent = games.getOtherKey(client);
-		if (game.getEnding() == Game.Ending.NOT_ENDED) {			// only if game has not ended
+		if (game != null && game.getEnding() == Game.Ending.NOT_ENDED) {			// only if game has not ended
 			clients.put(client, ClientState.UNREADY);
 			clients.put(opponent, ClientState.UNREADY);
 			games.remove(game);

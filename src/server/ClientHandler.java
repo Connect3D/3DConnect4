@@ -26,8 +26,8 @@ public class ClientHandler extends Observable implements Runnable {
 	
 	private final CommandParser parser = new CommandParser(Command.Direction.CLIENT_TO_SERVER);
 	
+	public final Socket socket;				// public so the server can close the clienthandler
 	private final Server server;
-	private final Socket socket;
 	private final BufferedReader in;
 	private final BufferedWriter out;
 	
@@ -157,10 +157,24 @@ public class ClientHandler extends Observable implements Runnable {
 	}
 	
 	
-	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) {
-		// ignore
-		// possibly forbidden
-		//sendCommand(Action.SAY, "ack");
+	private void runAcknowledgement(Acknowledgement acknowledgement, String[] args) throws CommandForbiddenException {
+		
+		switch (acknowledgement) {
+		
+			case OK:
+				break;
+				
+			case SAY:
+				throw new CommandForbiddenException();			// clients can only send SAY as a command, not as an ack
+				
+			case LIST:
+				throw new CommandForbiddenException();			// clients can only send LIST as a command, not as an ack
+				
+			case LEADERBOARD:
+				throw new CommandForbiddenException();			// clients can only send LEADERBOARD as a command, not as an ack
+		
+		}
+		
 	}
 	
 	
@@ -214,6 +228,7 @@ public class ClientHandler extends Observable implements Runnable {
 		}
 		catch (IOException e) { }
 	}
+
 	
 }
 

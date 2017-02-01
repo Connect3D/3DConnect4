@@ -1,4 +1,4 @@
-package server;
+package util.test;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,6 +17,7 @@ public class DebugClient implements Runnable {
 	private final BufferedReader console_in;
 	private final BufferedWriter console_out;
 	
+	private boolean stop = false;
 	
 	InetAddress REMOTE_ADRESS = InetAddress.getByName("130.89.95.25");
 	
@@ -40,11 +41,11 @@ public class DebugClient implements Runnable {
 	
 	
 	public void run() {
-		while (socket.isConnected()) {
+		while (!stop) {
 			try {
 				console_out.write(socket_in.readLine() + "\n");
 				console_out.flush();
-			} 
+			}
 			catch (IOException e) {
 				closeStreams();
 				break;
@@ -54,7 +55,7 @@ public class DebugClient implements Runnable {
 	
 	
 	public void readConsole() {
-		while (socket.isConnected()) {
+		while (!stop) {
 			try {
 				socket_out.write(console_in.readLine() + "\n");
 				socket_out.flush();
@@ -69,6 +70,7 @@ public class DebugClient implements Runnable {
 	
 	private void closeStreams() {
 		try {
+			stop = true;
 			socket_in.close();
 			socket_out.close();
 			console_in.close();
