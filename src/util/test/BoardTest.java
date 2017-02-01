@@ -5,22 +5,17 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import game.Board;
-import game.Direction;
+import game.*;
 import game.Direction.Axis;
-import game.Column;
-import game.Game;
-import game.Mark;
-import game.Move;
-import game.Position;
+
+
 
 public class BoardTest {
 
 	private Board board;
 
 	/**
-	 * Sets the instance variable to an initial value. All test methods should
-	 * be preceded by a call to this method.
+	 * Sets the instance variable to an initial value.
 	 */
 	@Before
 	public void setUp() {
@@ -105,7 +100,7 @@ public class BoardTest {
 	public void incompleteSeqYDirNotEmptyBoard() {
 		Direction dir = new Direction(Axis.NEUTRAL, Axis.POSITIVE, Axis.NEUTRAL);
 		fillConsecutiveMarks(new Position(0, 0, 0), Mark.O, dir, 3);
-		Direction dir2 = new Direction(Axis.NEUTRAL, Axis.POSITIVE, Axis.NEUTRAL);
+		//Direction dir2 = new Direction(Axis.NEUTRAL, Axis.POSITIVE, Axis.NEUTRAL);
 		fillConsecutiveMarks(new Position(0, 0, 0), Mark.X, dir, 4);
 		assertEquals(board.getEnding() == Game.Ending.X_WINS, false);
 	}
@@ -114,7 +109,7 @@ public class BoardTest {
 	public void completeSeqYDirNotEmptyBoard() {
 		Direction dir = new Direction(Axis.NEUTRAL, Axis.POSITIVE, Axis.NEUTRAL);
 		fillConsecutiveMarks(new Position(0, 0, 0), Mark.X, dir, 3);
-		Direction dir2 = new Direction(Axis.NEUTRAL, Axis.POSITIVE, Axis.NEUTRAL);
+		//Direction dir2 = new Direction(Axis.NEUTRAL, Axis.POSITIVE, Axis.NEUTRAL);
 		fillConsecutiveMarks(new Position(0, 0, 0), Mark.X, dir, 4);
 		assertEquals(board.getEnding() == Game.Ending.X_WINS, true);
 	}

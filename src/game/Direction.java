@@ -1,8 +1,7 @@
 package game;
 
 
-// no access specifier for package scope
-// TODO: remove public scope again
+
 public class Direction {
 	
 	
