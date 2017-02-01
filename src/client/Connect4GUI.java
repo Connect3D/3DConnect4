@@ -38,7 +38,8 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 	public final GameplayPanel gameplayPanel = new GameplayPanel();
 	private Controller controller;
 	private static final int DIM = 4;
-    private Mark currentMark;
+	private Mark currentMark;
+
 	public Connect4GUI() {
 		super("Connect4_3D_View");
 
@@ -67,7 +68,7 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		clientPanel.build(controller);
 		gameplayPanel.build(controller);
 	}
-	
+
 	public void createGame(Player p1, Player p2) {
 		Game game = new Game(p1, p2);
 		new Thread(game).start();
@@ -87,51 +88,37 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 		cc.add(mainpanel);
 	}
 
-//	
-//	String text = eventSource.getText();
-//	States newState = text.equals(States.READY.toString()) ? States.READY : States.UNREADY;
-//	client.setState(newState);
-//	mainGUI.gameplayPanel.statusButton.setText(newState.toString());
-
-	
 	public void addMessage(String msg) {
 		clientPanel.addMessage(msg);
 	}
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof Game) {
+		if (o instanceof Game && arg instanceof Move) {
 			Game game = (Game) o;
-// 			Handled by the server  oi
-//			if (arg instanceof Game.Ending) {
-//				gameplayPanel.statusLabel.setText(game.getEnding().toString());
-//				gameplayPanel.resetButton.setEnabled(true);
-//			}
-			if (arg instanceof Move) {
-				Move move = (Move) arg;
-				Column column = move.column;
-				Mark mark = move.mark;
-				currentMark = mark;
-				try {
-					TimeUnit.MILLISECONDS.sleep(100);
-					gameplayPanel.selectInputbutton(column.x, column.y, false);
-					gameplayPanel.setOutputbuttonText(column.x, column.y, game.getColumnHeigth(column) - 1,
-							mark.toString());
-				} catch (InterruptedException e1) {
-				} catch (ColumnFullException e) {
-					gameplayPanel.setOutputbuttonText(column.x, column.y, DIM - 1, mark.toString());
-				}
-				if (game.getBoardState().isColumnFull(column)) {
-					gameplayPanel.enableInputbutton(column.x, column.y, false);
-				}
+			Move move = (Move) arg;
+			Column column = move.column;
+			Mark mark = move.mark;
+			currentMark = mark;
+			try {
+				TimeUnit.MILLISECONDS.sleep(100);
+				gameplayPanel.selectInputbutton(column.x, column.y, false);
+				gameplayPanel.setOutputbuttonText(column.x, column.y, game.getColumnHeigth(column) - 1,
+						mark.toString());
+			} catch (InterruptedException e1) {
+			} catch (ColumnFullException e) {
+				gameplayPanel.setOutputbuttonText(column.x, column.y, DIM - 1, mark.toString());
+			}
+			if (game.getBoardState().isColumnFull(column)) {
+				gameplayPanel.enableInputbutton(column.x, column.y, false);
 			}
 		}
 	}
-	
+
 	public void updateStatusLabel() {
 		gameplayPanel.statusLabel.setText(currentMark + "'s turn");
 	}
-	
+
 	public static String getHostAddress() {
 		try {
 			InetAddress iaddr = InetAddress.getLocalHost();
@@ -140,7 +127,7 @@ public class Connect4GUI extends JFrame implements Observer, MessageUI {
 			return "?unknowns?";
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		new Connect4GUI();
 	}
